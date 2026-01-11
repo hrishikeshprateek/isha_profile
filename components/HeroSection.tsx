@@ -1,6 +1,9 @@
+"use client";
+
 import { Button } from "@/components/ui/button";
-import { Sparkles, ChevronDown } from "lucide-react";
+import { ChevronDown } from "lucide-react";
 import Image from "next/image";
+import { useEffect, useState } from "react";
 
 const SocialIcon = ({ children }: { children: React.ReactNode }) => (
     <a
@@ -11,13 +14,34 @@ const SocialIcon = ({ children }: { children: React.ReactNode }) => (
     </a>
 );
 
-const FloatingElement = ({ className }: { className?: string }) => (
-    <div className={`absolute ${className}`}>
-        <div className="w-6 h-6 bg-primary/60 rounded-lg rotate-45 float-animation" />
-    </div>
-);
+const roles = ["UI/UX Designer", "Content Creator", "Content Writer", "Designer"];
 
 const HeroSection = () => {
+    const [displayText, setDisplayText] = useState("");
+    const [roleIndex, setRoleIndex] = useState(0);
+    const [isDeleting, setIsDeleting] = useState(false);
+
+    useEffect(() => {
+        const currentRole = roles[roleIndex];
+        const timeout = setTimeout(() => {
+            if (!isDeleting) {
+                if (displayText.length < currentRole.length) {
+                    setDisplayText(currentRole.slice(0, displayText.length + 1));
+                } else {
+                    setTimeout(() => setIsDeleting(true), 2000);
+                }
+            } else {
+                if (displayText.length > 0) {
+                    setDisplayText(currentRole.slice(0, displayText.length - 1));
+                } else {
+                    setIsDeleting(false);
+                    setRoleIndex((prev) => (prev + 1) % roles.length);
+                }
+            }
+        }, isDeleting ? 50 : 100);
+
+        return () => clearTimeout(timeout);
+    }, [displayText, roleIndex, isDeleting]);
     return (
         <section className="relative min-h-screen overflow-hidden hero-gradient">
             {/* Background gradient orbs */}
@@ -28,28 +52,31 @@ const HeroSection = () => {
             <div className="absolute bottom-32 left-20 w-4 h-4 bg-[#F2A7A7] rounded-full blur-sm pulse-glow" />
             <div className="absolute bottom-40 left-32 w-2 h-2 bg-[#E8A0A0] rounded-full blur-sm pulse-glow" />
 
-            <div className="container mx-auto px-6 pt-32 pb-20">
-                <div className="grid lg:grid-cols-2 gap-12 items-center min-h-[80vh]">
+            <div className="container mx-auto px-6 pt-32 md:pt-32 pb-16 md:pb-20">
+                <div className="grid lg:grid-cols-2 gap-16 lg:gap-20 items-center min-h-[85vh]">
                     {/* Left Content */}
-                    <div className="space-y-8 z-10">
-                        <div className="space-y-4">
-                            <h1 className="text-5xl md:text-6xl lg:text-7xl font-medium text-[#3B241A] tracking-tight leading-[1.1]">
-                                <span className="block text-[#A68B7E] text-3xl md:text-4xl mb-2 italic">Hi, I&apos;m</span>
-                                <span className="block font-semibold">Isha Rani</span>
+                    <div className="space-y-6 md:space-y-8 z-10 mt-8 md:mt-0">
+                        <div className="space-y-3">
+                            <h1 className="text-4xl md:text-5xl lg:text-6xl font-medium text-[#3B241A]">
+                                <span className="italic">Hi,</span>
+                                <span className="font-light"> I&apos;m</span>{" "}
+                                <span className="font-semibold">Isha Rani</span>
                             </h1>
 
-                            <h2 className="text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight leading-[1.1]">
-                                <span className="text-gradient block">UI & UX</span>
-                                <span className="text-[#3B241A] block mt-2">Designer</span>
+                            <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold mt-2">
+                                <span className="text-gradient inline-block min-h-[1.2em]">
+                                    {displayText}
+                                    <span className="animate-pulse">|</span>
+                                </span>
                             </h2>
                         </div>
 
-                        <p className="text-lg md:text-xl text-[#6E5045] max-w-lg leading-relaxed">
+                        <p className="text-lg md:text-xl text-[#6E5045] max-w-xl leading-relaxed">
                             Crafting elegant digital experiences that blend beauty with purpose.
                             Transforming ideas into intuitive designs that captivate and inspire.
                         </p>
 
-                        <div className="flex flex-wrap gap-4 pt-6">
+                        <div className="flex flex-wrap gap-4 pt-4">
                             <Button variant="hero" size="lg" className="shadow-lg shadow-[#F2A7A7]/30 hover:shadow-xl hover:shadow-[#DC7C7C]/40">
                                 View My Work
                             </Button>
@@ -60,7 +87,7 @@ const HeroSection = () => {
                         </div>
 
                         {/* Social Icons */}
-                        <div className="flex gap-4 pt-6">
+                        <div className="flex gap-4 pt-4">
                             <SocialIcon>
                                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                     <rect width="20" height="20" x="2" y="2" rx="5" ry="5"/>
@@ -93,7 +120,7 @@ const HeroSection = () => {
                     <div className="relative flex justify-center items-center h-[450px] md:h-[550px] lg:h-[600px]">
                         {/* SVG Frame - centered and rotated, moved up */}
                         <svg
-                            className="absolute w-[280px] h-[320px] sm:w-[320px] sm:h-[360px] md:w-[380px] md:h-[420px] lg:w-[420px] lg:h-[460px] top-[80px] sm:top-[90px] md:top-[110px] lg:top-[130px] left-1/2"
+                            className="absolute w-[280px] h-[320px] sm:w-[320px] sm:h-[360px] md:w-[380px] md:h-[420px] lg:w-[420px] lg:h-[460px] top-[60px] sm:top-[70px] md:top-[90px] lg:top-[110px] left-1/2"
                             viewBox="0 0 420 460"
                             fill="none"
                             xmlns="http://www.w3.org/2000/svg"
