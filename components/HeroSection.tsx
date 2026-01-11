@@ -21,40 +21,40 @@ const HeroSection = () => {
     return (
         <section className="relative min-h-screen overflow-hidden hero-gradient">
             {/* Background gradient orbs */}
-            <div className="absolute top-20 right-20 w-96 h-96 bg-primary/20 rounded-full blur-3xl" />
-            <div className="absolute bottom-40 left-10 w-64 h-64 bg-accent/10 rounded-full blur-3xl" />
+            <div className="absolute top-20 right-20 w-96 h-96 bg-[#F2A7A7]/20 rounded-full blur-3xl" />
+            <div className="absolute bottom-40 left-10 w-64 h-64 bg-[#E8A0A0]/15 rounded-full blur-3xl" />
 
             {/* Floating decorative elements */}
             <FloatingElement className="top-40 left-[15%]" />
             <FloatingElement className="top-60 right-[40%] float-animation-delayed" />
             <FloatingElement className="bottom-60 left-[30%]" />
 
-            {/* Yellow/orange glowing orbs */}
-            <div className="absolute bottom-32 left-20 w-4 h-4 bg-yellow-400 rounded-full blur-sm pulse-glow" />
-            <div className="absolute bottom-40 left-32 w-2 h-2 bg-pink-400 rounded-full blur-sm pulse-glow" />
+            {/* Glowing orbs - softer colors */}
+            <div className="absolute bottom-32 left-20 w-4 h-4 bg-[#F2A7A7] rounded-full blur-sm pulse-glow" />
+            <div className="absolute bottom-40 left-32 w-2 h-2 bg-[#E8A0A0] rounded-full blur-sm pulse-glow" />
 
             <div className="container mx-auto px-6 pt-32 pb-20">
                 <div className="grid lg:grid-cols-2 gap-12 items-center min-h-[80vh]">
                     {/* Left Content */}
                     <div className="space-y-6 z-10">
                         <p className="text-sm uppercase tracking-widest text-muted-foreground flex items-center gap-2">
-                            Welcome to my world <Sparkles className="w-4 h-4 text-yellow-400 sparkle" />
+                            Welcome to my world <Sparkles className="w-4 h-4 text-[#F2A7A7] sparkle" />
                         </p>
 
                         <div>
-                            <h1 className="text-4xl md:text-5xl font-medium text-foreground">
+                            <h1 className="text-4xl md:text-5xl font-medium text-foreground font-serif">
                                 <span className="italic">Hi,</span>
                                 <span className="font-light">I&apos;m</span>{" "}
-                                <span className="font-semibold">Sara Howari</span>
+                                <span className="font-semibold">Isha Rani</span>
                             </h1>
 
-                            <h2 className="text-5xl md:text-7xl font-bold mt-2">
+                            <h2 className="text-5xl md:text-7xl font-bold mt-2 font-serif">
                                 <span className="text-gradient">UI&amp;UX</span>{" "}
                                 <span className="text-foreground">Designer</span>
                             </h2>
                         </div>
 
-                        <p className="text-muted-foreground max-w-md leading-relaxed">
+                        <p className="text-[#6E5045] max-w-md leading-relaxed">
                             Passionate UI/UX designer, I create intuitive and visually appealing digital
                             experiences. I transform ideas into seamless designs that meet users&apos;
                             expectations.
@@ -128,9 +128,9 @@ const HeroSection = () => {
                             />
                             <defs>
                                 <linearGradient id="frameGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                                    <stop offset="0%" stopColor="#7c3aed" />
-                                    <stop offset="50%" stopColor="#581c87" />
-                                    <stop offset="100%" stopColor="#4c1d95" />
+                                    <stop offset="0%" stopColor="#F2A7A7" />
+                                    <stop offset="50%" stopColor="#DC7C7C" />
+                                    <stop offset="100%" stopColor="#E8A0A0" />
                                 </linearGradient>
                             </defs>
                         </svg>
@@ -138,8 +138,8 @@ const HeroSection = () => {
                         {/* Avatar Image - positioned to pop out from top of frame */}
                         <div className="absolute z-10 w-[300px] h-[420px] md:w-[360px] md:h-[500px] top-[20px] md:top-[30px] overflow-visible">
                             <Image
-                                src="/avatar-3d-transparent.png"
-                                alt="Sara Howari - UI/UX Designer"
+                                src="/isha_a.png"
+                                alt="Isha Rani"
                                 fill
                                 className="object-cover object-top drop-shadow-2xl"
                                 style={{
@@ -155,9 +155,9 @@ const HeroSection = () => {
                         {/* Floating pen tool - top right */}
                         <div className="absolute -right-2 md:right-0 top-[20%] float-animation z-20">
                             <svg width="56" height="56" viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <rect width="56" height="56" rx="12" fill="#581c87" transform="rotate(15 28 28)"/>
+                                <rect width="56" height="56" rx="12" fill="#DC7C7C" transform="rotate(15 28 28)"/>
                                 <g transform="translate(14, 14)">
-                                    <path d="M20.71 4.04a3.5 3.5 0 0 0-4.95 0L4.04 15.75a1 1 0 0 0-.29.5l-1.5 6a1 1 0 0 0 1.22 1.22l6-1.5a1 1 0 0 0 .5-.29L21.68 9.96a3.5 3.5 0 0 0 0-4.92l-.97-.97z" fill="#a855f7"/>
+                                    <path d="M20.71 4.04a3.5 3.5 0 0 0-4.95 0L4.04 15.75a1 1 0 0 0-.29.5l-1.5 6a1 1 0 0 0 1.22 1.22l6-1.5a1 1 0 0 0 .5-.29L21.68 9.96a3.5 3.5 0 0 0 0-4.92l-.97-.97z" fill="#F2A7A7"/>
                                     <path d="M14 6l8 8" stroke="white" strokeWidth="2" strokeLinecap="round"/>
                                 </g>
                             </svg>
@@ -166,18 +166,18 @@ const HeroSection = () => {
                         {/* Bezier curve handle - bottom right */}
                         <div className="absolute right-4 md:right-8 bottom-[15%] float-animation-delayed z-20">
                             <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <circle cx="24" cy="24" r="8" fill="#a855f7"/>
-                                <line x1="24" y1="24" x2="40" y2="8" stroke="#a855f7" strokeWidth="3"/>
-                                <circle cx="40" cy="8" r="6" fill="#7c3aed"/>
+                                <circle cx="24" cy="24" r="8" fill="#F2A7A7"/>
+                                <line x1="24" y1="24" x2="40" y2="8" stroke="#F2A7A7" strokeWidth="3"/>
+                                <circle cx="40" cy="8" r="6" fill="#DC7C7C"/>
                             </svg>
                         </div>
 
                         {/* Bezier curve handle - left side */}
                         <div className="absolute -left-4 md:left-0 bottom-[30%] float-animation z-20">
                             <svg width="52" height="52" viewBox="0 0 52 52" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <circle cx="26" cy="26" r="10" fill="#7c3aed"/>
-                                <line x1="26" y1="26" x2="8" y2="44" stroke="#a855f7" strokeWidth="3"/>
-                                <circle cx="8" cy="44" r="6" fill="#581c87"/>
+                                <circle cx="26" cy="26" r="10" fill="#DC7C7C"/>
+                                <line x1="26" y1="26" x2="8" y2="44" stroke="#F2A7A7" strokeWidth="3"/>
+                                <circle cx="8" cy="44" r="6" fill="#E8A0A0"/>
                             </svg>
                         </div>
 
@@ -188,12 +188,12 @@ const HeroSection = () => {
                         {/* Decorative ribbon/confetti pieces */}
                         <div className="absolute right-[20%] top-[10%] float-animation-delayed">
                             <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                                <path d="M4 4 L20 12 L12 20 Z" fill="#a855f7" opacity="0.6"/>
+                                <path d="M4 4 L20 12 L12 20 Z" fill="#F2A7A7" opacity="0.6"/>
                             </svg>
                         </div>
                         <div className="absolute left-[15%] top-[15%] float-animation">
                             <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                                <rect x="2" y="2" width="16" height="16" rx="2" fill="#7c3aed" opacity="0.5" transform="rotate(45 10 10)"/>
+                                <rect x="2" y="2" width="16" height="16" rx="2" fill="#DC7C7C" opacity="0.5" transform="rotate(45 10 10)"/>
                             </svg>
                         </div>
                     </div>

@@ -9,21 +9,21 @@ const buttonVariants = cva(
     variants: {
       variant: {
         default:
-          "bg-primary text-primary-foreground shadow hover:bg-primary/90",
+          "bg-primary text-primary-foreground shadow-md shadow-primary/20 hover:bg-primary-dark hover:shadow-lg hover:shadow-primary/30",
         destructive:
-          "bg-destructive text-destructive-foreground shadow-sm hover:bg-destructive/90",
+          "bg-red-400 text-white shadow-sm hover:bg-red-500",
         outline:
-          "border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground",
+          "border-2 border-primary/40 bg-transparent text-foreground shadow-sm hover:bg-primary/10 hover:border-primary",
         secondary:
           "bg-secondary text-secondary-foreground shadow-sm hover:bg-secondary/80",
-        ghost: "hover:bg-accent hover:text-accent-foreground",
+        ghost: "hover:bg-secondary hover:text-foreground",
         link: "text-primary underline-offset-4 hover:underline",
         contact:
-          "bg-gradient-to-r from-primary to-accent text-foreground font-semibold hover:scale-105 glow rounded-full",
+          "bg-gradient-to-r from-primary to-accent text-white font-semibold hover:scale-105 shadow-lg shadow-primary/30 hover:shadow-xl hover:shadow-primary/40 rounded-full",
         hero:
-          "bg-foreground text-background font-semibold hover:scale-105 hover:shadow-xl shadow-lg rounded-full",
+          "bg-primary text-white font-semibold hover:scale-105 hover:shadow-xl shadow-lg shadow-primary/30 hover:bg-primary-dark rounded-full",
         heroOutline:
-          "border-2 border-primary/50 bg-transparent text-foreground font-semibold hover:border-primary hover:bg-primary/10 hover:scale-105 rounded-full",
+          "border-2 border-primary/50 bg-white/50 text-foreground font-semibold hover:border-primary hover:bg-primary/10 hover:scale-105 rounded-full shadow-md shadow-primary/10",
       },
       size: {
         default: "h-9 px-4 py-2",

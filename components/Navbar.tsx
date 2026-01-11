@@ -9,7 +9,7 @@ const Navbar = () => {
             <div className="glass rounded-full px-6 py-3 flex items-center justify-between">
                 {/* Logo */}
                 <div className="flex items-center gap-2">
-                    <div className="w-10 h-10 rounded-full border-2 border-primary/50 flex items-center justify-center">
+                    <div className="w-10 h-10 rounded-full border-2 border-[#F2A7A7]/50 flex items-center justify-center bg-[#F2A7A7]/10">
                         <span className="text-foreground font-bold text-lg">S</span>
                     </div>
                 </div>
@@ -20,10 +20,10 @@ const Navbar = () => {
                         <a
                             key={item}
                             href={`#${item.toLowerCase().replace(" ", "-")}`}
-                            className={`text-sm font-medium transition-colors hover:text-accent ${
+                            className={`text-sm font-medium transition-colors hover:text-[#DC7C7C] ${
                                 index === 0
-                                    ? "text-foreground relative after:absolute after:bottom-[-8px] after:left-0 after:w-full after:h-0.5 after:bg-primary after:rounded-full"
-                                    : "text-muted-foreground"
+                                    ? "text-[#3B241A] relative after:absolute after:bottom-[-8px] after:left-0 after:w-full after:h-0.5 after:bg-[#F2A7A7] after:rounded-full"
+                                    : "text-[#A68B7E]"
                             }`}
                         >
                             {item}
