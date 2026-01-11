@@ -5,7 +5,7 @@ import Image from "next/image";
 const SocialIcon = ({ children }: { children: React.ReactNode }) => (
     <a
         href="#"
-        className="w-12 h-12 rounded-full border border-primary/30 flex items-center justify-center text-muted-foreground hover:text-foreground hover:border-primary hover:bg-primary/10 transition-all duration-300"
+        className="w-12 h-12 rounded-full border border-[#F2A7A7]/30 bg-white/50 backdrop-blur-sm flex items-center justify-center text-[#A68B7E] hover:text-[#DC7C7C] hover:border-[#F2A7A7] hover:bg-[#F2A7A7]/10 hover:shadow-lg hover:shadow-[#F2A7A7]/20 transition-all duration-300"
     >
         {children}
     </a>
@@ -24,11 +24,6 @@ const HeroSection = () => {
             <div className="absolute top-20 right-20 w-96 h-96 bg-[#F2A7A7]/20 rounded-full blur-3xl" />
             <div className="absolute bottom-40 left-10 w-64 h-64 bg-[#E8A0A0]/15 rounded-full blur-3xl" />
 
-            {/* Floating decorative elements */}
-            <FloatingElement className="top-40 left-[15%]" />
-            <FloatingElement className="top-60 right-[40%] float-animation-delayed" />
-            <FloatingElement className="bottom-60 left-[30%]" />
-
             {/* Glowing orbs - softer colors */}
             <div className="absolute bottom-32 left-20 w-4 h-4 bg-[#F2A7A7] rounded-full blur-sm pulse-glow" />
             <div className="absolute bottom-40 left-32 w-2 h-2 bg-[#E8A0A0] rounded-full blur-sm pulse-glow" />
@@ -36,43 +31,31 @@ const HeroSection = () => {
             <div className="container mx-auto px-6 pt-32 pb-20">
                 <div className="grid lg:grid-cols-2 gap-12 items-center min-h-[80vh]">
                     {/* Left Content */}
-                    <div className="space-y-6 z-10">
-                        <p className="text-sm uppercase tracking-widest text-muted-foreground flex items-center gap-2">
-                            Welcome to my world <Sparkles className="w-4 h-4 text-[#F2A7A7] sparkle" />
-                        </p>
-
-                        <div>
-                            <h1 className="text-4xl md:text-5xl font-medium text-foreground font-serif">
-                                <span className="italic">Hi,</span>
-                                <span className="font-light">I&apos;m</span>{" "}
-                                <span className="font-semibold">Isha Rani</span>
+                    <div className="space-y-8 z-10">
+                        <div className="space-y-4">
+                            <h1 className="text-5xl md:text-6xl lg:text-7xl font-medium text-[#3B241A] tracking-tight leading-[1.1]">
+                                <span className="block text-[#A68B7E] text-3xl md:text-4xl mb-2 italic">Hi, I&apos;m</span>
+                                <span className="block font-semibold">Isha Rani</span>
                             </h1>
 
-                            <h2 className="text-5xl md:text-7xl font-bold mt-2 font-serif">
-                                <span className="text-gradient">UI&amp;UX</span>{" "}
-                                <span className="text-foreground">Designer</span>
+                            <h2 className="text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight leading-[1.1]">
+                                <span className="text-gradient block">UI & UX</span>
+                                <span className="text-[#3B241A] block mt-2">Designer</span>
                             </h2>
                         </div>
 
-                        <p className="text-[#6E5045] max-w-md leading-relaxed">
-                            Passionate UI/UX designer, I create intuitive and visually appealing digital
-                            experiences. I transform ideas into seamless designs that meet users&apos;
-                            expectations.
+                        <p className="text-lg md:text-xl text-[#6E5045] max-w-lg leading-relaxed">
+                            Crafting elegant digital experiences that blend beauty with purpose.
+                            Transforming ideas into intuitive designs that captivate and inspire.
                         </p>
 
-                        <div className="flex flex-wrap gap-4 pt-4">
-                            <Button variant="hero" size="lg" className="relative">
-                                <span className="absolute -top-1 -left-1 w-2 h-2 border-l-2 border-t-2 border-primary/50" />
-                                <span className="absolute -top-1 -right-1 w-2 h-2 border-r-2 border-t-2 border-primary/50" />
-                                <span className="absolute -bottom-1 -left-1 w-2 h-2 border-l-2 border-b-2 border-primary/50" />
-                                <span className="absolute -bottom-1 -right-1 w-2 h-2 border-r-2 border-b-2 border-primary/50" />
-                                My Projects
+                        <div className="flex flex-wrap gap-4 pt-6">
+                            <Button variant="hero" size="lg" className="shadow-lg shadow-[#F2A7A7]/30 hover:shadow-xl hover:shadow-[#DC7C7C]/40">
+                                View My Work
                             </Button>
 
-                            <Button variant="heroOutline" size="lg" className="relative">
-                                <Sparkles className="w-4 h-4 text-primary sparkle" />
+                            <Button variant="heroOutline" size="lg">
                                 Download CV
-                                <Sparkles className="w-4 h-4 text-primary sparkle" />
                             </Button>
                         </div>
 
@@ -106,15 +89,15 @@ const HeroSection = () => {
                         </div>
                     </div>
 
-                    {/* Right Content - Avatar with Frame */}
-                    <div className="relative flex justify-center items-center h-[500px] md:h-[600px]">
-                        {/* SVG Frame - positioned lower so avatar pops out from top */}
+                    {/* Right Content - Avatar with Frame - Centered */}
+                    <div className="relative flex justify-center items-center h-[450px] md:h-[550px] lg:h-[600px]">
+                        {/* SVG Frame - centered and rotated, moved up */}
                         <svg
-                            className="absolute w-[340px] h-[380px] md:w-[420px] md:h-[460px] top-[120px] md:top-[140px]"
+                            className="absolute w-[280px] h-[320px] sm:w-[320px] sm:h-[360px] md:w-[380px] md:h-[420px] lg:w-[420px] lg:h-[460px] top-[80px] sm:top-[90px] md:top-[110px] lg:top-[130px] left-1/2"
                             viewBox="0 0 420 460"
                             fill="none"
                             xmlns="http://www.w3.org/2000/svg"
-                            style={{ transform: 'rotate(3deg)' }}
+                            style={{ transform: 'translateX(-50%) rotate(15deg)' }}
                         >
                             <rect
                                 x="16"
@@ -135,67 +118,28 @@ const HeroSection = () => {
                             </defs>
                         </svg>
 
-                        {/* Avatar Image - positioned to pop out from top of frame */}
-                        <div className="absolute z-10 w-[300px] h-[420px] md:w-[360px] md:h-[500px] top-[20px] md:top-[30px] overflow-visible">
+                        {/* Avatar Image - centered and positioned to pop out significantly from top of frame */}
+                        <div className="absolute z-10 w-[260px] h-[360px] sm:w-[300px] sm:h-[400px] md:w-[340px] md:h-[460px] lg:w-[380px] lg:h-[520px] top-[0px] sm:top-[5px] md:top-[10px] lg:top-[15px] left-1/2 -translate-x-1/2 overflow-visible">
                             <Image
                                 src="/isha_a.png"
                                 alt="Isha Rani"
                                 fill
-                                className="object-cover object-top drop-shadow-2xl"
+                                className="object-cover object-top drop-shadow-2xl rounded-3xl"
                                 style={{
                                     mixBlendMode: 'normal',
                                     filter: 'drop-shadow(0 25px 50px rgba(0,0,0,0.5))',
-                                    maskImage: 'linear-gradient(to bottom, black 80%, transparent 98%)',
-                                    WebkitMaskImage: 'linear-gradient(to bottom, black 80%, transparent 98%)'
+                                    maskImage: 'linear-gradient(to bottom, black 85%, transparent 98%)',
+                                    WebkitMaskImage: 'linear-gradient(to bottom, black 85%, transparent 98%)'
                                 }}
                                 priority
                             />
                         </div>
 
-                        {/* Floating pen tool - top right */}
-                        <div className="absolute -right-2 md:right-0 top-[20%] float-animation z-20">
-                            <svg width="56" height="56" viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <rect width="56" height="56" rx="12" fill="#DC7C7C" transform="rotate(15 28 28)"/>
-                                <g transform="translate(14, 14)">
-                                    <path d="M20.71 4.04a3.5 3.5 0 0 0-4.95 0L4.04 15.75a1 1 0 0 0-.29.5l-1.5 6a1 1 0 0 0 1.22 1.22l6-1.5a1 1 0 0 0 .5-.29L21.68 9.96a3.5 3.5 0 0 0 0-4.92l-.97-.97z" fill="#F2A7A7"/>
-                                    <path d="M14 6l8 8" stroke="white" strokeWidth="2" strokeLinecap="round"/>
-                                </g>
-                            </svg>
-                        </div>
-
-                        {/* Bezier curve handle - bottom right */}
-                        <div className="absolute right-4 md:right-8 bottom-[15%] float-animation-delayed z-20">
-                            <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <circle cx="24" cy="24" r="8" fill="#F2A7A7"/>
-                                <line x1="24" y1="24" x2="40" y2="8" stroke="#F2A7A7" strokeWidth="3"/>
-                                <circle cx="40" cy="8" r="6" fill="#DC7C7C"/>
-                            </svg>
-                        </div>
-
-                        {/* Bezier curve handle - left side */}
-                        <div className="absolute -left-4 md:left-0 bottom-[30%] float-animation z-20">
-                            <svg width="52" height="52" viewBox="0 0 52 52" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <circle cx="26" cy="26" r="10" fill="#DC7C7C"/>
-                                <line x1="26" y1="26" x2="8" y2="44" stroke="#F2A7A7" strokeWidth="3"/>
-                                <circle cx="8" cy="44" r="6" fill="#E8A0A0"/>
-                            </svg>
-                        </div>
-
-                        {/* Small floating purple circles */}
-                        <div className="absolute right-16 bottom-8 w-5 h-5 bg-accent/70 rounded-full float-animation" />
-                        <div className="absolute right-8 top-[35%] w-3 h-3 bg-primary/50 rounded-full float-animation-delayed" />
-
-                        {/* Decorative ribbon/confetti pieces */}
-                        <div className="absolute right-[20%] top-[10%] float-animation-delayed">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                                <path d="M4 4 L20 12 L12 20 Z" fill="#F2A7A7" opacity="0.6"/>
-                            </svg>
-                        </div>
-                        <div className="absolute left-[15%] top-[15%] float-animation">
-                            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                                <rect x="2" y="2" width="16" height="16" rx="2" fill="#DC7C7C" opacity="0.5" transform="rotate(45 10 10)"/>
-                            </svg>
-                        </div>
+                        {/* Mild floating particles */}
+                        <div className="absolute right-[15%] top-[15%] w-3 h-3 bg-[#F2A7A7]/30 rounded-full float-animation" />
+                        <div className="absolute left-[15%] top-[25%] w-2 h-2 bg-[#E8A0A0]/25 rounded-full float-animation-delayed" />
+                        <div className="absolute right-[20%] bottom-[20%] w-2.5 h-2.5 bg-[#DC7C7C]/20 rounded-full pulse-glow" />
+                        <div className="absolute left-[20%] bottom-[30%] w-2 h-2 bg-[#F2A7A7]/25 rounded-full pulse-glow" style={{ animationDelay: '1s' }} />
                     </div>
                 </div>
 
