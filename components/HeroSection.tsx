@@ -52,7 +52,7 @@ const HeroSection = () => {
             <div className="absolute bottom-32 left-20 w-4 h-4 bg-[#F2A7A7] rounded-full blur-sm pulse-glow" />
             <div className="absolute bottom-40 left-32 w-2 h-2 bg-[#E8A0A0] rounded-full blur-sm pulse-glow" />
 
-            <div className="container mx-auto px-6 pt-32 md:pt-32 pb-16 md:pb-20">
+            <div className="container mx-auto px-6 pt-32 md:pt-32 pb-16 md:pb-12">
                 <div className="grid lg:grid-cols-2 gap-16 lg:gap-20 items-center min-h-[85vh]">
                     {/* Left Content */}
                     <div className="space-y-6 md:space-y-8 z-10 mt-8 md:mt-0">
