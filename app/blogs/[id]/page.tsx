@@ -14,10 +14,8 @@ import {
     Linkedin,
     Copy,
     Check,
-    Globe,
-    ArrowLeft
+    Globe
 } from 'lucide-react';
-import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { motion, useScroll, useSpring } from 'framer-motion';
 
@@ -212,6 +210,10 @@ export default function BlogPostPage() {
                             <div className="w-8 h-[1px] bg-[#3B241A]/10 my-2" />
                             <button onClick={handleCopyLink} className="p-3 rounded-full bg-white text-[#3B241A] hover:bg-[#FAF0E6] transition-colors relative">
                                 {copied ? <Check className="w-5 h-5 text-green-500" /> : <Copy className="w-5 h-5" />}
+                            </button>
+                            <button className="p-3 rounded-full bg-white text-[#3B241A] hover:bg-[#F2A7A7]/20 transition-colors relative group">
+                                <MessageCircle className="w-5 h-5" />
+                                <span className="absolute left-full ml-3 px-3 py-1.5 bg-[#3B241A] text-[#FAF0E6] text-xs rounded-lg whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">Comments</span>
                             </button>
                         </div>
                     </div>
