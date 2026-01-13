@@ -2,64 +2,24 @@
 
 import React, { useState } from 'react';
 import Toolbar from '@/components/Toolbar';
+import Link from 'next/link';
 
-// Mock blog data for content creator/travel vlogger
-const blogPosts = [
-  {
-    id: 1,
-    title: 'Hidden Gems of Southeast Asia',
-    excerpt: 'Discover the untold stories and secret locations that most travelers miss. From secluded beaches to mountain villages...',
-    category: 'Travel',
-    date: 'January 10, 2026',
-    readTime: '8 min read',
-    image: 'https://images.unsplash.com/photo-1552733407-5d5c46c3bb3b?w=800&h=600&fit=crop',
-  },
-  {
-    id: 2,
-    title: 'Content Creation Tips for Beginners',
-    excerpt: 'Starting your journey as a content creator? Here are essential tips that helped me grow from zero to thousands...',
-    category: 'Content Creation',
-    date: 'January 8, 2026',
-    readTime: '5 min read',
-    image: 'https://images.unsplash.com/photo-1499750310107-5fef28a66643?w=800&h=600&fit=crop',
-  },
-  {
-    id: 3,
-    title: 'A Week in the Himalayas',
-    excerpt: 'Join me on an incredible journey through the majestic Himalayan mountains, where every sunrise tells a story...',
-    category: 'Travel',
-    date: 'January 5, 2026',
-    readTime: '10 min read',
-    image: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&h=600&fit=crop',
-  },
-  {
-    id: 4,
-    title: 'Building an Authentic Brand',
-    excerpt: 'Authenticity is key in content creation. Learn how to stay true to yourself while building a successful brand...',
-    category: 'Content Creation',
-    date: 'January 3, 2026',
-    readTime: '6 min read',
-    image: 'https://images.unsplash.com/photo-1432888498266-38ffec3eaf0a?w=800&h=600&fit=crop',
-  },
-  {
-    id: 5,
-    title: 'Street Food Adventures in India',
-    excerpt: 'Exploring the vibrant flavors and culinary traditions through local street food. A gastronomic journey you cannot miss...',
-    category: 'Food & Culture',
-    date: 'December 28, 2025',
-    readTime: '7 min read',
-    image: 'https://images.unsplash.com/photo-1554978991-33ef7f31d658?w=800&h=600&fit=crop',
-  },
-  {
-    id: 6,
-    title: 'Photography Essentials for Travel',
-    excerpt: 'Master the art of travel photography with these essential tips and techniques that will transform your content...',
-    category: 'Photography',
-    date: 'December 25, 2025',
-    readTime: '9 min read',
-    image: 'https://images.unsplash.com/photo-1452587925148-ce544e77e70d?w=800&h=600&fit=crop',
-  },
-];
+// Interface for blog post data
+interface BlogPost {
+  id: string;
+  title: string;
+  excerpt: string;
+  category: string;
+  date: string;
+  readTime: string;
+  image: string;
+  author: string;
+  content: string;
+  tags: string[];
+}
+
+// Load blog data from JSON file
+const blogPosts: BlogPost[] = require('@/data/blogs.json'); // eslint-disable-line @typescript-eslint/no-require-imports
 
 const categories = ['All', 'Travel', 'Content Creation', 'Food & Culture', 'Photography'];
 
@@ -68,7 +28,7 @@ const Blogs = () => {
 
   const filteredPosts = selectedCategory === 'All'
     ? blogPosts
-    : blogPosts.filter(post => post.category === selectedCategory);
+    : blogPosts.filter((post: BlogPost) => post.category === selectedCategory);
 
   return (
     <div className="min-h-screen bg-[#FAF0E6]">
@@ -116,11 +76,12 @@ const Blogs = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-20">
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
           {filteredPosts.map((post, index) => (
-            <article
-              key={post.id}
-              className={`glass rounded-xl overflow-hidden hover:shadow-2xl transition-all duration-500 group cursor-pointer fade-in-up stagger-${(index % 4) + 1}`}
-            >
+            <Link key={post.id} href={`/blogs/${post.id}`}>
+              <article
+                className={`glass rounded-xl overflow-hidden hover:shadow-2xl transition-all duration-500 group cursor-pointer fade-in-up stagger-${(index % 4) + 1}`}
+              >
               <div className="relative h-44 overflow-hidden">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={post.image}
                   alt={post.title}
@@ -155,14 +116,15 @@ const Blogs = () => {
                 <p className="text-body-text text-xs leading-relaxed mb-3 line-clamp-2">
                   {post.excerpt}
                 </p>
-                <button className="inline-flex items-center gap-2 text-primary font-medium text-xs group-hover:gap-3 transition-all">
+                <div className="inline-flex items-center gap-2 text-primary font-medium text-xs group-hover:gap-3 transition-all">
                   Continue Reading
                   <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                   </svg>
-                </button>
+                </div>
               </div>
             </article>
+            </Link>
           ))}
         </div>
 
