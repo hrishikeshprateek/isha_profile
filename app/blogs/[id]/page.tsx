@@ -122,12 +122,6 @@ export default function BlogPostPage() {
                 {/* HERO SECTION */}
                 <header className="px-5 sm:px-6 lg:px-8 max-w-4xl mx-auto text-center relative mb-12">
 
-                    {/* Back Link Mobile */}
-                    <div className="md:hidden flex justify-start mb-6">
-                        <Link href="/blogs" className="flex items-center text-sm text-[#A68B7E] font-medium">
-                            <ArrowLeft size={16} className="mr-2"/> Back
-                        </Link>
-                    </div>
 
                     {/* Decor */}
                     <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[300px] md:w-[600px] h-[300px] md:h-[600px] bg-[#F2A7A7]/10 rounded-full blur-[80px] md:blur-[120px] pointer-events-none -z-10" />
