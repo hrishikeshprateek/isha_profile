@@ -186,7 +186,7 @@ export default function BlogPostPage() {
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: 0.4 }}
-                className="max-w-6xl mx-auto px-4 sm:px-6 mb-8 sm:mb-12"
+                className="max-w-6xl mx-auto px-4 sm:px-6 mb-12 sm:mb-16"
             >
                 <div className="relative aspect-[16/9] sm:aspect-[21/9] rounded-2xl sm:rounded-[2.5rem] overflow-hidden shadow-xl sm:shadow-2xl shadow-[#3B241A]/10">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -329,7 +329,7 @@ export default function BlogPostPage() {
             </div>
 
             {/* Padding for mobile bottom bar */}
-            <div className="h-20 lg:h-0" />
+            <div className="h-24 lg:h-0" />
 
             {/* Global Styles for Typography */}
             <style jsx global>{`
