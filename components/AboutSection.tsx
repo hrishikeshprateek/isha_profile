@@ -3,6 +3,7 @@
 import Image from "next/image";
 import {motion} from "framer-motion";
 import {ArrowUpRight, Feather, PenTool, Camera, Monitor, Video} from "lucide-react";
+import {useRouter} from "next/navigation";
 
 const roles = [
     {label: "Content Creator", icon: Video},
@@ -25,6 +26,9 @@ const item = {
 };
 
 export default function AboutBentoGrid() {
+
+    const router = useRouter();
+
     return (
         // Equal padding top and bottom - visually balanced
         <section className="pt-16 pb-16 md:pt-24 md:pb-24 bg-[#F2E4D8] px-4">
@@ -59,6 +63,9 @@ export default function AboutBentoGrid() {
                     </div>
 
                     <div
+                        onClick={() => {
+                            router.push("/my_journey")
+                        }}
                         className="mt-8 flex items-center gap-2 text-[#6E5045] font-medium text-sm hover:text-[#3B241A] transition-colors cursor-pointer w-fit">
                         <span>Read my story</span>
                         <ArrowUpRight className="w-4 h-4"/>

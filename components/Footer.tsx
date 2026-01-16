@@ -13,6 +13,8 @@ import {
     Send,
     Zap
 } from "lucide-react";
+import {useRouter} from "next/navigation";
+
 
 // Scrolling Marquee Component
 const Marquee = () => {
@@ -57,6 +59,7 @@ const Marquee = () => {
 
 export default function Footer() {
     const currentYear = new Date().getFullYear();
+    const router = useRouter();
 
     const socialLinks = [
         { name: "Instagram", icon: Instagram, href: "#" },
@@ -92,13 +95,15 @@ export default function Footer() {
 
                         <div className="relative z-10 flex flex-wrap gap-3 mt-auto">
                             <a
-                                href="mailto:hello@isharani.com"
+                                href="mailto:me@isharani.in"
                                 className="flex items-center gap-2 px-6 py-3 bg-[#FAF0E6] text-[#3B241A] rounded-full font-bold hover:bg-[#F2A7A7] transition-all duration-300 shadow-lg active:scale-95 text-sm"
                             >
                                 <Mail size={16} />
                                 Email Me
                             </a>
-                            <button className="flex items-center gap-2 px-6 py-3 bg-[#F2A7A7] text-[#3B241A] rounded-full font-bold hover:bg-[#FAF0E6] transition-all duration-300 shadow-lg active:scale-95 text-sm">
+                            <button onClick={() => {
+                                router.push('/build')
+                            }} className="flex items-center gap-2 px-6 py-3 bg-[#F2A7A7] text-[#3B241A] rounded-full font-bold hover:bg-[#FAF0E6] transition-all duration-300 shadow-lg active:scale-95 text-sm">
                                 <Zap size={16} fill="currentColor" />
                                 Let&#39;s Build!
                             </button>

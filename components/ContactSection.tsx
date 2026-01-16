@@ -117,7 +117,7 @@ const ContactSection = () => {
                         <div className="bg-white/60 rounded-3xl p-5 border border-white flex items-center justify-between gap-3 shadow-sm hover:shadow-md transition-shadow">
                             <div>
                                 <p className="text-[10px] font-bold uppercase tracking-wider text-[#3B241A]/50 mb-0.5">Direct Email</p>
-                                <a href="mailto:hello@isharani.com" className="text-base font-bold text-[#3B241A] hover:text-[#F2A7A7] transition-colors">
+                                <a href="mailto:me@isharani.in" className="text-base font-bold text-[#3B241A] hover:text-[#F2A7A7] transition-colors">
                                     me@isharani.in
                                 </a>
                             </div>
@@ -125,7 +125,7 @@ const ContactSection = () => {
                                 className="p-2.5 bg-[#FAF0E6] hover:bg-[#3B241A] hover:text-[#FAF0E6] rounded-full text-[#3B241A] transition-colors"
                                 title="Copy Email"
                             >
-                                <Copy size={16} />
+                                <Mail onClick={()=> {}} size={16} />
                             </button>
                         </div>
 
