@@ -13,6 +13,7 @@
     "test-db": "node scripts/test-mongodb.js"
   },
   "dependencies": {
+    "@radix-ui/react-slot": "^1.2.4",
     "@radix-ui/react-toast": "^1.2.15",
     "bcryptjs": "^3.0.3",
     "class-variance-authority": "^0.7.1",
