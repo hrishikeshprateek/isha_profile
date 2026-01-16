@@ -1,9 +1,10 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { X, Menu, ArrowLeft, Sparkles } from "lucide-react";
+import { X, Menu, ArrowLeft } from "lucide-react";
 import { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 interface ToolbarProps {
   title?: string;
@@ -23,6 +24,7 @@ const Toolbar = ({
   logoText = "S",
 }: ToolbarProps) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const router = useRouter();
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
@@ -30,6 +32,11 @@ const Toolbar = ({
 
   const closeMobileMenu = () => {
     setIsMobileMenuOpen(false);
+  };
+
+  const handleVcardClick = () => {
+    router.push("/vcard");
+    closeMobileMenu();
   };
 
   return (
@@ -72,10 +79,13 @@ const Toolbar = ({
 
         {/* Right - Contact Button or Menu */}
         {showContactButton ? (
-          <Button variant="contact" size="lg" className="hidden md:flex">
-            <Sparkles className="w-4 h-4" />
-            Contact
-            <Sparkles className="w-4 h-4" />
+          <Button
+            variant="contact"
+            size="lg"
+            className="hidden md:flex"
+            onClick={handleVcardClick}
+          >
+            Vcard
           </Button>
         ) : (
           <div className="w-10 h-10"></div>
@@ -114,10 +124,13 @@ const Toolbar = ({
             ))}
             {showContactButton && (
               <div className="px-6 pt-4">
-                <Button variant="contact" size="lg" className="w-full">
-                  <Sparkles className="w-4 h-4" />
-                  Contact
-                  <Sparkles className="w-4 h-4" />
+                <Button
+                  variant="contact"
+                  size="lg"
+                  className="w-full"
+                  onClick={handleVcardClick}
+                >
+                  Vcard
                 </Button>
               </div>
             )}

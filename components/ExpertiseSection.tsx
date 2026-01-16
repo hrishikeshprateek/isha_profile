@@ -11,7 +11,6 @@ import {
 } from "lucide-react";
 
 // --- CONFIGURATION ---
-// TOOL_RADIUS: Keep tools scattered far from their category
 const TOOL_RADIUS = 165;
 
 // --- TYPE DEFINITIONS ---
@@ -47,21 +46,18 @@ interface BranchGroupProps {
 interface ToolNodeProps {
     parent: CoreNode;
     data: Tool;
-    initX: number;
-    initY: number;
+    offsetX: number; // CHANGED: We now pass offset instead of absolute initX
+    offsetY: number; // CHANGED
     lineColor: string;
 }
-
-// Helper to get brand icons from Simple Icons CDN
-const getIcon = (slug: string) => `https://cdn.simpleicons.org/${slug}`;
 
 const networkData = [
     {
         id: "design",
         label: "Design",
         icon: PenTool,
-        angle: 315, // Top Left
-        radius: 240, // Medium distance
+        angle: 315,
+        radius: 240,
         color: "#F2A7A7",
         tools: [
             { id: "ps", name: "Photoshop", iconUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/3/30/Adobe_Photoshop_CC_2026_icon.svg/250px-Adobe_Photoshop_CC_2026_icon.svg.png", color: "bg-[#ffffff]" },
@@ -74,8 +70,8 @@ const networkData = [
         id: "video",
         label: "Video",
         icon: Video,
-        angle: 45, // Top Right
-        radius: 340, // FAR distance (More)
+        angle: 45,
+        radius: 340,
         color: "#9999FF",
         tools: [
             { id: "pr", name: "Premiere", iconUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/3/34/Adobe_Premiere_Pro_CC_2026_icon.svg/250px-Adobe_Premiere_Pro_CC_2026_icon.svg.png", color: "bg-[#ffffff]" },
@@ -88,8 +84,8 @@ const networkData = [
         id: "content",
         label: "Content",
         icon: Type,
-        angle: 135, // Bottom Right
-        radius: 290, // Medium-Far
+        angle: 135,
+        radius: 290,
         color: "#15C39A",
         tools: [
             { id: "no", name: "Notion", iconUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e9/Notion-logo.svg/120px-Notion-logo.svg.png", color: "bg-white border-2 border-gray-200" },
@@ -101,8 +97,8 @@ const networkData = [
         id: "photo",
         label: "Photo",
         icon: Camera,
-        angle: 225, // Bottom Left
-        radius: 190, // CLOSE distance (Less)
+        angle: 225,
+        radius: 190,
         color: "#2FA3F7",
         tools: [
             { id: "lr", name: "Lightroom", iconUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b6/Adobe_Photoshop_Lightroom_CC_logo.svg/500px-Adobe_Photoshop_Lightroom_CC_logo.svg.png", color: "bg-[#001E36]" },
@@ -176,9 +172,8 @@ export default function InteractiveGraph() {
     const coreY = useSpring(centerY, { stiffness: 150, damping: 20 });
 
     return (
-        <section className="bg-[#FAF0E6] py-10 md:py-24 relative overflow-hidden select-none">
+        <section className="bg-[#F2E4D8] py-10 md:py-12 relative overflow-hidden select-none">
 
-            {/* Header */}
             <div className="text-center mb-4 md:mb-12 relative z-10 px-6 pointer-events-none">
                 <h2 className="text-3xl md:text-5xl font-serif font-bold text-[#3B241A]">
                     My Creative <span className="text-[#F2A7A7] italic">Universe</span>
@@ -188,13 +183,10 @@ export default function InteractiveGraph() {
                 </p>
             </div>
 
-            {/* GRAPH CONTAINER */}
             <div ref={containerRef} className="w-full h-[600px] md:h-[900px] overflow-hidden relative cursor-crosshair touch-none flex items-center justify-center">
-
-                {/* Scalable Canvas */}
                 <div className="relative w-[1000px] h-[900px] origin-center transform scale-[0.55] md:scale-100 transition-transform duration-500 -translate-x-38 md:translate-x-0">
 
-                    {/* CORE NODE (ISHA) */}
+                    {/* CORE NODE */}
                     <DraggableNode x={coreX} y={coreY} className="z-50">
                         <div className="w-32 h-32 md:w-40 md:h-40 rounded-full bg-[#3B241A] border-[6px] border-[#F2A7A7] shadow-2xl flex flex-col items-center justify-center relative group hover:border-white transition-colors duration-300">
                             <span className="text-4xl font-serif font-bold text-[#FAF0E6]">ISHA</span>
@@ -206,7 +198,6 @@ export default function InteractiveGraph() {
                     {/* BRANCHES */}
                     {networkData.map((cat) => {
                         const rad = (cat.angle * Math.PI) / 180;
-                        // USING VARIABLE RADIUS FROM DATA (cat.radius)
                         const initX = centerX + Math.cos(rad) * cat.radius;
                         const initY = centerY + Math.sin(rad) * cat.radius;
 
@@ -220,11 +211,9 @@ export default function InteractiveGraph() {
                             />
                         )
                     })}
-
                 </div>
             </div>
 
-            {/* Mobile Hint */}
             <div className="absolute bottom-6 left-0 right-0 text-center text-[#3B241A]/20 text-xs font-bold uppercase tracking-widest pointer-events-none animate-pulse md:hidden">
                 Tap & Drag
             </div>
@@ -239,14 +228,14 @@ function BranchGroup({ core, data, initX, initY }: BranchGroupProps) {
 
     return (
         <>
-            {/* A. Connector: CORE -> CATEGORY */}
+            {/* Connector: CORE -> CATEGORY */}
             <svg className="absolute top-0 left-0 w-full h-full pointer-events-none overflow-visible z-0">
                 <Connector fromX={core.x} fromY={core.y} toX={catX} toY={catY} color="#3B241A" dash />
             </svg>
 
-            {/* B. The Category Node */}
+            {/* The Category Node */}
             <DraggableNode x={catX} y={catY} className="z-40">
-                <div className="bg-[#FAF0E6] border-2 border-[#3B241A] px-6 py-3 rounded-full flex items-center gap-3 shadow-[0_8px_30px_rgb(0,0,0,0.12)] w-max">
+                <div className="bg-[#F2E4D8] border-2 border-[#3B241A] px-6 py-3 rounded-full flex items-center gap-3 shadow-[0_8px_30px_rgb(0,0,0,0.12)] w-max">
                     <data.icon size={20} className="text-[#F2A7A7]" />
                     <span className="font-bold text-[#3B241A] uppercase tracking-wider text-sm select-none">
                         {data.label}
@@ -254,30 +243,27 @@ function BranchGroup({ core, data, initX, initY }: BranchGroupProps) {
                 </div>
             </DraggableNode>
 
-            {/* C. The Tools (Real Logos) */}
+            {/* The Tools */}
             {data.tools.map((tool: Tool, index: number) => {
-                // SPREAD LOGIC:
-                // Large spread (150 degrees) to keep them scattered
                 const toolsCount = data.tools.length;
                 const spread = 150;
                 const step = spread / (toolsCount > 1 ? toolsCount - 1 : 1);
                 const startAngle = data.angle - (spread / 2);
-
                 const finalAngle = startAngle + (index * step);
-
                 const rad = (finalAngle * Math.PI) / 180;
 
-                // Using TOOL_RADIUS (165)
-                const toolInitX = initX + Math.cos(rad) * TOOL_RADIUS;
-                const toolInitY = initY + Math.sin(rad) * TOOL_RADIUS;
+                // CHANGED: We calculate the OFFSET relative to the Category (0,0)
+                // instead of the absolute page position.
+                const offsetX = Math.cos(rad) * TOOL_RADIUS;
+                const offsetY = Math.sin(rad) * TOOL_RADIUS;
 
                 return (
                     <ToolNode
                         key={tool.id}
                         parent={{ x: catX, y: catY }}
                         data={tool}
-                        initX={toolInitX}
-                        initY={toolInitY}
+                        offsetX={offsetX} // Pass offset
+                        offsetY={offsetY} // Pass offset
                         lineColor={data.color}
                     />
                 )
@@ -286,22 +272,23 @@ function BranchGroup({ core, data, initX, initY }: BranchGroupProps) {
     )
 }
 
-function ToolNode({ parent, data, initX, initY, lineColor }: ToolNodeProps) {
-    const toolX = useSpring(initX, { stiffness: 150, damping: 15 });
-    const toolY = useSpring(initY, { stiffness: 150, damping: 15 });
+function ToolNode({ parent, data, offsetX, offsetY, lineColor }: ToolNodeProps) {
+    // CHANGED: Create a target that follows the parent's position + offset
+    const targetX = useTransform(parent.x, (x) => x + offsetX);
+    const targetY = useTransform(parent.y, (y) => y + offsetY);
+
+    // CHANGED: Feed the DYNAMIC target into useSpring
+    const toolX = useSpring(targetX, { stiffness: 150, damping: 15 });
+    const toolY = useSpring(targetY, { stiffness: 150, damping: 15 });
 
     return (
         <>
-            {/* Connector: CATEGORY -> TOOL */}
             <svg className="absolute top-0 left-0 w-full h-full pointer-events-none overflow-visible z-10">
                 <Connector fromX={parent.x} fromY={parent.y} toX={toolX} toY={toolY} color={lineColor} />
             </svg>
 
-            {/* The Tool Node (Actual Logo) */}
             <DraggableNode x={toolX} y={toolY} className="z-30">
                 <div className={`w-20 h-20 rounded-[1.2rem] shadow-lg flex flex-col items-center justify-center relative transition-all border-2 border-white/20 hover:shadow-2xl hover:shadow-[#3B241A]/20 overflow-hidden ${data.color}`}>
-
-                    {/* The Logo Image */}
                     <div className="p-2 w-full h-full flex items-center justify-center">
                         <Image
                             src={data.iconUrl}
@@ -312,8 +299,6 @@ function ToolNode({ parent, data, initX, initY, lineColor }: ToolNodeProps) {
                             style={{ filter: data.color.includes('bg-white') || data.color.includes('#ffffff') ? '' : 'invert(1) brightness(2)' }}
                         />
                     </div>
-
-                    {/* Tool Name Tag */}
                     <div className="absolute bottom-0 w-full text-center pb-1 opacity-0 group-hover:opacity-100 transition-opacity">
                          <span className="text-[8px] uppercase font-bold text-white/90 drop-shadow-md">
                             {data.name}
