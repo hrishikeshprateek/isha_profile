@@ -11,7 +11,7 @@ import {
   GoogleAuthProvider,
   signInWithPopup
 } from 'firebase/auth';
-import { auth } from '@/lib/firebase';
+import { ensureAuth } from '@/lib/firebase';
 
 interface User {
   id: string;
@@ -51,7 +51,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
 
     // Guard: Only listen to Firebase auth state if auth is initialized
-    if (!auth) {
+    let auth;
+    try {
+      auth = ensureAuth();
+    } catch (err) {
       setLoading(false);
       return;
     }
@@ -118,8 +121,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       localStorage.setItem('user', JSON.stringify(data.user));
 
       // Also sign in to Firebase if available
-      if (auth) {
+      try {
+        const auth = ensureAuth();
         await signInWithEmailAndPassword(auth, email, password);
+      } catch (err) {
+        console.warn('Firebase sign-in skipped (auth not initialized):', err);
       }
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : 'Login error occurred';
@@ -155,9 +161,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // Login with Google
   const loginWithGoogle = async () => {
     try {
-      if (!auth) {
-        throw new Error('Firebase not initialized');
-      }
+      const auth = ensureAuth();
 
       const provider = new GoogleAuthProvider();
       const result = await signInWithPopup(auth, provider);
@@ -175,8 +179,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // Logout
   const logout = async () => {
     try {
-      if (auth) {
+      try {
+        const auth = ensureAuth();
         await signOut(auth);
+      } catch (err) {
+        console.warn('Firebase signOut skipped (auth not initialized)');
       }
       setUser(null);
       setToken(null);
@@ -276,4 +283,3 @@ export default function LoginPage() {
 }
 
 */
-
