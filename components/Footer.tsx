@@ -67,6 +67,36 @@ export default function Footer() {
         { name: "GitHub", icon: Github, href: "#" },
     ];
 
+    const [email, setEmail] = React.useState('');
+    const [status, setStatus] = React.useState<'idle' | 'loading' | 'success' | 'error'>('idle');
+    const [message, setMessage] = React.useState('');
+
+    async function handleSubscribe(e: React.FormEvent) {
+        e.preventDefault();
+        if (!email) return;
+        try {
+            setStatus('loading');
+            setMessage('');
+            const res = await fetch('/api/subscribers', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, source: 'footer' }),
+            });
+            const data = await res.json();
+            if (res.ok && data.success) {
+                setStatus('success');
+                setMessage(data.message || 'You are subscribed!');
+                setEmail('');
+            } else {
+                setStatus('error');
+                setMessage(data.error || 'Subscription failed');
+            }
+        } catch (err) {
+            setStatus('error');
+            setMessage('Subscription failed');
+        }
+    }
+
     return (
         <footer className="bg-[#1A0F08] text-[#FAF0E6] flex flex-col">
             <Marquee />
@@ -123,16 +153,24 @@ export default function Footer() {
                                 </p>
                             </div>
 
-                            <form className="flex gap-2">
+                            <form className="flex gap-2" onSubmit={handleSubscribe}>
                                 <input
                                     type="email"
+                                    value={email}
+                                    onChange={(e) => setEmail(e.target.value)}
                                     placeholder="email@example.com"
+                                    required
                                     className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#F2A7A7]/50 focus:bg-white/10 transition-colors text-[#FAF0E6] placeholder:text-[#A68B7E]/50"
                                 />
-                                <button className="bg-[#F2A7A7] text-[#3B241A] px-4 py-3 rounded-xl hover:bg-white transition-colors">
-                                    <Send size={18} />
+                                <button type="submit" disabled={status === 'loading'} className="bg-[#F2A7A7] text-[#3B241A] px-4 py-3 rounded-xl hover:bg-white transition-colors disabled:opacity-60">
+                                    {status === 'loading' ? '...' : <Send size={18} />}
                                 </button>
                             </form>
+                            {message && (
+                                <p className={`text-xs mt-3 ${status === 'success' ? 'text-green-400' : 'text-red-400'}`}>
+                                    {message}
+                                </p>
+                            )}
                         </div>
 
                         {/* 2. Socials & LinkTree Row */}

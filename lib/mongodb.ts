@@ -42,5 +42,5 @@ export const Collections = {
   BLOG_POSTS: 'blog_posts',
   PROJECTS: 'projects',
   CONTACTS: 'contacts',
+  SUBSCRIBERS: 'subscribers',
 } as const;
-
