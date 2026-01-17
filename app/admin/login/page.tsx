@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
@@ -17,11 +17,48 @@ import {
 
 export default function AdminLoginPage() {
     const router = useRouter();
-    const [email, setEmail] = useState('admin@isharani.in');
-    const [password, setPassword] = useState('AdminPass123!');
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false); // Toggle state
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [checkingAuth, setCheckingAuth] = useState(true);
+
+    // If already signed in as admin, redirect to /admin
+    useEffect(() => {
+        let mounted = true;
+        async function check() {
+            try {
+                if (!auth) {
+                    if (mounted) setCheckingAuth(false);
+                    return;
+                }
+
+                const user = auth.currentUser;
+                if (!user) {
+                    // No user signed in
+                    if (mounted) setCheckingAuth(false);
+                    return;
+                }
+
+                const idTokenResult = await user.getIdTokenResult();
+                if (idTokenResult?.claims?.admin) {
+                    // redirect to admin
+                    router.replace('/admin');
+                    return;
+                }
+            } catch (err) {
+                console.warn('Auth check failed:', err);
+            } finally {
+                if (mounted) setCheckingAuth(false);
+            }
+        }
+
+        check();
+        return () => {
+            mounted = false;
+        };
+    }, [router]);
 
     async function handleSubmit(e: React.FormEvent) {
         e.preventDefault();
@@ -35,36 +72,63 @@ export default function AdminLoginPage() {
         }
 
         try {
+            // Sign in with Firebase to get an ID token
             const credential = await signInWithEmailAndPassword(auth, email, password);
             const idTokenResult = await credential.user.getIdTokenResult();
             const firebaseToken = idTokenResult.token;
 
+            // Check if user has admin claim
             if (!idTokenResult.claims.admin) {
                 setError('You do not have admin privileges');
                 setLoading(false);
                 return;
             }
 
+            // Store token in localStorage for authenticated API calls
             localStorage.setItem('admin_token', firebaseToken);
 
+            // Optionally, sync with backend (create session) - can be optional with client-side token
             try {
                 const res = await fetch('/api/auth/login', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ firebaseToken }),
                 });
-                if (!res.ok) console.warn('Backend sync failed');
+
+                if (!res.ok) {
+                    console.warn('Backend sync failed, proceeding with client token');
+                }
             } catch (syncErr) {
-                console.warn('Backend sync error', syncErr);
+                console.warn('Backend sync error, proceeding with client token', syncErr);
             }
 
+            // Navigate to admin dashboard
             router.push('/admin');
+            return;
         } catch (err: unknown) {
-            const message = err instanceof Error ? err.message : String(err);
-            setError(message);
+            const message = err instanceof Error ? err.message : String(err) || 'An error occurred';
+
+            // Provide user-friendly error messages
+            if (message.includes('auth/user-not-found')) {
+                setError('User not found');
+            } else if (message.includes('auth/wrong-password')) {
+                setError('Invalid password');
+            } else if (message.includes('auth/invalid-email')) {
+                setError('Invalid email address');
+            } else {
+                setError(message);
+            }
         } finally {
             setLoading(false);
         }
+    }
+
+    if (checkingAuth) {
+        return (
+            <div className="min-h-screen flex items-center justify-center">
+                <div className="text-[#3B241A]">Checking authentication...</div>
+            </div>
+        );
     }
 
     return (
@@ -127,8 +191,8 @@ export default function AdminLoginPage() {
                         {/* Header */}
                         <div className="mb-8 pl-4 border-l-2 !border-[#F2A7A7]">
                             <div className="inline-flex items-center gap-2 mb-1 opacity-60">
-                                <Sparkles size={12} className="!text-[#3B241A]" />
-                                <span className="text-[10px] font-bold uppercase tracking-widest !text-[#3B241A]">Restricted Area</span>
+                                <Lock size={12} className="!text-[#3B241A]" />
+                                 <span className="text-[10px] font-bold uppercase tracking-widest !text-[#3B241A]">Restricted Area</span>
                             </div>
                             <h1 className="text-3xl font-serif font-bold !text-[#3B241A]">Login.</h1>
                         </div>
