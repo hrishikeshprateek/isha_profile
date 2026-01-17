@@ -11,7 +11,7 @@ import {
   GoogleAuthProvider,
   signInWithPopup
 } from 'firebase/auth';
-import { ensureAuth } from '@/lib/firebase';
+import { auth as firebaseAuth } from '@/lib/firebase';
 
 interface User {
   id: string;
@@ -51,16 +51,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
 
     // Guard: Only listen to Firebase auth state if auth is initialized
-    let auth;
-    try {
-      auth = ensureAuth();
-    } catch (err) {
+    const clientAuth = firebaseAuth;
+    if (!clientAuth) {
       setLoading(false);
       return;
     }
 
     // Listen to Firebase auth state
-    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+    const unsubscribe = onAuthStateChanged(clientAuth, async (firebaseUser) => {
       if (firebaseUser) {
         // User is signed in, get custom token from backend
         const idToken = await firebaseUser.getIdToken();
@@ -122,10 +120,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       // Also sign in to Firebase if available
       try {
-        const auth = ensureAuth();
-        await signInWithEmailAndPassword(auth, email, password);
+        if (firebaseAuth) {
+          await signInWithEmailAndPassword(firebaseAuth, email, password);
+        } else {
+          console.warn('Firebase sign-in skipped (auth not initialized)');
+        }
       } catch (err) {
-        console.warn('Firebase sign-in skipped (auth not initialized):', err);
+        console.warn('Firebase sign-in failed:', err);
       }
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : 'Login error occurred';
@@ -161,10 +162,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // Login with Google
   const loginWithGoogle = async () => {
     try {
-      const auth = ensureAuth();
-
+      if (!firebaseAuth) throw new Error('Firebase not initialized');
       const provider = new GoogleAuthProvider();
-      const result = await signInWithPopup(auth, provider);
+      const result = await signInWithPopup(firebaseAuth, provider);
 
       // Get Firebase token and sync with backend
       const idToken = await result.user.getIdToken();
@@ -180,8 +180,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const logout = async () => {
     try {
       try {
-        const auth = ensureAuth();
-        await signOut(auth);
+        if (firebaseAuth) await signOut(firebaseAuth);
       } catch (err) {
         console.warn('Firebase signOut skipped (auth not initialized)');
       }

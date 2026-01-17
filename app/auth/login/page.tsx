@@ -7,7 +7,6 @@ import { auth } from '@/lib/firebase';
 import { motion } from 'framer-motion';
 import {
     ArrowRight,
-    Sparkles,
     AlertCircle,
     Lock,
     Key,
@@ -19,12 +18,11 @@ export default function AdminLoginPage() {
     const router = useRouter();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    const [showPassword, setShowPassword] = useState(false); // Toggle state
+    const [showPassword, setShowPassword] = useState(false);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [checkingAuth, setCheckingAuth] = useState(true);
 
-    // If already signed in as admin, redirect to /admin
     useEffect(() => {
         let mounted = true;
         async function check() {
@@ -36,14 +34,12 @@ export default function AdminLoginPage() {
 
                 const user = auth.currentUser;
                 if (!user) {
-                    // No user signed in
                     if (mounted) setCheckingAuth(false);
                     return;
                 }
 
                 const idTokenResult = await user.getIdTokenResult();
                 if (idTokenResult?.claims?.admin) {
-                    // redirect to admin
                     router.replace('/admin');
                     return;
                 }
@@ -72,22 +68,18 @@ export default function AdminLoginPage() {
         }
 
         try {
-            // Sign in with Firebase to get an ID token
             const credential = await signInWithEmailAndPassword(auth, email, password);
             const idTokenResult = await credential.user.getIdTokenResult();
             const firebaseToken = idTokenResult.token;
 
-            // Check if user has admin claim
             if (!idTokenResult.claims.admin) {
                 setError('You do not have admin privileges');
                 setLoading(false);
                 return;
             }
 
-            // Store token in localStorage for authenticated API calls
             localStorage.setItem('admin_token', firebaseToken);
 
-            // Optionally, sync with backend (create session) - can be optional with client-side token
             try {
                 const res = await fetch('/api/auth/login', {
                     method: 'POST',
@@ -102,13 +94,11 @@ export default function AdminLoginPage() {
                 console.warn('Backend sync error, proceeding with client token', syncErr);
             }
 
-            // Navigate to admin dashboard
             router.push('/admin');
             return;
         } catch (err: unknown) {
             const message = err instanceof Error ? err.message : String(err) || 'An error occurred';
 
-            // Provide user-friendly error messages
             if (message.includes('auth/user-not-found')) {
                 setError('User not found');
             } else if (message.includes('auth/wrong-password')) {
@@ -132,22 +122,17 @@ export default function AdminLoginPage() {
     }
 
     return (
-        // MAIN BACKGROUND: Light Pink/Cream Theme
         <div className="min-h-screen !bg-[#FAF0E6] flex items-center justify-center p-6 relative overflow-hidden font-sans selection:!bg-[#F2A7A7] selection:!text-[#3B241A]">
 
-            {/* 1. Grain Texture */}
             <div className="fixed inset-0 pointer-events-none opacity-[0.4] z-0 mix-blend-multiply"
                  style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")` }}>
             </div>
 
-            {/* 2. Soft Background Elements */}
             <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-[#F2A7A7]/10 rounded-full blur-[120px] pointer-events-none" />
             <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-[#3B241A]/5 rounded-full blur-[120px] pointer-events-none" />
 
-            {/* 3. INTERACTIVE LOGIN CONTAINER */}
             <div className="relative z-10 flex items-center justify-center w-full max-w-[800px]">
 
-                {/* A. THE SPINE (The Anchor) */}
                 <motion.div
                     initial={{ y: -50, opacity: 0 }}
                     animate={{ y: 0, opacity: 1 }}
@@ -173,7 +158,6 @@ export default function AdminLoginPage() {
                     />
                 </motion.div>
 
-                {/* B. THE DRAWER (Slides out) */}
                 <motion.div
                     initial={{ x: "-100%", opacity: 0 }}
                     animate={{ x: 0, opacity: 1 }}
@@ -188,19 +172,16 @@ export default function AdminLoginPage() {
                         transition={{ delay: 1.4, duration: 0.5 }}
                         className="relative z-20"
                     >
-                        {/* Header */}
                         <div className="mb-8 pl-4 border-l-2 !border-[#F2A7A7]">
                             <div className="inline-flex items-center gap-2 mb-1 opacity-60">
                                 <Lock size={12} className="!text-[#3B241A]" />
-                                 <span className="text-[10px] font-bold uppercase tracking-widest !text-[#3B241A]">Restricted Area</span>
+                                <span className="text-[10px] font-bold uppercase tracking-widest !text-[#3B241A]">Restricted Area</span>
                             </div>
                             <h1 className="text-3xl font-serif font-bold !text-[#3B241A]">Login.</h1>
                         </div>
 
-                        {/* Form */}
                         <form onSubmit={handleSubmit} className="flex flex-col gap-6">
 
-                            {/* Email Field */}
                             <div className="relative group">
                                 <input
                                     type="email"
@@ -215,10 +196,9 @@ export default function AdminLoginPage() {
                                 </div>
                             </div>
 
-                            {/* Password Field */}
                             <div className="relative group">
                                 <input
-                                    type={showPassword ? "text" : "password"} // Dynamic type
+                                    type={showPassword ? "text" : "password"}
                                     placeholder="Password"
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
@@ -226,12 +206,10 @@ export default function AdminLoginPage() {
                                     required
                                 />
 
-                                {/* Lock Icon (Left) */}
                                 <div className="absolute left-0 top-3 !text-[#3B241A]/30 group-focus-within:!text-[#F2A7A7] transition-colors">
                                     <Lock size={16} />
                                 </div>
 
-                                {/* Eye Toggle (Right) */}
                                 <button
                                     type="button"
                                     onClick={() => setShowPassword(!showPassword)}
@@ -241,14 +219,12 @@ export default function AdminLoginPage() {
                                 </button>
                             </div>
 
-                            {/* Forgot Password Link (Visual Only) */}
                             <div className="flex justify-end -mt-2">
                                 <a href="#" className="text-[10px] text-[#3B241A]/40 hover:text-[#F2A7A7] font-bold uppercase tracking-wider transition-colors">
                                     Forgot Password?
                                 </a>
                             </div>
 
-                            {/* Error Message */}
                             {error && (
                                 <motion.div
                                     initial={{ height: 0, opacity: 0 }}
@@ -260,7 +236,6 @@ export default function AdminLoginPage() {
                                 </motion.div>
                             )}
 
-                            {/* Submit Button */}
                             <button
                                 type="submit"
                                 disabled={loading}
@@ -275,7 +250,6 @@ export default function AdminLoginPage() {
 
             </div>
 
-            {/* Footer */}
             <div className="absolute bottom-6 text-center w-full">
                 <p className="text-[10px] !text-[#3B241A]/20 uppercase tracking-widest font-bold">
                     © {new Date().getFullYear()} Secured System
@@ -285,3 +259,4 @@ export default function AdminLoginPage() {
         </div>
     );
 }
+
