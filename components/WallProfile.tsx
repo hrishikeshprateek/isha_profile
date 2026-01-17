@@ -1,312 +1,305 @@
 "use client";
 
-import { useState } from "react";
+import React, { useState } from "react";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-    Heart,
-    MessageCircle,
-    Grid,
     Play,
-    Bookmark,
-    MoreHorizontal,
-    Send,
-    Smile,
-    User,
-    Settings,
-    ChevronDown,
-    BadgeCheck,
-    Clapperboard
+    X,
+    ChevronLeft,
+    ChevronRight,
+    Maximize2,
+    Layers
 } from "lucide-react";
 
-// --- DATA ---
-const POSTS = [
-    { id: "1", type: "image", src: "/isha_a.png", likes: 1204, comments: 45 },
-    { id: "2", type: "video", src: "https://videos.pexels.com/video-files/3045163/3045163-sd_640_360_30fps.mp4", likes: 3500, comments: 120 },
-    { id: "3", type: "image", src: "/isha_a.png", likes: 900, comments: 32 },
-    { id: "4", type: "image", src: "/isha_a.png", likes: 4500, comments: 310 },
-    { id: "5", type: "video", src: "https://videos.pexels.com/video-files/3045163/3045163-sd_640_360_30fps.mp4", likes: 1200, comments: 88 },
-    { id: "6", type: "image", src: "/isha_a.png", likes: 2100, comments: 150 },
-    { id: "7", type: "image", src: "/isha_a.png", likes: 3300, comments: 200 },
-    { id: "8", type: "image", src: "/isha_a.png", likes: 1800, comments: 90 },
-    { id: "9", type: "image", src: "/isha_a.png", likes: 5000, comments: 400 },
+// --- MOCK DATA (The "Feed") ---
+const PORTFOLIO_ITEMS = [
+    {
+        id: 1,
+        type: "video",
+        category: "Reels",
+        src: "https://assets.mixkit.co/videos/preview/mixkit-girl-in-neon-sign-1232-large.mp4", // Mock Video
+        thumb: "https://images.unsplash.com/photo-1516035069371-29a1b244cc32?auto=format&fit=crop&q=80&w=800",
+        title: "Neon Campaigns",
+        client: "Urban Outfitters",
+        desc: "A high-energy reel designed to stop the scroll. Increased CTR by 45%."
+    },
+    {
+        id: 2,
+        type: "image",
+        category: "Photography",
+        src: "https://images.unsplash.com/photo-1492633423870-43d1cd2775eb?auto=format&fit=crop&q=80&w=800",
+        thumb: "https://images.unsplash.com/photo-1492633423870-43d1cd2775eb?auto=format&fit=crop&q=80&w=800",
+        title: "Summer Editorial",
+        client: "Vogue India",
+        desc: "Capturing the essence of Indian summer through a vintage lens."
+    },
+    {
+        id: 3,
+        type: "image",
+        category: "Branding",
+        src: "https://images.unsplash.com/photo-1600607686527-6fb886090705?auto=format&fit=crop&q=80&w=800",
+        thumb: "https://images.unsplash.com/photo-1600607686527-6fb886090705?auto=format&fit=crop&q=80&w=800",
+        title: "Minimalist Packaging",
+        client: "Pure Skin",
+        desc: "Rebranding a skincare line to appeal to Gen Z."
+    },
+    {
+        id: 4,
+        type: "video",
+        category: "Reels",
+        src: "https://assets.mixkit.co/videos/preview/mixkit-fashion-model-posing-in-neon-light-1233-large.mp4",
+        thumb: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=800",
+        title: "Fashion Week BTS",
+        client: "Lakme",
+        desc: "Behind the scenes coverage that felt intimate and raw."
+    },
+    {
+        id: 5,
+        type: "image",
+        category: "Photography",
+        src: "https://images.unsplash.com/photo-1529139574466-a302d27f6054?auto=format&fit=crop&q=80&w=800",
+        thumb: "https://images.unsplash.com/photo-1529139574466-a302d27f6054?auto=format&fit=crop&q=80&w=800",
+        title: "Urban Portraits",
+        client: "Personal Project",
+        desc: "Exploring light and shadow in Mumbai streets."
+    },
+    {
+        id: 6,
+        type: "image",
+        category: "Branding",
+        src: "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?auto=format&fit=crop&q=80&w=800",
+        thumb: "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?auto=format&fit=crop&q=80&w=800",
+        title: "Tech Startup UI",
+        client: "Nexus",
+        desc: "Clean, accessible UI design for a fintech app."
+    }
 ];
 
-const HIGHLIGHTS = [
-    { id: 1, title: "UI Design", src: "/isha_a.png" },
-    { id: 2, title: "Travel", src: "/isha_a.png" },
-    { id: 3, title: "Process", src: "/isha_a.png" },
-    { id: 4, title: "Clients", src: "/isha_a.png" },
-];
+const FILTERS = ["All", "Reels", "Photography", "Branding"];
 
-export default function InstagramExact() {
-    const [activeTab, setActiveTab] = useState("posts");
-    const [selectedPost, setSelectedPost] = useState<any>(null);
+export default function WorkPage() {
+    const [activeFilter, setActiveFilter] = useState("All");
+    const [selectedId, setSelectedId] = useState<number | null>(null);
+
+    // Filter Logic
+    const filteredItems = activeFilter === "All"
+        ? PORTFOLIO_ITEMS
+        : PORTFOLIO_ITEMS.filter(item => item.category === activeFilter);
+
+    // Find active item index for the "Story Viewer"
+    const selectedIndex = filteredItems.findIndex(item => item.id === selectedId);
+    const activeItem = filteredItems[selectedIndex];
+
+    // Navigation Handlers
+    const handleNext = (e?: React.MouseEvent) => {
+        e?.stopPropagation();
+        if (selectedIndex < filteredItems.length - 1) {
+            setSelectedId(filteredItems[selectedIndex + 1].id);
+        } else {
+            setSelectedId(null); // Close on finish
+        }
+    };
+
+    const handlePrev = (e?: React.MouseEvent) => {
+        e?.stopPropagation();
+        if (selectedIndex > 0) {
+            setSelectedId(filteredItems[selectedIndex - 1].id);
+        }
+    };
 
     return (
-        <div className="min-h-screen bg-[#FAF0E6] text-[#262626] font-sans pb-10">
+        <div className="min-h-screen bg-[#FAF0E6] text-[#3B241A] font-sans selection:bg-[#F2A7A7] selection:text-[#3B241A]">
 
-            {/* CONTAINER */}
-            <div className="max-w-[935px] mx-auto pt-8 px-5 md:px-0">
-
-                {/* --- HEADER SECTION --- */}
-                <header className="flex flex-col md:flex-row mb-10 md:mb-16">
-
-                    {/* PROFILE PICTURE (Mobile: Left, Desktop: Big Left) */}
-                    <div className="flex md:block md:mx-0 md:mr-24 mb-6 md:mb-0 shrink-0">
-                        {/* Mobile Layout Wrapper */}
-                        <div className="flex items-center w-full md:w-auto">
-
-                            {/* The Ring */}
-                            <div className="relative w-[77px] h-[77px] md:w-[150px] md:h-[150px] rounded-full p-[2px] bg-gradient-to-tr from-yellow-400 via-red-500 to-purple-500 shrink-0 cursor-pointer">
-                                <div className="w-full h-full rounded-full border-[2px] border-[#FAF0E6] bg-white relative overflow-hidden">
-                                    <Image src="/isha_a.png" alt="Isha" fill className="object-cover" />
-                                </div>
-                            </div>
-
-                            {/* Mobile Stats (Right of Pic) */}
-                            <div className="flex md:hidden flex-1 justify-around ml-4">
-                                <div className="flex flex-col items-center">
-                                    <span className="font-bold text-[#3B241A]">1,250</span>
-                                    <span className="text-xs text-[#3B241A]/70">Posts</span>
-                                </div>
-                                <div className="flex flex-col items-center">
-                                    <span className="font-bold text-[#3B241A]">45.2K</span>
-                                    <span className="text-xs text-[#3B241A]/70">Followers</span>
-                                </div>
-                                <div className="flex flex-col items-center">
-                                    <span className="font-bold text-[#3B241A]">543</span>
-                                    <span className="text-xs text-[#3B241A]/70">Following</span>
-                                </div>
-                            </div>
-                        </div>
+            {/* 1. HEADER & FILTERS */}
+            <div className="pt-32 pb-12 px-6 container mx-auto">
+                <div className="flex flex-col md:flex-row justify-between items-end mb-12 gap-6">
+                    <div>
+                        <h1 className="text-5xl md:text-7xl font-serif font-bold mb-4">
+                            Selected <span className="text-[#F2A7A7] italic">Works</span>
+                        </h1>
+                        <p className="text-[#6E5045] max-w-md">
+                            A collection of visual stories, digital experiences, and brand identities crafted with purpose.
+                        </p>
                     </div>
 
-                    {/* PROFILE INFO (Right Side) */}
-                    <div className="flex-1">
-
-                        {/* Row 1: Handle & Buttons */}
-                        <div className="flex flex-col md:flex-row md:items-center gap-4 mb-5">
-                            <div className="flex items-center gap-2">
-                                <h2 className="text-xl md:text-2xl font-normal text-[#3B241A]">isha_designs</h2>
-                                <BadgeCheck size={18} className="text-[#0095f6] fill-[#0095f6] text-white" />
-                            </div>
-
-                            <div className="flex gap-2">
-                                <button className="bg-[#0095f6] hover:bg-[#1877f2] text-white px-5 py-[7px] rounded-lg font-semibold text-sm transition-colors">
-                                    Follow
-                                </button>
-                                <button className="bg-[#EFEFEF] hover:bg-[#dbdbdb] text-[#3B241A] px-4 py-[7px] rounded-lg font-semibold text-sm transition-colors">
-                                    Message
-                                </button>
-                                <button className="bg-[#EFEFEF] hover:bg-[#dbdbdb] text-[#3B241A] p-[7px] rounded-lg transition-colors">
-                                    <User size={20} strokeWidth={1.5} />
-                                </button>
-                            </div>
-
-                            <Settings size={24} className="hidden md:block ml-2 cursor-pointer text-[#3B241A]" strokeWidth={1.5} />
-                            <MoreHorizontal size={24} className="md:hidden absolute top-4 right-4 text-[#3B241A]" />
-                        </div>
-
-                        {/* Row 2: Desktop Stats (Hidden on Mobile) */}
-                        <div className="hidden md:flex gap-10 mb-5 text-[#3B241A] text-base">
-                            <span><strong className="font-semibold">1,250</strong> posts</span>
-                            <span><strong className="font-semibold">45.2K</strong> followers</span>
-                            <span><strong className="font-semibold">543</strong> following</span>
-                        </div>
-
-                        {/* Row 3: Bio */}
-                        <div className="text-sm text-[#3B241A]">
-                            <div className="font-semibold">Isha Rani</div>
-                            <div className="whitespace-pre-line text-[#3B241A]/90">
-                                🎨 Digital Creator<br/>
-                                ✨ Designing aesthetic experiences<br/>
-                                📍 India<br/>
-                                👇 Check out my latest work!
-                            </div>
-                            <a href="#" className="font-semibold text-[#00376b] hover:underline">www.isha-portfolio.com</a>
-                        </div>
+                    {/* Filter Pills */}
+                    <div className="flex flex-wrap gap-2">
+                        {FILTERS.map((f) => (
+                            <button
+                                key={f}
+                                onClick={() => setActiveFilter(f)}
+                                className={`px-6 py-2 rounded-full text-sm font-bold transition-all border
+                        ${activeFilter === f
+                                    ? "bg-[#3B241A] text-[#FAF0E6] border-[#3B241A]"
+                                    : "bg-white/50 border-[#3B241A]/10 text-[#3B241A] hover:bg-white hover:border-[#F2A7A7]"}`}
+                            >
+                                {f}
+                            </button>
+                        ))}
                     </div>
-                </header>
-
-                {/* --- HIGHLIGHTS --- */}
-                <div className="flex gap-4 md:gap-10 overflow-x-auto pb-4 mb-6 md:mb-12 scrollbar-hide">
-                    {HIGHLIGHTS.map((h) => (
-                        <div key={h.id} className="flex flex-col items-center gap-2 cursor-pointer shrink-0">
-                            <div className="w-16 h-16 md:w-[77px] md:h-[77px] rounded-full p-[2px] border border-[#3B241A]/10 bg-white">
-                                <div className="w-full h-full rounded-full border border-white relative overflow-hidden bg-[#3B241A]/5">
-                                    <Image src={h.src} alt={h.title} fill className="object-cover" />
-                                </div>
-                            </div>
-                            <span className="text-xs font-semibold text-[#3B241A]">{h.title}</span>
-                        </div>
-                    ))}
                 </div>
 
-                {/* --- TAB NAVIGATION (Sticky) --- */}
-                <div className="border-t border-[#3B241A]/15 flex justify-around md:justify-center md:gap-14 text-xs font-semibold tracking-widest uppercase">
-                    <button
-                        onClick={() => setActiveTab("posts")}
-                        className={`flex items-center gap-1.5 py-4 border-t border-transparent transition-all ${activeTab === 'posts' ? 'border-[#3B241A] text-[#3B241A]' : 'text-[#3B241A]/40'}`}
-                    >
-                        <Grid size={12} strokeWidth={activeTab === 'posts' ? 3 : 1.5} />
-                        <span className="hidden md:inline">Posts</span>
-                    </button>
-                    <button
-                        onClick={() => setActiveTab("reels")}
-                        className={`flex items-center gap-1.5 py-4 border-t border-transparent transition-all ${activeTab === 'reels' ? 'border-[#3B241A] text-[#3B241A]' : 'text-[#3B241A]/40'}`}
-                    >
-                        <Clapperboard size={12} strokeWidth={activeTab === 'reels' ? 3 : 1.5} />
-                        <span className="hidden md:inline">Reels</span>
-                    </button>
-                    <button
-                        onClick={() => setActiveTab("tagged")}
-                        className={`flex items-center gap-1.5 py-4 border-t border-transparent transition-all ${activeTab === 'tagged' ? 'border-[#3B241A] text-[#3B241A]' : 'text-[#3B241A]/40'}`}
-                    >
-                        <User size={12} strokeWidth={activeTab === 'tagged' ? 3 : 1.5} />
-                        <span className="hidden md:inline">Tagged</span>
-                    </button>
+                {/* 2. THE MASONRY GRID (The Feed) */}
+                <div className="columns-1 md:columns-2 lg:columns-3 gap-6 space-y-6">
+                    <AnimatePresence mode="popLayout">
+                        {filteredItems.map((item) => (
+                            <motion.div
+                                layout
+                                initial={{ opacity: 0, scale: 0.9 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                exit={{ opacity: 0, scale: 0.9 }}
+                                transition={{ duration: 0.4 }}
+                                key={item.id}
+                                onClick={() => setSelectedId(item.id)}
+                                className="break-inside-avoid relative group rounded-3xl overflow-hidden cursor-pointer shadow-sm hover:shadow-xl transition-all duration-500"
+                            >
+                                {/* Image/Thumb */}
+                                <div className="relative aspect-[4/5] w-full">
+                                    <Image
+                                        src={item.type === 'video' ? item.thumb : item.src}
+                                        alt={item.title}
+                                        fill
+                                        className="object-cover transition-transform duration-700 group-hover:scale-105"
+                                    />
+
+                                    {/* Video Indicator */}
+                                    {item.type === 'video' && (
+                                        <div className="absolute top-4 right-4 w-10 h-10 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center text-white border border-white/30">
+                                            <Play size={14} fill="currentColor" />
+                                        </div>
+                                    )}
+
+                                    {/* Hover Overlay (Desktop) */}
+                                    <div className="absolute inset-0 bg-gradient-to-t from-[#3B241A]/90 via-[#3B241A]/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-6">
+                                        <span className="text-[#F2A7A7] text-xs font-bold uppercase tracking-widest mb-2">{item.category}</span>
+                                        <h3 className="text-[#FAF0E6] text-2xl font-serif font-bold leading-none mb-1">{item.title}</h3>
+                                        <div className="flex items-center gap-2 text-[#FAF0E6]/60 text-xs mt-3">
+                                            <span>View Story</span>
+                                            <Maximize2 size={12} />
+                                        </div>
+                                    </div>
+                                </div>
+                            </motion.div>
+                        ))}
+                    </AnimatePresence>
                 </div>
-
-                {/* --- GRID LAYOUT --- */}
-                <div className="grid grid-cols-3 gap-1 md:gap-7">
-                    {POSTS.map((post) => (
-                        <motion.div
-                            key={post.id}
-                            layoutId={post.id}
-                            onClick={() => setSelectedPost(post)}
-                            className="relative aspect-square cursor-pointer group bg-[#3B241A]/5"
-                        >
-                            {/* Media */}
-                            {post.type === "image" ? (
-                                <Image src={post.src} alt="Post" fill className="object-cover" />
-                            ) : (
-                                <video src={post.src} className="w-full h-full object-cover" />
-                            )}
-
-                            {/* Type Indicator */}
-                            {post.type === "video" && (
-                                <div className="absolute top-2 right-2">
-                                    <Clapperboard size={16} fill="white" stroke="white" className="drop-shadow-md" />
-                                </div>
-                            )}
-
-                            {/* Desktop Hover Overlay */}
-                            <div className="absolute inset-0 bg-black/30 hidden md:flex items-center justify-center gap-6 opacity-0 group-hover:opacity-100 transition-opacity z-10">
-                                <div className="flex items-center gap-1.5 text-white font-bold">
-                                    <Heart size={22} fill="white" /> {post.likes}
-                                </div>
-                                <div className="flex items-center gap-1.5 text-white font-bold">
-                                    <MessageCircle size={22} fill="white" /> {post.comments}
-                                </div>
-                            </div>
-                        </motion.div>
-                    ))}
-                </div>
-
             </div>
 
-            {/* --- MODAL OVERLAY --- */}
+            {/* 3. THE "STORY VIEWER" (WhatsApp/Instagram Style Overlay) */}
             <AnimatePresence>
-                {selectedPost && (
+                {selectedId && activeItem && (
                     <motion.div
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
-                        onClick={() => setSelectedPost(null)}
-                        className="fixed inset-0 bg-black/60 z-[60] flex items-center justify-center p-4 md:p-8 backdrop-blur-sm"
+                        className="fixed inset-0 z-[100] bg-[#1A0F08]/95 backdrop-blur-xl flex items-center justify-center"
                     >
-                        <motion.div
-                            layoutId={selectedPost.id}
-                            onClick={(e) => e.stopPropagation()}
-                            className="bg-white max-w-[1000px] w-full max-h-[90vh] rounded-[4px] overflow-hidden flex flex-col md:flex-row shadow-2xl"
+                        {/* CLOSE BUTTON */}
+                        <button
+                            onClick={() => setSelectedId(null)}
+                            className="absolute top-6 right-6 z-50 p-2 bg-white/10 hover:bg-white/20 rounded-full text-white transition-colors"
                         >
-                            {/* LEFT: Media */}
-                            <div className="bg-black w-full md:w-[60%] aspect-square md:aspect-auto relative flex items-center justify-center">
-                                {selectedPost.type === "image" ? (
-                                    <Image src={selectedPost.src} alt="Post" fill className="object-contain" />
-                                ) : (
-                                    <video src={selectedPost.src} controls autoPlay className="w-full h-full object-contain" />
-                                )}
-                            </div>
+                            <X size={24} />
+                        </button>
 
-                            {/* RIGHT: Comments & Info */}
-                            <div className="w-full md:w-[40%] bg-white flex flex-col h-full md:h-auto min-h-[400px]">
+                        {/* MAIN CONTENT CONTAINER */}
+                        <div className="relative w-full max-w-md md:max-w-4xl h-full md:h-[85vh] flex flex-col md:flex-row bg-[#23150F] md:rounded-[2rem] overflow-hidden shadow-2xl border border-white/5">
 
-                                {/* Header */}
-                                <div className="p-4 border-b border-[#3B241A]/10 flex items-center justify-between">
-                                    <div className="flex items-center gap-3">
-                                        <div className="w-8 h-8 rounded-full relative overflow-hidden border border-[#3B241A]/10">
-                                            <Image src="/isha_a.png" alt="Isha" fill className="object-cover" />
-                                        </div>
-                                        <div className="text-sm">
-                                            <span className="font-semibold text-[#262626] mr-1 hover:opacity-50 cursor-pointer">isha_designs</span>
-                                            <span className="font-semibold text-[#0095f6] hover:text-[#00376b] cursor-pointer">Follow</span>
-                                        </div>
-                                    </div>
-                                    <MoreHorizontal size={20} className="cursor-pointer" />
-                                </div>
+                            {/* A. MEDIA SIDE (The "Story") */}
+                            <div className="relative w-full md:w-1/2 h-full bg-black flex items-center justify-center">
 
-                                {/* Comments Area */}
-                                <div className="flex-1 overflow-y-auto p-4 scrollbar-hide space-y-4">
-                                    {/* Caption */}
-                                    <div className="flex gap-3">
-                                        <div className="w-8 h-8 rounded-full relative overflow-hidden shrink-0">
-                                            <Image src="/isha_a.png" alt="Isha" fill className="object-cover" />
-                                        </div>
-                                        <div className="text-sm">
-                                            <span className="font-semibold text-[#262626] mr-2">isha_designs</span>
-                                            <span className="text-[#262626]">
-                                                Doing what I love most! ✨ <span className="text-[#00376b]">#design</span> <span className="text-[#00376b]">#creative</span>
-                                            </span>
-                                            <div className="text-xs text-gray-500 mt-2">2h</div>
-                                        </div>
-                                    </div>
-
-                                    {/* Dummy Comments */}
-                                    {[1, 2, 3].map((i) => (
-                                        <div key={i} className="flex gap-3">
-                                            <div className="w-8 h-8 rounded-full bg-gray-200 shrink-0" />
-                                            <div className="text-sm">
-                                                <span className="font-semibold text-[#262626] mr-2">user_{i}</span>
-                                                <span className="text-[#262626]">This is absolutely stunning! 😍</span>
-                                                <div className="flex gap-3 text-xs text-gray-500 mt-1 font-semibold">
-                                                    <span>1h</span>
-                                                    <span>12 likes</span>
-                                                    <span>Reply</span>
-                                                </div>
-                                            </div>
-                                            <Heart size={12} className="ml-auto mt-1 text-gray-400 hover:text-gray-600 cursor-pointer" />
+                                {/* Progress Bars (Like WhatsApp/Insta) */}
+                                <div className="absolute top-4 left-4 right-4 z-20 flex gap-1 h-1">
+                                    {filteredItems.map((item) => (
+                                        <div key={item.id} className="h-full flex-1 bg-white/20 rounded-full overflow-hidden">
+                                            <div
+                                                className={`h-full bg-[#F2A7A7] transition-all duration-300 ${
+                                                    item.id === activeItem.id ? "w-full" :
+                                                        filteredItems.indexOf(item) < selectedIndex ? "w-full" : "w-0"
+                                                }`}
+                                            />
                                         </div>
                                     ))}
                                 </div>
 
-                                {/* Interaction Footer */}
-                                <div className="border-t border-[#3B241A]/10 p-4">
-                                    <div className="flex justify-between mb-3">
-                                        <div className="flex gap-4">
-                                            <Heart size={24} strokeWidth={1.5} className="hover:text-gray-500 cursor-pointer transition-colors" />
-                                            <MessageCircle size={24} strokeWidth={1.5} className="hover:text-gray-500 cursor-pointer transition-colors" />
-                                            <Send size={24} strokeWidth={1.5} className="hover:text-gray-500 cursor-pointer transition-colors" />
-                                        </div>
-                                        <Bookmark size={24} strokeWidth={1.5} className="hover:text-gray-500 cursor-pointer transition-colors" />
-                                    </div>
-                                    <div className="font-semibold text-sm mb-1">{selectedPost.likes.toLocaleString()} likes</div>
-                                    <div className="text-[10px] text-gray-500 uppercase tracking-wide mb-4">2 HOURS AGO</div>
-
-                                    <div className="flex items-center gap-3 pt-3 border-t border-[#3B241A]/10">
-                                        <Smile size={24} strokeWidth={1.5} className="text-[#262626]" />
-                                        <input
-                                            type="text"
-                                            placeholder="Add a comment..."
-                                            className="flex-1 outline-none text-sm bg-transparent placeholder-gray-500"
+                                {/* The Media */}
+                                {activeItem.type === 'video' ? (
+                                    <video
+                                        src={activeItem.src}
+                                        autoPlay
+                                        loop
+                                        muted
+                                        playsInline
+                                        className="w-full h-full object-cover"
+                                    />
+                                ) : (
+                                    <div className="relative w-full h-full">
+                                        <Image
+                                            src={activeItem.src}
+                                            alt={activeItem.title}
+                                            fill
+                                            className="object-cover"
                                         />
-                                        <button className="text-[#0095f6] font-semibold text-sm disabled:opacity-50">Post</button>
                                     </div>
+                                )}
+
+                                {/* Tap Navigation Zones (Invisible) */}
+                                <div className="absolute inset-y-0 left-0 w-1/3 z-10" onClick={handlePrev} />
+                                <div className="absolute inset-y-0 right-0 w-1/3 z-10" onClick={handleNext} />
+
+                                {/* Mobile Overlay Text */}
+                                <div className="absolute bottom-0 left-0 w-full p-6 bg-gradient-to-t from-black/90 to-transparent md:hidden">
+                                    <h2 className="text-white font-serif font-bold text-2xl">{activeItem.title}</h2>
+                                    <p className="text-white/70 text-sm mt-1">{activeItem.client}</p>
+                                </div>
+                            </div>
+
+                            {/* B. DETAILS SIDE (Desktop Context - The "Content Rich" Part) */}
+                            <div className="hidden md:flex w-1/2 p-10 flex-col justify-between bg-[#23150F]">
+                                <div>
+                                    <div className="flex items-center gap-2 mb-6">
+                                        <div className="w-8 h-8 rounded-full bg-[#F2A7A7] flex items-center justify-center text-[#3B241A]">
+                                            {activeItem.type === 'video' ? <Play size={14} fill="currentColor"/> : <Layers size={14}/>}
+                                        </div>
+                                        <span className="text-[#F2A7A7] font-bold uppercase tracking-widest text-xs">
+                                    {activeItem.category}
+                                </span>
+                                    </div>
+
+                                    <h2 className="text-4xl font-serif font-bold text-[#FAF0E6] mb-2 leading-tight">
+                                        {activeItem.title}
+                                    </h2>
+                                    <p className="text-[#FAF0E6]/50 text-sm mb-8 font-mono">
+                                        Client: {activeItem.client}
+                                    </p>
+
+                                    <div className="w-full h-[1px] bg-white/10 mb-8" />
+
+                                    <h3 className="text-[#FAF0E6] font-bold text-sm uppercase tracking-wider mb-4">The Story</h3>
+                                    <p className="text-[#A68B7E] leading-relaxed text-lg">
+                                        {activeItem.desc}
+                                    </p>
                                 </div>
 
+                                {/* Navigation Buttons (Desktop) */}
+                                <div className="flex gap-4 mt-8">
+                                    <button
+                                        onClick={handlePrev}
+                                        disabled={selectedIndex === 0}
+                                        className="flex-1 py-4 rounded-xl border border-white/10 text-[#FAF0E6] hover:bg-white/5 disabled:opacity-30 transition-colors flex items-center justify-center gap-2"
+                                    >
+                                        <ChevronLeft size={20} /> Prev
+                                    </button>
+                                    <button
+                                        onClick={handleNext}
+                                        className="flex-1 py-4 rounded-xl bg-[#F2A7A7] text-[#3B241A] font-bold hover:bg-white transition-colors flex items-center justify-center gap-2"
+                                    >
+                                        {selectedIndex === filteredItems.length - 1 ? "Finish" : "Next"} <ChevronRight size={20} />
+                                    </button>
+                                </div>
                             </div>
-                        </motion.div>
+                        </div>
                     </motion.div>
                 )}
             </AnimatePresence>

@@ -7,6 +7,7 @@ import ContactSection from "@/components/ContactSection";
 import FeaturedBlogs from "@/components/sections/FeaturedBlogs";
 import Footer from "@/components/Footer";
 import Testimonials from "@/components/sections/Testimonials";
+import QuotesPreviewSection from "@/components/sections/QuotesPreviewSection";
 
 export default function D1Page() {
   return (
@@ -16,7 +17,9 @@ export default function D1Page() {
       <AboutSection />
       <ServicesSection />
       <ExpertiseSection />
+        <QuotesPreviewSection/>
       <FeaturedBlogs />
+
         <Testimonials/>
       <ContactSection />
       <Footer />

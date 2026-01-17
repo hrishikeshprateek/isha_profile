@@ -1,7 +1,8 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, Suspense } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import {
     ArrowRight,
@@ -14,7 +15,8 @@ import {
     Code,
     MessageSquare,
     Layers,
-    X
+    X,
+    Wrench
 } from "lucide-react";
 
 // --- CONFIGURATION ---
@@ -32,23 +34,29 @@ const CATEGORIES = [
     { id: "branding", label: "Brand Identity", icon: Sparkles, desc: "Logo, Strategy, Colors" },
     { id: "graphics", label: "Graphic Design", icon: Layers, desc: "Social Posts, Posters" },
     { id: "consult", label: "Consultation", icon: MessageSquare, desc: "Strategy, Audits, Ideas" },
+    { id: "custom", label: "Custom Project", icon: Wrench, desc: "MVPs, Unique Ideas, SaaS" },
 ];
 
 const VIBES = ["Minimalist", "Bold", "Playful", "Corporate", "Luxury", "Futuristic", "Retro", "Friendly", "Techy", "Organic"];
-
-// UPDATED: INR Budget Ranges
 const BUDGETS = ["< ₹25k", "₹25k - ₹50k", "₹50k - ₹1L", "₹1L - ₹3L", "₹3L+"];
 
-export default function ProjectPlanner() {
+// --- MAIN CONTENT COMPONENT ---
+function ProjectPlannerContent() {
+    const searchParams = useSearchParams();
     const [currentStep, setCurrentStep] = useState(1);
-    const [formData, setFormData] = useState({
-        category: "",
-        vibe: [] as string[],
-        description: "",
-        budget: "",
-        deadline: "",
-        name: "",
-        email: "",
+
+    // Initialize state with lazy initialization function to avoid setState in effect
+    const [formData, setFormData] = useState(() => {
+        const urlCategory = searchParams.get("category") || "";
+        return {
+            category: urlCategory,
+            vibe: [] as string[],
+            description: "",
+            budget: "",
+            deadline: "",
+            name: "",
+            email: "",
+        };
     });
 
     const handleNext = () => {
@@ -86,8 +94,8 @@ export default function ProjectPlanner() {
                         <span className="font-serif font-bold text-[#3B241A]">ISHA RANI</span>
                     </div>
                     <span className="text-xs font-bold uppercase tracking-widest text-[#3B241A]/50">
-                Step {currentStep}/{STEPS.length}
-            </span>
+                        Step {currentStep}/{STEPS.length}
+                    </span>
                 </div>
                 <div className="w-full h-1 bg-[#3B241A]/10 rounded-full overflow-hidden">
                     <motion.div
@@ -100,7 +108,7 @@ export default function ProjectPlanner() {
             </div>
 
             {/* --- LEFT PANEL (Desktop Sidebar) --- */}
-            <div className="hidden lg:flex lg:w-1/3 bg-[#3B241A] text-[#FAF0E6] p-12 flex-col justify-between relative overflow-hidden h-screen sticky top-0">
+            <div className="hidden lg:flex lg:w-1/3 bg-[#3B241A] text-[#FAF0E6] p-12 flex-col justify-between overflow-hidden h-screen sticky top-0">
                 <div className="absolute top-0 right-0 w-64 h-64 bg-[#F2A7A7]/10 rounded-full blur-[80px]" />
 
                 <div>
@@ -129,14 +137,14 @@ export default function ProjectPlanner() {
                     {STEPS.map((step) => (
                         <div key={step.id} className="flex items-center gap-4">
                             <div className={`
-                        w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all duration-500
-                        ${currentStep >= step.id ? "bg-[#F2A7A7] text-[#3B241A]" : "bg-white/10 text-white/30"}
-                    `}>
+                                w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all duration-500
+                                ${currentStep >= step.id ? "bg-[#F2A7A7] text-[#3B241A]" : "bg-white/10 text-white/30"}
+                            `}>
                                 {currentStep > step.id ? <Check size={14} /> : step.id}
                             </div>
                             <span className={`text-sm uppercase tracking-widest font-bold transition-colors duration-500 ${currentStep >= step.id ? "text-[#FAF0E6]" : "text-[#FAF0E6]/30"}`}>
-                        {step.title}
-                    </span>
+                                {step.title}
+                            </span>
                         </div>
                     ))}
                 </div>
@@ -159,10 +167,10 @@ export default function ProjectPlanner() {
 
                 {/* Form Content */}
                 <div className="flex-grow p-6 pt-28 lg:p-20 flex flex-col">
-                    <div className="max-w-3xl w-full mx-auto flex-grow flex flex-col justify-center">
+                    <div className="max-w-4xl w-full mx-auto flex-grow flex flex-col justify-center">
                         <AnimatePresence mode="wait">
 
-                            {/* STEP 1 */}
+                            {/* STEP 1: Categories */}
                             {currentStep === 1 && (
                                 <motion.div
                                     key="step1"
@@ -179,11 +187,12 @@ export default function ProjectPlanner() {
                                                 key={cat.id}
                                                 onClick={() => setFormData({ ...formData, category: cat.id })}
                                                 className={`
-                                            p-5 rounded-2xl border-2 text-left transition-all duration-300 group
-                                            ${formData.category === cat.id
+                                                    p-5 rounded-2xl border-2 text-left transition-all duration-300 group
+                                                    ${formData.category === cat.id
                                                     ? "border-[#F2A7A7] bg-white shadow-md ring-1 ring-[#F2A7A7]"
                                                     : "border-[#3B241A]/5 bg-white/40 hover:bg-white hover:border-[#F2A7A7]/50"}
-                                        `}
+                                                    ${cat.id === 'custom' ? 'sm:col-span-2 md:col-span-1 lg:col-span-1' : ''} 
+                                                `}
                                             >
                                                 <div className="flex items-center gap-4">
                                                     <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 transition-colors ${formData.category === cat.id ? "bg-[#F2A7A7] text-[#3B241A]" : "bg-[#3B241A]/5 text-[#3B241A] group-hover:bg-[#F2A7A7]/20"}`}>
@@ -218,11 +227,11 @@ export default function ProjectPlanner() {
                                                     key={v}
                                                     onClick={() => toggleVibe(v)}
                                                     className={`
-                                                px-4 py-2 rounded-full text-xs md:text-sm font-bold border transition-all
-                                                ${formData.vibe.includes(v)
+                                                        px-4 py-2 rounded-full text-xs md:text-sm font-bold border transition-all
+                                                        ${formData.vibe.includes(v)
                                                         ? "bg-[#3B241A] text-[#FAF0E6] border-[#3B241A]"
                                                         : "bg-white border-[#3B241A]/10 hover:border-[#F2A7A7] text-[#3B241A]"}
-                                            `}
+                                                    `}
                                                 >
                                                     {v}
                                                 </button>
@@ -237,7 +246,7 @@ export default function ProjectPlanner() {
                                         <textarea
                                             rows={4}
                                             className="w-full bg-white/60 border-2 border-[#3B241A]/10 rounded-2xl p-4 focus:outline-none focus:border-[#F2A7A7] text-base md:text-lg placeholder:text-[#3B241A]/30 resize-none"
-                                            placeholder="I want it to look like..."
+                                            placeholder={formData.category === 'custom' ? "Describe your unique idea..." : "I want it to look like..."}
                                             value={formData.description}
                                             onChange={(e) => setFormData({...formData, description: e.target.value})}
                                         />
@@ -266,11 +275,11 @@ export default function ProjectPlanner() {
                                                     key={b}
                                                     onClick={() => setFormData({...formData, budget: b})}
                                                     className={`
-                                                py-3 px-2 rounded-xl text-sm font-bold border transition-all text-center
-                                                ${formData.budget === b
+                                                        py-3 px-2 rounded-xl text-sm font-bold border transition-all text-center
+                                                        ${formData.budget === b
                                                         ? "bg-[#F2A7A7] text-[#3B241A] border-[#F2A7A7]"
                                                         : "bg-white border-[#3B241A]/10 hover:border-[#F2A7A7]"}
-                                            `}
+                                                    `}
                                                 >
                                                     {b}
                                                 </button>
@@ -355,7 +364,7 @@ export default function ProjectPlanner() {
                     </div>
                 </div>
 
-                {/* 3. NEW: Minimalist Strip Footer */}
+                {/* 3. Minimalist Strip Footer */}
                 <div className="mt-auto w-full bg-[#3B241A] text-[#FAF0E6]/60 py-6 px-6 md:px-12">
                     <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4 text-[10px] md:text-xs font-bold uppercase tracking-widest">
                         <p>© {new Date().getFullYear()} Isha Rani. All Rights Reserved.</p>
@@ -370,5 +379,14 @@ export default function ProjectPlanner() {
 
             </div>
         </div>
+    );
+}
+
+// --- EXPORT WRAPPED IN SUSPENSE ---
+export default function ProjectPlanner() {
+    return (
+        <Suspense fallback={<div className="min-h-screen bg-[#FAF0E6]"></div>}>
+            <ProjectPlannerContent />
+        </Suspense>
     );
 }

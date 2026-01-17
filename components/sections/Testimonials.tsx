@@ -5,8 +5,17 @@ import Image from "next/image";
 import { motion } from "framer-motion";
 import { Star, Quote } from "lucide-react";
 
+// Define a strict type for reviews to avoid any
+type Review = {
+  id: number;
+  name: string;
+  role: string;
+  image: string;
+  content: string;
+};
+
 // --- MOCK DATA ---
-const reviews = [
+const reviews: Review[] = [
     {
         id: 1,
         name: "Sarah Jenkins",
@@ -64,7 +73,7 @@ const Testimonials = () => {
 
                 {/* Title: Forced Light Cream Text (!text-[#FAF0E6]) */}
                 <h2 className="text-3xl md:text-5xl font-serif font-bold !text-[#FAF0E6] leading-tight">
-                    Don't just take <br />
+                    Don&#39;t just take <br />
                     <span className="text-[#F2A7A7] italic">my word</span> for it.
                 </h2>
             </div>
@@ -109,7 +118,7 @@ const Testimonials = () => {
 };
 
 // --- SUB-COMPONENT: DARK CARD ---
-const ReviewCard = ({ review }: { review: any }) => (
+const ReviewCard = ({ review }: { review: Review }) => (
     <div className="w-[320px] md:w-[380px] flex-shrink-0 bg-[#FAF0E6]/5 backdrop-blur-md border border-[#FAF0E6]/10 p-6 rounded-2xl hover:bg-[#FAF0E6]/10 transition-colors duration-300 shadow-lg group">
 
         <div className="flex justify-between items-center mb-3">
