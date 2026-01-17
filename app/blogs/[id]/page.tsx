@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import { useParams } from 'next/navigation';
 import { motion, useScroll, useSpring } from 'framer-motion';
+import Footer from "@/components/Footer";
 
 // --- TYPES ---
 interface BlogPost {
@@ -263,26 +264,7 @@ export default function BlogPostPage() {
                     <div className="hidden lg:block lg:col-span-2"></div>
                 </div>
 
-                {/* NEWSLETTER */}
-                <div className="bg-[#3B241A] text-[#FAF0E6] py-16 px-5 relative overflow-hidden">
-                    <div className="absolute top-0 right-0 w-[300px] h-[300px] bg-[#F2A7A7] rounded-full blur-[100px] opacity-20 pointer-events-none" />
-                    <div className="max-w-3xl mx-auto text-center relative z-10">
-                        <h2 className="text-2xl md:text-4xl font-serif font-bold mb-4">Join the creative circle.</h2>
-                        <p className="text-[#FAF0E6]/70 mb-8 text-sm md:text-lg">
-                            Get the latest design insights delivered to your inbox.
-                        </p>
-                        <form className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
-                            <input
-                                type="email"
-                                placeholder="Email address"
-                                className="flex-1 px-5 py-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder-white/40 focus:outline-none"
-                            />
-                            <button className="px-6 py-3 rounded-xl bg-[#F2A7A7] text-[#3B241A] font-bold hover:bg-[#e08e8e]">
-                                Subscribe
-                            </button>
-                        </form>
-                    </div>
-                </div>
+                <Footer/>
 
                 {/* BOTTOM PADDING for Sticky Mobile Bar */}
                 <div className="h-24 lg:h-0" />

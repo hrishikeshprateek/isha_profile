@@ -13,6 +13,8 @@ interface ToolbarProps {
   navItems?: string[];
   showContactButton?: boolean;
   logoText?: string;
+  logoTitle?: string;
+  tagline?: string;
 }
 
 const Toolbar = ({
@@ -21,7 +23,9 @@ const Toolbar = ({
   backHref = "/d1",
   navItems = ["Home", "Services", "My Projects", "Reviews", "Contact"],
   showContactButton = false,
-  logoText = "S",
+  logoText = "IR",
+  logoTitle = "ISHA RANI",
+  tagline = "",
 }: ToolbarProps) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const router = useRouter();
@@ -53,9 +57,15 @@ const Toolbar = ({
               <span className="hidden sm:inline text-sm font-medium">{title}</span>
             </Link>
           ) : (
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-full border-2 border-[#F2A7A7]/50 flex items-center justify-center bg-[#F2A7A7]/10">
                 <span className="text-foreground font-bold text-lg">{logoText}</span>
+              </div>
+
+              {/* Show title + tagline on larger screens, keep compact on mobile */}
+              <div className="hidden sm:flex flex-col leading-tight">
+                <span className="text-sm font-semibold text-foreground">{logoTitle}</span>
+                <span className="text-xs text-[#A68B7E]">{tagline}</span>
               </div>
             </div>
           )}

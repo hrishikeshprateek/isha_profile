@@ -267,7 +267,7 @@ export default function WorkPage() {
                                 </span>
                                     </div>
 
-                                    <h2 className="text-4xl font-serif font-bold text-[#FAF0E6] mb-2 leading-tight">
+                                    <h2 className="text-4xl font-serif font-bold !text-[#FAF0E6] mb-2 leading-tight">
                                         {activeItem.title}
                                     </h2>
                                     <p className="text-[#FAF0E6]/50 text-sm mb-8 font-mono">
@@ -276,7 +276,7 @@ export default function WorkPage() {
 
                                     <div className="w-full h-[1px] bg-white/10 mb-8" />
 
-                                    <h3 className="text-[#FAF0E6] font-bold text-sm uppercase tracking-wider mb-4">The Story</h3>
+                                    <h3 className="!text-[#FAF0E6] font-bold text-sm uppercase tracking-wider mb-4">The Story</h3>
                                     <p className="text-[#A68B7E] leading-relaxed text-lg">
                                         {activeItem.desc}
                                     </p>

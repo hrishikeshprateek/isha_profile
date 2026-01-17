@@ -267,7 +267,7 @@ export default function ServicesSection() {
                                             <Zap size={20} fill="currentColor" />
                                         </div>
                                         <div className="relative z-10">
-                                            <h4 className="font-bold text-[#FAF0E6] text-lg">Start Project</h4>
+                                            <h4 className="font-bold !text-[#FAF0E6] text-lg">Start Project</h4>
                                             <p className="text-sm text-[#FAF0E6]/60 mt-1">I need this service. Let&#39;s create a proposal.</p>
                                         </div>
                                         <div className="text-[#F2A7A7] text-sm font-bold flex items-center gap-2 group-hover:translate-x-1 transition-transform relative z-10">

@@ -34,7 +34,7 @@ const PREVIEW_QUOTES = [
 export default function QuotesPreviewSection() {
     return (
         // Added !bg-[#3B241A] for forced background color
-        <section className="py-24 !bg-[#3B241A] relative overflow-hidden">
+        <section className="py-20 !bg-[#3B241A] relative overflow-hidden">
 
             {/* Background Ambience (Forced colors) */}
             <div className="absolute top-0 right-0 w-[500px] h-[500px] !bg-[#F2A7A7]/5 rounded-full blur-[100px] pointer-events-none" />

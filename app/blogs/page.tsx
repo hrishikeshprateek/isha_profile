@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import Toolbar from '@/components/Toolbar';
 import Link from 'next/link';
+import Footer from "@/components/Footer";
 
 // Interface for blog post data
 interface BlogPost {
@@ -160,6 +161,8 @@ const Blogs = () => {
           </div>
         </div>
       </div>
+
+        <Footer/>
     </div>
   );
 };

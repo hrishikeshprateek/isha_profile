@@ -8,7 +8,8 @@ const Navbar = () => {
             showBackButton={false}
             navItems={["Home", "Services", "My Projects", "Reviews", "Contact"]}
             showContactButton={true}
-            logoText="S"
+            logoText="IR"
+            logoTitle="ISHA RANI"
         />
     );
 };
