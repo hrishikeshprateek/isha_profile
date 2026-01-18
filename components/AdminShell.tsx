@@ -5,9 +5,9 @@ import AdminSidebar from './AdminSidebar';
 
 export default function AdminShell({ children }: { children: React.ReactNode }) {
   return (
-    <div className="min-h-screen bg-[#FAF8F6] flex">
+    <div className="min-h-screen bg-[#FAF0E6] flex">
       <AdminSidebar />
-      <main className="flex-1 p-6">
+      <main className="flex-1">
         {children}
       </main>
     </div>
