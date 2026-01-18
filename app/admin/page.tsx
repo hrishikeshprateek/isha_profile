@@ -6,6 +6,7 @@ import { onAuthStateChanged, signOut } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
+import SpotlightSearch from '@/components/SpotlightSearch';
 import {
     PenTool, Code, Image as ImageIcon, User as UserIcon, MessageSquare, LogOut,
     ExternalLink, Sparkles, Search, Settings, Users, Activity, Quote, Layout,
@@ -61,6 +62,23 @@ export default function AdminDashboard() {
 
     // Analytics State
     const [activeTab, setActiveTab] = useState<'traffic' | 'audience' | 'content'>('traffic');
+
+    // Spotlight Search State
+    const [searchOpen, setSearchOpen] = useState(false);
+
+    // --- KEYBOARD SHORTCUT FOR SEARCH ---
+    useEffect(() => {
+        const handleKeyDown = (e: KeyboardEvent) => {
+            // Cmd+K or Ctrl+K to open search
+            if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+                e.preventDefault();
+                setSearchOpen(true);
+            }
+        };
+
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, []);
 
     // --- 1. AUTH LOGIC ---
     useEffect(() => {
@@ -128,6 +146,9 @@ export default function AdminDashboard() {
 
     return (
         <div className="min-h-screen bg-[#FAF0E6] flex font-sans selection:bg-[#F2A7A7] selection:text-[#3B241A]">
+            {/* Spotlight Search */}
+            <SpotlightSearch isOpen={searchOpen} onClose={() => setSearchOpen(false)} />
+
             {/* Texture */}
             <div className="fixed inset-0 pointer-events-none opacity-[0.4] z-0 mix-blend-multiply" style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")` }}></div>
 
@@ -136,6 +157,13 @@ export default function AdminDashboard() {
                 {/* Mobile Header */}
                 <div className="md:hidden flex items-center justify-between p-4 border-b border-[#3B241A]/10 bg-[#FAF0E6]/95 backdrop-blur-md fixed top-0 left-0 w-full z-50 shadow-sm h-16">
                     <span className="font-serif font-bold text-[#3B241A] text-lg flex items-center gap-2"><Sparkles size={16} /> Admin Studio</span>
+                    <button
+                        onClick={() => setSearchOpen(true)}
+                        className="p-2 rounded-lg hover:bg-[#3B241A]/5 transition-colors"
+                        title="Search (⌘K)"
+                    >
+                        <Search size={18} className="text-[#3B241A]" />
+                    </button>
                     <div className="flex items-center gap-4">
                         <Link href="/" target="_blank"><ExternalLink size={20} className="text-[#3B241A]" /></Link>
                         <button onClick={handleLogout}><LogOut size={20} className="text-[#3B241A]" /></button>
@@ -155,8 +183,14 @@ export default function AdminDashboard() {
                             <p className="text-sm md:text-base text-[#A68B7E]">Welcome back, Isha. Here is your overview.</p>
                         </div>
                         <div className="relative group w-full lg:w-auto">
-                            <input type="text" placeholder="Jump to section..." className="bg-white border border-[#3B241A]/10 rounded-full py-3 pl-10 pr-6 w-full lg:w-72 text-sm focus:outline-none focus:border-[#F2A7A7] transition-all shadow-sm" />
-                            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#3B241A]/30" size={16} />
+                            <button
+                                onClick={() => setSearchOpen(true)}
+                                className="bg-white border border-[#3B241A]/10 rounded-full py-3 pl-10 pr-6 w-full lg:w-72 text-sm focus:outline-none focus:border-[#F2A7A7] transition-all shadow-sm hover:border-[#F2A7A7] text-left flex items-center justify-between"
+                            >
+                                <span className="text-[#A68B7E]">Search pages, settings...</span>
+                                <kbd className="hidden md:inline-flex items-center gap-1 px-2 py-1 text-[10px] font-mono bg-[#FAF0E6] rounded border border-[#3B241A]/10">⌘K</kbd>
+                            </button>
+                            <Search size={16} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[#A68B7E] pointer-events-none" />
                         </div>
                     </header>
 
