@@ -49,4 +49,5 @@ export const Collections = {
   CONTACTS: 'contacts',
   SUBSCRIBERS: 'subscribers',
   VCARD: 'vcard',
+  BLOGS: 'blogs',
 } as const;

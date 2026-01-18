@@ -92,7 +92,7 @@ export default function VCardAdminPage() {
     // --- AUTH & DATA FETCHING ---
     useEffect(() => {
         if (!auth) {
-            router.push('/admin/login');
+            router.push('/auth/login');
             return;
         }
         const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
@@ -100,14 +100,14 @@ export default function VCardAdminPage() {
                 if (!firebaseUser) {
                     setIsAuthorized(false);
                     setLoading(false);
-                    router.push('/admin/login');
+                    router.push('/auth/login');
                     return;
                 }
                 const idTokenResult = await firebaseUser.getIdTokenResult();
                 if (!idTokenResult.claims.admin) {
                     setIsAuthorized(false);
                     setLoading(false);
-                    router.push('/admin/login');
+                    router.push('/auth/login');
                     return;
                 }
                 localStorage.setItem('admin_token', idTokenResult.token);
@@ -130,7 +130,7 @@ export default function VCardAdminPage() {
                 console.error('Auth error:', err);
                 setIsAuthorized(false);
                 setLoading(false);
-                router.push('/admin/login');
+                router.push('/auth/login');
             }
         });
         return () => unsubscribe();

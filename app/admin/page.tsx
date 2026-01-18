@@ -66,12 +66,12 @@ export default function AdminDashboard() {
     useEffect(() => {
         if (!auth) {
             setTimeout(() => setLoading(false), 0);
-            router.push('/admin/login');
+            router.push('/auth/login');
             return;
         }
         const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
             if (!firebaseUser || !(await firebaseUser.getIdTokenResult()).claims.admin) {
-                router.push('/admin/login');
+                router.push('/auth/login');
                 return;
             }
             localStorage.setItem('admin_token', (await firebaseUser.getIdTokenResult()).token);
@@ -84,7 +84,7 @@ export default function AdminDashboard() {
     async function handleLogout() {
         if (auth) await signOut(auth);
         localStorage.removeItem('admin_token');
-        router.push('/admin/login');
+        router.push('/auth/login');
     }
 
     // --- 2. MENU DATA ---

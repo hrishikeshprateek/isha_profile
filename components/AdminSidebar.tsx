@@ -127,9 +127,9 @@ export default function AdminSidebar() {
         e.preventDefault();
         try {
             localStorage.removeItem('admin_token');
-            window.location.href = '/admin/login';
+            window.location.href = '/auth/login';
         } catch {
-            window.location.href = '/admin/login';
+            window.location.href = '/auth/login';
         }
     };
 
