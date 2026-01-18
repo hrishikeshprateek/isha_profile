@@ -59,10 +59,50 @@ function ProjectPlannerContent() {
         };
     });
 
-    const handleNext = () => {
+    const [submitting, setSubmitting] = useState(false);
+    const [submitError, setSubmitError] = useState("");
+    const [submitSuccess, setSubmitSuccess] = useState(false);
+
+    const handleNext = async () => {
         if (currentStep === 4) {
-            console.log("Submitting:", formData);
-            alert("Proposal Sent!");
+            // Submit form to API
+            setSubmitting(true);
+            setSubmitError("");
+
+            try {
+                const response = await fetch('/api/build', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(formData)
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data.success) {
+                    setSubmitSuccess(true);
+                    // Reset form after success
+                    setTimeout(() => {
+                        setFormData({
+                            category: "",
+                            vibe: [],
+                            description: "",
+                            budget: "",
+                            deadline: "",
+                            name: "",
+                            email: "",
+                        });
+                        setCurrentStep(1);
+                        setSubmitSuccess(false);
+                    }, 2000);
+                } else {
+                    setSubmitError(data.error || 'Failed to submit proposal');
+                }
+            } catch (error) {
+                setSubmitError('Error submitting proposal. Please try again.');
+                console.error('Submission error:', error);
+            } finally {
+                setSubmitting(false);
+            }
         } else {
             setCurrentStep((prev) => Math.min(prev + 1, 4));
         }

@@ -15,6 +15,9 @@ const SEARCHABLE_ITEMS = [
   { title: 'Create New Blog', description: 'Write a new story', href: '/admin/blogs/create', category: 'Content' },
   { title: 'Quotes Archive', description: 'Manage quotes', href: '/admin/quotes', category: 'Content' },
 
+  // Projects & Build
+  { title: 'Build Requests', description: 'Manage project enquiries', href: '/admin/build', category: 'Content' },
+
   // Page Sections
   { title: 'Hero Section', description: 'Edit homepage hero', href: '/admin/hero', category: 'Sections' },
   { title: 'About Me', description: 'Update about section', href: '/admin/about', category: 'Sections' },
