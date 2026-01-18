@@ -17,8 +17,8 @@ export default function SubscribersPage() {
   const [loading, setLoading] = useState(true);
   const [isAuthorized, setIsAuthorized] = useState(false);
   const [subscribers, setSubscribers] = useState<Subscriber[]>([]);
-  // const [fetching, setFetching] = useState(false); // not used currently
   const [error, setError] = useState('');
+  const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
     if (!auth) {
@@ -45,7 +45,7 @@ export default function SubscribersPage() {
         localStorage.setItem('admin_token', idTokenResult.token);
         setIsAuthorized(true);
         setLoading(false);
-      } catch (_err) {
+      } catch {
         setIsAuthorized(false);
         setLoading(false);
         router.push('/auth/login');
@@ -68,7 +68,7 @@ export default function SubscribersPage() {
       } else {
         setError(data.error || 'Failed to load subscribers');
       }
-    } catch (_err) {
+    } catch {
       setError('Failed to load subscribers');
     } finally {
       // setFetching(false);
@@ -84,7 +84,7 @@ export default function SubscribersPage() {
       if (auth) await signOut(auth);
       localStorage.removeItem('admin_token');
       router.push('/auth/login');
-    } catch (_err) {
+    } catch {
       router.push('/auth/login');
     }
   }
@@ -110,16 +110,17 @@ export default function SubscribersPage() {
   return (
     <div className="min-h-screen bg-[#FAF0E6] text-[#3B241A]">
       <div className="max-w-5xl mx-auto p-6 md:p-10">
-        <div className="flex justify-between items-center mb-6">
+        <div className="flex justify-between items-center mb-8">
           <div>
             <p className="text-[10px] uppercase tracking-[0.2em] text-[#A68B7E] font-bold">Subscribers</p>
             <h1 className="text-3xl font-serif font-bold">Newsletter List</h1>
+            <p className="text-sm text-[#A68B7E] mt-2">{subscribers.length} total subscriber{subscribers.length !== 1 ? 's' : ''}</p>
           </div>
           <div className="flex items-center gap-3">
             <button onClick={fetchSubscribers} className="flex items-center gap-2 px-3 py-2 rounded-lg bg-white border border-[#3B241A]/10 hover:border-[#3B241A]/30 text-sm">
               <RefreshCw size={14}/> Refresh
             </button>
-            <button onClick={downloadCSV} className="flex items-center gap-2 px-3 py-2 rounded-lg bg-[#3B241A] text-[#FAF0E6] text-sm hover:bg-[#F2A7A7] hover:text-[#3B241A]">
+            <button onClick={downloadCSV} disabled={subscribers.length === 0} className="flex items-center gap-2 px-3 py-2 rounded-lg bg-[#3B241A] text-[#FAF0E6] text-sm hover:bg-[#F2A7A7] hover:text-[#3B241A] disabled:opacity-50">
               <Download size={14}/> Export CSV
             </button>
             <button onClick={handleLogout} className="p-2 rounded-lg bg-white border border-[#3B241A]/10 text-[#3B241A] hover:border-[#3B241A]/30">
@@ -128,7 +129,18 @@ export default function SubscribersPage() {
           </div>
         </div>
 
-        {error && <p className="text-sm text-red-500 mb-4">{error}</p>}
+        {error && <p className="text-sm text-red-500 mb-4 bg-red-50 p-3 rounded">{error}</p>}
+
+        {/* Search Bar */}
+        <div className="mb-6">
+          <input
+            type="text"
+            placeholder="Search by email..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value.toLowerCase())}
+            className="w-full px-4 py-3 rounded-lg border border-[#3B241A]/10 bg-white focus:outline-none focus:border-[#3B241A]/30 text-sm"
+          />
+        </div>
 
         <div className="bg-white rounded-2xl border border-[#3B241A]/10 shadow-sm overflow-hidden">
           <div className="grid grid-cols-12 px-4 py-3 text-xs font-bold uppercase tracking-[0.2em] text-[#A68B7E] border-b border-[#3B241A]/10">
@@ -137,20 +149,23 @@ export default function SubscribersPage() {
             <span className="col-span-3">Subscribed</span>
           </div>
           <div className="divide-y divide-[#3B241A]/10">
-            {subscribers.length === 0 ? (
-              <div className="p-6 text-sm text-[#A68B7E]">No subscribers yet.</div>
-            ) : (
-              subscribers.map((s, i) => (
-                <div key={`${s.email}-${i}`} className="grid grid-cols-12 px-4 py-3 text-sm text-[#3B241A]">
-                  <div className="col-span-6 flex items-center gap-2">
-                    <Mail size={14} className="text-[#A68B7E]"/>
-                    <span className="truncate">{s.email}</span>
+            {(() => {
+              const filtered = subscribers.filter(s => s.email.includes(searchTerm));
+              return filtered.length === 0 ? (
+                <div className="p-6 text-sm text-[#A68B7E]">{searchTerm ? 'No matching subscribers.' : 'No subscribers yet.'}</div>
+              ) : (
+                filtered.map((s, i) => (
+                  <div key={`${s.email}-${i}`} className="grid grid-cols-12 px-4 py-3 text-sm text-[#3B241A] hover:bg-[#FAF0E6]/50 transition">
+                    <div className="col-span-6 flex items-center gap-2">
+                      <Mail size={14} className="text-[#A68B7E]"/>
+                      <span className="truncate">{s.email}</span>
+                    </div>
+                    <div className="col-span-3 text-[#A68B7E] text-xs">{s.source || 'unknown'}</div>
+                    <div className="col-span-3 text-[#A68B7E] text-xs">{s.createdAt ? new Date(s.createdAt).toLocaleDateString() : ''}</div>
                   </div>
-                  <div className="col-span-3 text-[#A68B7E]">{s.source || 'unknown'}</div>
-                  <div className="col-span-3 text-[#A68B7E]">{s.createdAt ? new Date(s.createdAt).toLocaleDateString() : ''}</div>
-                </div>
-              ))
-            )}
+                ))
+              );
+            })()}
           </div>
         </div>
       </div>

@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -8,7 +8,6 @@ import {
     MapPin,
     Globe,
     Download,
-    Share2,
     Instagram,
     Linkedin,
     Twitter,
@@ -19,19 +18,18 @@ import {
     Copy,
     Check,
     Sparkles,
-    Palette, // Fallback icon
     Github,
     Facebook
 } from 'lucide-react';
 
-// --- 1. MOCK BACKEND DATA (JSON) ---
-const userData = {
+// --- 1. DEFAULT DATA (Fallback) ---
+const DEFAULT_DATA = {
     profile: {
         name: "Isha Rani",
         role: "Digital Creator & Designer",
         email: "me@isharani.in",
         phone: "+91 98765 43210",
-        location: "Patna, India", // Updated for better map accuracy
+        location: "Patna, India",
         websiteDisplay: "isharani.in",
         websiteUrl: "https://isharani.in",
         avatar: "/isha_a.png",
@@ -62,6 +60,8 @@ const userData = {
     ]
 };
 
+// ...existing code...
+
 // --- 2. CONFIGURATION HELPER ---
 const getSocialConfig = (id: string) => {
     switch (id) {
@@ -78,6 +78,24 @@ const getSocialConfig = (id: string) => {
 export default function UltimateVCard() {
     const [showQR, setShowQR] = useState(false);
     const [copied, setCopied] = useState("");
+    const [userData, setUserData] = useState(DEFAULT_DATA);
+
+    React.useEffect(() => {
+        async function fetchVCard() {
+            try {
+                const res = await fetch('/api/vcard', {
+                    next: { tags: ['vcard'], revalidate: 3600 }
+                });
+                const data = await res.json();
+                if (data.success && data.data) {
+                    setUserData(data.data);
+                }
+            } catch (err) {
+                console.warn('Failed to fetch vcard, using defaults:', err);
+            }
+        }
+        fetchVCard();
+    }, []);
 
     const handleCopy = (text: string, type: string) => {
         navigator.clipboard.writeText(text);
@@ -325,3 +343,4 @@ export default function UltimateVCard() {
         </div>
     );
 }
+

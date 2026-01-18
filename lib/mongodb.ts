@@ -5,7 +5,11 @@ if (!process.env.MONGODB_URI) {
 }
 
 const uri: string = process.env.MONGODB_URI;
-const options = {};
+const options = {
+  maxPoolSize: 10,
+  minPoolSize: 5,
+  maxIdleTimeMS: 45000,
+};
 
 let client: MongoClient;
 let clientPromise: Promise<MongoClient>;
@@ -23,7 +27,8 @@ if (process.env.NODE_ENV === 'development') {
   }
   clientPromise = global._mongoClientPromise;
 } else {
-  // In production mode, create a new client for each connection
+  // In production mode, ALSO use persistent connection with pooling
+  // DO NOT create new client per request - this causes massive cost overages
   client = new MongoClient(uri, options);
   clientPromise = client.connect();
 }
@@ -43,4 +48,5 @@ export const Collections = {
   PROJECTS: 'projects',
   CONTACTS: 'contacts',
   SUBSCRIBERS: 'subscribers',
+  VCARD: 'vcard',
 } as const;

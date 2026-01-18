@@ -85,15 +85,28 @@ export default function Footer() {
             const data = await res.json();
             if (res.ok && data.success) {
                 setStatus('success');
-                setMessage(data.message || 'You are subscribed!');
+                setMessage(data.message || 'Check your email!');
                 setEmail('');
+                // Auto-clear success message after 3 seconds
+                setTimeout(() => {
+                    setStatus('idle');
+                    setMessage('');
+                }, 3000);
             } else {
                 setStatus('error');
                 setMessage(data.error || 'Subscription failed');
+                setTimeout(() => {
+                    setStatus('idle');
+                    setMessage('');
+                }, 3000);
             }
-        } catch (err) {
+        } catch (_err) {
             setStatus('error');
-            setMessage('Subscription failed');
+            setMessage('Subscription failed. Try again.');
+            setTimeout(() => {
+                setStatus('idle');
+                setMessage('');
+            }, 3000);
         }
     }
 
