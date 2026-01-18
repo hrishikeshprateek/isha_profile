@@ -324,7 +324,7 @@ export default function AdminDashboard() {
                                             <div className="w-2 h-2 mt-1.5 rounded-full bg-[#F2A7A7] flex-shrink-0" />
                                             <div className="min-w-0">
                                                 <h4 className="text-sm font-bold text-[#3B241A]">New Project Inquiry</h4>
-                                                <p className="text-xs text-[#A68B7E] truncate">Hi, I'm interested in your services...</p>
+                                                <p className="text-xs text-[#A68B7E] truncate">Hi, I am interested in your services...</p>
                                                 <span className="text-[10px] text-[#3B241A]/30 font-bold mt-1 block">2 hours ago</span>
                                             </div>
                                         </div>
