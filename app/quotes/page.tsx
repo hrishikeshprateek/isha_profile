@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
     Quote,
@@ -14,116 +14,133 @@ import {
 import Footer from "@/components/Footer";
 import Toolbar from "@/components/Toolbar";
 
-// --- MOCK DATA ---
-const QUOTES = [
+interface Quote {
+    id?: string;
+    _id?: string;
+    text: string;
+    author: string;
+    category: string;
+    date?: string;
+    published?: boolean;
+}
+
+// --- MOCK DATA (Fallback) ---
+const FALLBACK_QUOTES: Quote[] = [
     {
-        id: 1,
         text: "Design is not just what it looks like and feels like. Design is how it works.",
         author: "Steve Jobs",
-        category: "Design",
-        lang: "en",
-        liked: true
+        id: "1",
+        category: "Inspiration"
     },
     {
-        id: 2,
-        text: "वक्त सबको मिलता है जिंदगी बदलने के लिए, पर जिंदगी दोबारा नहीं मिलती वक्त बदलने के लिए।",
-        author: "Unknown",
-        category: "Life",
-        lang: "hi",
-        liked: false
-    },
-    {
-        id: 3,
+        id: "2",
         text: "Creativity is intelligence having fun.",
         author: "Albert Einstein",
-        category: "Creativity",
-        lang: "en",
-        liked: true
+        category: "Inspiration"
     },
     {
-        id: 4,
-        text: "मंजिलें उन्हीं को मिलती हैं, जिनके सपनों में जान होती है।",
-        author: "Mirza Ghalib",
-        category: "Motivation",
-        lang: "hi",
-        liked: true
+        id: "3",
+        text: "The only way to do great work is to love what you do.",
+        author: "Steve Jobs",
+        category: "Motivation"
     },
     {
-        id: 5,
+        id: "4",
         text: "Simplicity is the ultimate sophistication.",
         author: "Leonardo da Vinci",
-        category: "Art",
-        lang: "en",
-        liked: false
+        category: "Wisdom"
     },
     {
-        id: 6,
-        text: "सफर खूबसूरत है मंजिल से भी।",
-        author: "Ae Dil Hai Mushkil",
-        category: "Journey",
-        lang: "hi",
-        liked: true
-    },
-    {
-        id: 7,
+        id: "5",
         text: "Make it simple, but significant.",
         author: "Don Draper",
-        category: "Minimalism",
-        lang: "en",
-        liked: true
-    },
-    {
-        id: 8,
-        text: "कर्म ही पूजा है।",
-        author: "Mahatma Gandhi",
-        category: "Motivation",
-        lang: "hi",
-        liked: false
+        category: "General"
     }
 ];
 
-const CATEGORIES = ["All", "Design", "Life", "Creativity", "Motivation", "Journey"];
+const CATEGORIES = ['All', 'Inspiration', 'Wisdom', 'Motivation', 'Life', 'Travel', 'General'];
 
 export default function QuotesPage() {
+    const [copiedId, setCopiedId] = useState<string | null>(null);
+    const [quotes, setQuotes] = useState<Quote[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [categories, setCategories] = useState<string[]>(["All"]);
     const [activeCategory, setActiveCategory] = useState("All");
     const [searchTerm, setSearchTerm] = useState("");
-    const [copiedId, setCopiedId] = useState<number | null>(null);
-    const [quotes, setQuotes] = useState(QUOTES);
 
-    const handleLike = (id: number) => {
-        setQuotes(prev => prev.map(q => q.id === id ? { ...q, liked: !q.liked } : q));
-    };
+    // Fetch quotes from API
+    useEffect(() => {
+        async function fetchQuotes() {
+            try {
+                const res = await fetch('/api/admin/quotes');
+                const data = await res.json();
 
-    const handleCopy = (text: string, id: number) => {
+                if (res.ok && data.success && data.quotes) {
+                    const fetchedQuotes = data.quotes.map((q: Quote) => ({
+                        ...q,
+                        id: q._id?.toString() || q.id
+                    }));
+
+                    setQuotes(fetchedQuotes);
+
+                    // Extract unique categories
+                    const categorySet = new Set(fetchedQuotes.map((q: Quote) => q.category));
+                    const uniqueCategories: string[] = ['All', ...(Array.from(categorySet) as string[])];
+                    setCategories(uniqueCategories);
+                } else {
+                    setQuotes(FALLBACK_QUOTES);
+                }
+            } catch (error) {
+                console.error('Failed to fetch quotes:', error);
+                setQuotes(FALLBACK_QUOTES);
+            } finally {
+                setLoading(false);
+            }
+        }
+
+        fetchQuotes();
+    }, []);
+
+    const handleCopy = (text: string, id: string | undefined) => {
+        if (!id) return;
         navigator.clipboard.writeText(text);
         setCopiedId(id);
         setTimeout(() => setCopiedId(null), 2000);
     };
 
+    // Filter quotes based on category and search
     const filteredQuotes = quotes.filter(q => {
         const matchesCategory = activeCategory === "All" || q.category === activeCategory;
-        const matchesSearch = q.text.toLowerCase().includes(searchTerm.toLowerCase());
+        const matchesSearch = q.text.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                             q.author.toLowerCase().includes(searchTerm.toLowerCase());
         return matchesCategory && matchesSearch;
     });
 
+    if (loading) {
+        return (
+            <div className="flex flex-col min-h-screen !bg-[#3B241A] !text-[#FAF0E6] font-sans items-center justify-center">
+                <motion.div animate={{ rotate: 360 }} transition={{ duration: 2, repeat: Infinity, ease: 'linear' }}>
+                    <Sparkles size={40} className="text-[#F2A7A7]" />
+                </motion.div>
+                <p className="mt-4 font-serif text-lg">Loading quotes...</p>
+            </div>
+        );
+    }
+
     return (
         <div className="flex flex-col min-h-screen !bg-[#3B241A] !text-[#FAF0E6] font-sans selection:!bg-[#F2A7A7] selection:!text-[#3B241A]">
-
-            {/* CSS TO HIDE SCROLLBAR */}
             <style jsx global>{`
                 .no-scrollbar::-webkit-scrollbar {
                     display: none;
                 }
                 .no-scrollbar {
-                    -ms-overflow-style: none;  /* IE and Edge */
-                    scrollbar-width: none;  /* Firefox */
+                    -ms-overflow-style: none;
+                    scrollbar-width: none;
                 }
             `}</style>
 
             {/* 1. TOOLBAR */}
             <Toolbar
-                title="Quotes"
-                showBackButton={true}
                 backHref="/"
                 navItems={["Home", "Services", "Work", "About", "Contact"]}
             />
@@ -174,7 +191,7 @@ export default function QuotesPage() {
                         animate={{ opacity: 1 }}
                         className="flex gap-2 overflow-x-auto pb-6 no-scrollbar"
                     >
-                        {CATEGORIES.map((cat) => (
+                        {categories.map((cat) => (
                             <button
                                 key={cat}
                                 onClick={() => setActiveCategory(cat)}
@@ -191,91 +208,77 @@ export default function QuotesPage() {
                     </motion.div>
 
                     {/* QUOTES GRID (Compact) */}
-                    <div className="columns-1 md:columns-2 lg:columns-3 gap-6 space-y-6">
+                    <div className="columns-1 md:columns-2 lg:columns-3 gap-6 space-y-6 mt-8">
                         <AnimatePresence mode="popLayout">
-                            {filteredQuotes.map((quote) => (
-                                <motion.div
-                                    layout
-                                    initial={{ opacity: 0, y: 20 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    exit={{ opacity: 0, scale: 0.95 }}
-                                    transition={{ duration: 0.4 }}
-                                    key={quote.id}
-                                    className="break-inside-avoid relative group"
-                                >
-                                    {/* CARD - Reduced padding to p-6 and border-radius to 1.5rem */}
-                                    <div className="relative !bg-[#FAF0E6]/5 backdrop-blur-md border !border-[#FAF0E6]/10 p-6 rounded-3xl hover:!bg-[#FAF0E6]/10 hover:!border-[#FAF0E6]/20 transition-all duration-300">
+                            {filteredQuotes.length > 0 ? (
+                                filteredQuotes.map((quote) => (
+                                    <motion.div
+                                        layout
+                                        initial={{ opacity: 0, y: 20 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        exit={{ opacity: 0, scale: 0.95 }}
+                                        key={quote.id || quote._id}
+                                        className="break-inside-avoid relative group"
+                                    >
+                                        <div className="relative !bg-[#FAF0E6]/5 backdrop-blur-md border !border-[#FAF0E6]/10 p-6 rounded-3xl hover:border-[#F2A7A7]/30 transition-all">
 
-                                        {/* Quote Icon */}
-                                        <Quote className="absolute top-5 left-5 w-6 h-6 !text-[#F2A7A7]/10 rotate-180" />
+                                            {/* Quote Icon */}
+                                            <Quote className="absolute top-5 left-5 w-6 h-6 !text-[#F2A7A7]/10 rotate-180" />
 
-                                        {/* Content */}
-                                        <div className="relative z-10 mb-6 pt-3">
-                                            {/* Font Sizes Scaled Down */}
-                                            <p className={`
-                                                leading-[1.5] !text-[#FAF0E6] mb-4
-                                                ${quote.lang === 'hi'
-                                                ? 'text-lg font-medium font-sans tracking-wide'
-                                                : 'text-xl font-serif font-bold tracking-tight'} 
-                                            `}>
-                                                &#34;{quote.text}&#34;
+                                            {/* Quote Text */}
+                                            <p className="leading-[1.5] !text-[#FAF0E6] mb-4 text-lg md:text-xl font-serif font-bold tracking-tight">
+                                                "{quote.text}"
                                             </p>
 
-                                            <div className="flex items-center gap-3">
+                                            {/* Author */}
+                                            <div className="flex items-center gap-3 mb-4 pb-4 border-b !border-[#FAF0E6]/10">
                                                 <div className="h-[1px] w-6 !bg-[#F2A7A7]" />
                                                 <span className="!text-[#F2A7A7] text-[10px] font-bold uppercase tracking-widest">
                                                     {quote.author}
                                                 </span>
                                             </div>
-                                        </div>
 
-                                        {/* Card Footer */}
-                                        <div className="flex justify-between items-center border-t !border-[#FAF0E6]/10 pt-4">
-                                            <span className="text-[9px] font-bold uppercase tracking-widest !text-[#FAF0E6]/30">
-                                                {quote.category}
-                                            </span>
+                                            {/* Category & Actions */}
+                                            <div className="flex justify-between items-center">
+                                                <span className="text-[9px] font-bold uppercase tracking-widest !text-[#FAF0E6]/30">
+                                                    {quote.category}
+                                                </span>
 
-                                            <div className="flex gap-2">
                                                 {/* Copy Button */}
                                                 <button
-                                                    onClick={() => handleCopy(quote.text, quote.id)}
-                                                    className="p-1.5 rounded-full hover:!bg-[#FAF0E6]/10 !text-[#FAF0E6]/60 hover:!text-[#FAF0E6] transition-colors relative"
+                                                    onClick={() => handleCopy(quote.text, quote.id || quote._id)}
+                                                    className="p-1.5 rounded-full hover:!bg-[#FAF0E6]/10 transition-colors"
                                                 >
-                                                    {copiedId === quote.id ? (
-                                                        <motion.span initial={{ scale: 0 }} animate={{ scale: 1 }} className="!text-[#F2A7A7] text-[9px] font-bold">Copied</motion.span>
+                                                    {copiedId === (quote.id || quote._id) ? (
+                                                        <span className="!text-[#F2A7A7] text-[9px] font-bold">Copied</span>
                                                     ) : (
-                                                        <Copy size={16} />
+                                                        <Copy size={16} className="!text-[#F2A7A7]" />
                                                     )}
-                                                </button>
-
-                                                {/* Like Button */}
-                                                <button
-                                                    onClick={() => handleLike(quote.id)}
-                                                    className={`p-1.5 rounded-full hover:!bg-[#FAF0E6]/10 transition-colors ${quote.liked ? "!text-[#F2A7A7]" : "!text-[#FAF0E6]/60 hover:!text-[#FAF0E6]"}`}
-                                                >
-                                                    <Heart size={16} fill={quote.liked ? "currentColor" : "none"} />
                                                 </button>
                                             </div>
                                         </div>
-
-                                    </div>
-                                </motion.div>
-                            ))}
+                                    </motion.div>
+                                ))
+                            ) : (
+                                <div className="col-span-full flex flex-col items-center justify-center py-20 gap-4">
+                                    <Quote size={48} className="opacity-20" />
+                                    <p className="text-sm font-medium !text-[#FAF0E6]/50">No quotes found.</p>
+                                    <button
+                                        onClick={() => { setActiveCategory("All"); setSearchTerm(""); }}
+                                        className="text-xs font-bold uppercase tracking-widest !text-[#F2A7A7] hover:!text-[#FAF0E6] transition-colors"
+                                    >
+                                        Reset Filters
+                                    </button>
+                                </div>
+                            )}
                         </AnimatePresence>
                     </div>
-
-                    {/* Empty State */}
-                    {filteredQuotes.length === 0 && (
-                        <div className="text-center py-20 opacity-50 !text-[#FAF0E6]">
-                            <p>No quotes found.</p>
-                        </div>
-                    )}
                 </div>
             </main>
 
             {/* 4. FOOTER */}
             <Footer />
-
         </div>
     );
 }
+

@@ -88,7 +88,7 @@ export default function CreateBlogPage() {
         try {
             const payload = {
                 ...formData,
-                tags: formData.tags.split(',').map(t => t.trim()),
+                tags: formData.tags.split(',').map(t => t.trim()).filter(Boolean),
                 date: new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
             };
 
@@ -353,3 +353,4 @@ export default function CreateBlogPage() {
         </div>
     );
 }
+

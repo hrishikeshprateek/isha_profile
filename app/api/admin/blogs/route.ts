@@ -9,10 +9,50 @@ export async function GET(request: NextRequest) {
     const collection = db.collection(Collections.BLOGS);
 
     // Get query parameters for filtering
+    const id = request.nextUrl.searchParams.get('id');
     const category = request.nextUrl.searchParams.get('category');
     const search = request.nextUrl.searchParams.get('search');
     const startDate = request.nextUrl.searchParams.get('startDate');
     const endDate = request.nextUrl.searchParams.get('endDate');
+
+    // If fetching a specific blog by ID
+    if (id) {
+      try {
+        const blog = await collection.findOne(
+          { _id: new ObjectId(id) },
+          {
+            projection: {
+              _id: 1,
+              title: 1,
+              excerpt: 1,
+              content: 1,
+              category: 1,
+              date: 1,
+              image: 1,
+              author: 1,
+              readTime: 1,
+              tags: 1,
+              published: 1,
+              slug: 1,
+            }
+          }
+        );
+
+        if (!blog) {
+          return NextResponse.json({ error: 'Blog not found' }, { status: 404 });
+        }
+
+        return NextResponse.json({
+          success: true,
+          blogs: [{
+            ...blog,
+            id: blog._id?.toString(),
+          }]
+        });
+      } catch {
+        return NextResponse.json({ error: 'Invalid blog ID' }, { status: 400 });
+      }
+    }
 
     const filter: Record<string, any> = {};
 
@@ -179,4 +219,3 @@ export async function DELETE(request: NextRequest) {
     return NextResponse.json({ error: 'Failed to delete blog' }, { status: 500 });
   }
 }
-

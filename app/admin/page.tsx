@@ -55,7 +55,7 @@ const ANALYTICS_DATA = {
     }
 };
 
-export default function AdminDashboard() {
+export default function AdminDashboard({ searchOpen: propsSearchOpen, setSearchOpen: propsSetSearchOpen }: any) {
     const router = useRouter();
     const [loading, setLoading] = useState(true);
     const [isAuthorized, setIsAuthorized] = useState(false);
@@ -63,8 +63,10 @@ export default function AdminDashboard() {
     // Analytics State
     const [activeTab, setActiveTab] = useState<'traffic' | 'audience' | 'content'>('traffic');
 
-    // Spotlight Search State
-    const [searchOpen, setSearchOpen] = useState(false);
+    // Spotlight Search State - use props if provided, otherwise use local state
+    const [localSearchOpen, setLocalSearchOpen] = useState(false);
+    const searchOpen = propsSearchOpen !== undefined ? propsSearchOpen : localSearchOpen;
+    const setSearchOpen = propsSetSearchOpen || setLocalSearchOpen;
 
     // --- KEYBOARD SHORTCUT FOR SEARCH ---
     useEffect(() => {
@@ -78,7 +80,7 @@ export default function AdminDashboard() {
 
         window.addEventListener('keydown', handleKeyDown);
         return () => window.removeEventListener('keydown', handleKeyDown);
-    }, []);
+    }, [setSearchOpen]);
 
     // --- 1. AUTH LOGIC ---
     useEffect(() => {
@@ -199,6 +201,17 @@ export default function AdminDashboard() {
 
                         {/* LEFT COLUMN: MODULES */}
                         <div className="lg:col-span-2 space-y-10 order-2 lg:order-1">
+                            {/* Mobile Search Bar */}
+                            <div className="md:hidden">
+                                <button
+                                    onClick={() => setSearchOpen(true)}
+                                    className="w-full flex items-center gap-3 px-4 py-3 bg-white rounded-full border border-[#3B241A]/10 hover:border-[#F2A7A7] transition-colors"
+                                >
+                                    <Search size={16} className="text-[#A68B7E]" />
+                                    <span className="text-sm text-[#A68B7E]">Search pages, settings...</span>
+                                </button>
+                            </div>
+
                             {/* Quick Actions */}
                             <div>
                                 <h3 className="text-xs font-bold uppercase tracking-widest text-[#3B241A]/50 mb-4">Quick Actions</h3>
@@ -316,7 +329,16 @@ export default function AdminDashboard() {
                             <div className="bg-white p-6 rounded-3xl border border-[#3B241A]/5 shadow-sm">
                                 <div className="flex justify-between items-center mb-6">
                                     <h3 className="font-bold text-[#3B241A] text-sm uppercase tracking-wide">Inbox</h3>
-                                    <Link href="/admin/enquiries" className="text-xs font-bold text-[#F2A7A7] hover:underline">View All</Link>
+                                    <div className="flex items-center gap-2">
+                                        <button
+                                            onClick={() => setSearchOpen(true)}
+                                            className="p-2 hover:bg-[#FAF0E6] rounded-lg transition-colors md:hidden"
+                                            title="Search"
+                                        >
+                                            <Search size={16} className="text-[#3B241A]" />
+                                        </button>
+                                        <Link href="/admin/enquiries" className="text-xs font-bold text-[#F2A7A7] hover:underline">View All</Link>
+                                    </div>
                                 </div>
                                 <div className="space-y-4">
                                     {[1, 2, 3].map((_, i) => (
@@ -334,7 +356,16 @@ export default function AdminDashboard() {
 
                             {/* Activity Log */}
                             <div className="bg-white p-6 rounded-3xl border border-[#3B241A]/5 shadow-sm">
-                                <h3 className="font-bold text-[#3B241A] text-sm uppercase tracking-wide mb-6">Activity Log</h3>
+                                <div className="flex justify-between items-center mb-6">
+                                    <h3 className="font-bold text-[#3B241A] text-sm uppercase tracking-wide">Activity Log</h3>
+                                    <button
+                                        onClick={() => setSearchOpen(true)}
+                                        className="p-2 hover:bg-[#FAF0E6] rounded-lg transition-colors md:hidden"
+                                        title="Search"
+                                    >
+                                        <Search size={16} className="text-[#3B241A]" />
+                                    </button>
+                                </div>
                                 <div className="space-y-6 relative">
                                     <div className="absolute left-1.5 top-2 bottom-2 w-[1px] bg-[#3B241A]/10" />
                                     {[

@@ -50,4 +50,6 @@ export const Collections = {
   SUBSCRIBERS: 'subscribers',
   VCARD: 'vcard',
   BLOGS: 'blogs',
+  QUOTES: 'quotes',
+  TESTIMONIALS: 'testimonials',
 } as const;

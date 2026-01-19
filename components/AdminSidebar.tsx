@@ -17,7 +17,8 @@ import {
     Menu,
     X,
     Quote,
-    PenTool
+    PenTool,
+    Search
 } from 'lucide-react';
 
 // --- MENU DATA ---
@@ -109,7 +110,7 @@ const MENU: MenuItem[] = [
     },
 ];
 
-export default function AdminSidebar() {
+export default function AdminSidebar({ onSearch }: { onSearch?: () => void }) {
     const pathname = usePathname() || '';
     const [open, setOpen] = useState<Record<string, boolean>>({ content: true, sections: false });
     const [mobileOpen, setMobileOpen] = useState(false);
@@ -149,14 +150,26 @@ export default function AdminSidebar() {
                     <div className="w-8 h-8 rounded-full bg-[#FAF0E6] text-[#3B241A] flex items-center justify-center">
                         <span className="font-serif font-bold text-sm">I</span>
                     </div>
-                    <span className="font-bold text-sm tracking-widest uppercase">Isha Admin</span>
+                    <div className="leading-tight">
+                        <p className="text-[11px] font-bold tracking-widest uppercase ">Isha Rani</p>
+                        <p className="text-[10px] opacity-60">Administrator</p>
+                    </div>
                 </div>
-                <button
-                    onClick={() => setMobileOpen((v) => !v)}
-                    className="p-2 rounded-md hover:bg-[#FAF0E6]/10"
-                >
-                    {mobileOpen ? <X size={20} /> : <Menu size={20} />}
-                </button>
+                <div className="flex items-center gap-2">
+                    <button
+                        onClick={() => onSearch?.()}
+                        className="p-2 rounded-md hover:bg-[#FAF0E6]/10 transition-colors"
+                        title="Search (⌘K)"
+                    >
+                        <Search size={18} />
+                    </button>
+                    <button
+                        onClick={() => setMobileOpen((v) => !v)}
+                        className="p-2 rounded-md hover:bg-[#FAF0E6]/10"
+                    >
+                        {mobileOpen ? <X size={20} /> : <Menu size={20} />}
+                    </button>
+                </div>
             </div>
 
             {/* MOBILE OVERLAY */}
@@ -176,10 +189,29 @@ export default function AdminSidebar() {
                     ${mobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
                 `}
             >
+                {/* MOBILE HEADER INSIDE SIDEBAR (when open) */}
+                <div className="lg:hidden flex items-center justify-between px-4 py-3 border-b border-[#FAF0E6]/10">
+                    <div className="flex items-center gap-2">
+                        <div className="w-8 h-8 rounded-full bg-[#FAF0E6] text-[#3B241A] flex items-center justify-center">
+                            <span className="font-serif font-bold text-sm">I</span>
+                        </div>
+                        <div className="leading-tight">
+                            <p className="text-[11px] font-bold tracking-widest uppercase">Isha Rani</p>
+                            <p className="text-[10px] opacity-60">Administrator</p>
+                        </div>
+                    </div>
+                    <button
+                        onClick={() => onSearch?.()}
+                        className="p-2 rounded-md hover:bg-[#FAF0E6]/10"
+                        title="Search"
+                    >
+                        <Search size={18} />
+                    </button>
+                </div>
 
-                {/* HEADER */}
-                <div className="p-8 border-b border-[#FAF0E6]/10 hidden lg:block flex-shrink-0">
-                    <div className="flex items-center gap-3">
+                {/* HEADER (DESKTOP) */}
+                <div className="p-6 border-b border-[#FAF0E6]/10 hidden lg:block flex-shrink-0">
+                    <div className="flex items-center gap-3 mb-3">
                         <div className="w-10 h-10 rounded-full bg-[#FAF0E6] text-[#3B241A] flex items-center justify-center shadow-md">
                             <span className="font-serif font-bold text-xl">I</span>
                         </div>
@@ -187,6 +219,18 @@ export default function AdminSidebar() {
                             <h2 className="font-bold text-sm tracking-widest uppercase text-[#FAF0E6]">Isha Rani</h2>
                             <p className="text-[10px] font-medium opacity-50 uppercase tracking-widest text-[#FAF0E6] mt-0.5">Administrator</p>
                         </div>
+                    </div>
+
+                    {/* DESKTOP SEARCH BAR */}
+                    <div className="relative group">
+                        <input
+                            type="text"
+                            placeholder="Search pages..."
+                            className="w-full bg-[#2F1E17]/60 text-[#FAF0E6] placeholder-[#FAF0E6]/60 border border-[#FAF0E6]/10 rounded-lg py-2 pl-9 pr-3 text-sm focus:outline-none focus:border-[#F2A7A7]"
+                            onFocus={() => onSearch?.()}
+                            onKeyDown={(e) => { if (e.key === 'Enter') onSearch?.(); }}
+                        />
+                        <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#FAF0E6]/60 pointer-events-none" />
                     </div>
                 </div>
 
