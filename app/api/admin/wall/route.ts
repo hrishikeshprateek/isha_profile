@@ -73,7 +73,13 @@ export async function GET(request: NextRequest) {
     });
   } catch (error) {
     console.error('Get testimonials error:', error);
-    return NextResponse.json({ error: 'Failed to fetch testimonials' }, { status: 500 });
+    return NextResponse.json(
+      {
+        error: 'Failed to fetch testimonials',
+        details: error instanceof Error ? error.message : String(error),
+      },
+      { status: 500 }
+    );
   }
 }
 
@@ -181,4 +187,3 @@ export async function DELETE(request: NextRequest) {
     return NextResponse.json({ error: 'Failed to delete testimonial' }, { status: 500 });
   }
 }
-

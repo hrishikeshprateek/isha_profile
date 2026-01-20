@@ -92,6 +92,7 @@ const MENU: MenuItem[] = [
         title: 'Community',
         icon: <Users size={18} />,
         children: [
+            { id: 'testimonials', title: 'Testimonials', href: '/admin/testimonials', icon: <Quote size={14}/> },
             { id: 'enquiries', title: 'Enquiries', href: '/admin/enquiries' },
             { id: 'subscribers', title: 'Subscribers', href: '/admin/subscribers' },
         ],

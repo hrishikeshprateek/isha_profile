@@ -4,10 +4,10 @@ import { useEffect, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { onAuthStateChanged } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
+import { getQuillModulesWithCloudinary } from '@/lib/cloudinary-helpers';
 import {
   Save,
   ArrowLeft,
-  Image as ImageIcon,
   Tag,
   Type,
   AlignLeft,
@@ -18,6 +18,8 @@ import {
 import { motion } from 'framer-motion';
 import dynamic from 'next/dynamic';
 import 'react-quill-new/dist/quill.snow.css';
+import CloudinaryUpload from '@/components/CloudinaryUpload';
+import MediaSelector from '@/components/MediaSelector';
 
 // Dynamic import for ReactQuill to avoid SSR issues
 const ReactQuill = dynamic(() => import('react-quill-new'), {
@@ -28,18 +30,6 @@ const ReactQuill = dynamic(() => import('react-quill-new'), {
     </div>
   )
 });
-
-const modules = {
-  toolbar: [
-    [{ header: [1, 2, 3, 4, 5, 6, false] }],
-    ['bold', 'italic', 'underline', 'strike', 'blockquote'],
-    [{ list: 'ordered' }, { list: 'bullet' }, { indent: '-1' }, { indent: '+1' }],
-    [{ color: [] }, { background: [] }],
-    [{ align: [] }],
-    ['link', 'image', 'video', 'code-block'],
-    ['clean']
-  ]
-};
 
 interface FormData {
   title: string;
@@ -62,6 +52,10 @@ export default function EditBlogPage() {
   const [isAuthorized, setIsAuthorized] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
+  const [mediaSelectorOpen, setMediaSelectorOpen] = useState(false);
+
+  // Get Quill modules with Cloudinary integration
+  const quillModules = getQuillModulesWithCloudinary('blogs');
 
   const [formData, setFormData] = useState<FormData>({
     title: '',
@@ -114,6 +108,7 @@ export default function EditBlogPage() {
         }
       } catch (err) {
         setError('Failed to load blog.');
+        console.error('Load blog error:', err);
       }
     }
 
@@ -157,6 +152,7 @@ export default function EditBlogPage() {
       }
     } catch (err) {
       setError('An error occurred while saving.');
+      console.error('Save error:', err);
     } finally {
       setSaving(false);
     }
@@ -242,7 +238,7 @@ export default function EditBlogPage() {
                 theme="snow"
                 value={formData.content}
                 onChange={(content) => setFormData({...formData, content})}
-                modules={modules}
+                modules={quillModules}
                 className="h-full"
               />
             </div>
@@ -306,29 +302,43 @@ export default function EditBlogPage() {
 
             {/* Cover Media Card */}
             <div className="bg-white p-6 rounded-[32px] border border-[#3B241A]/5 shadow-sm space-y-4">
-              <h3 className="text-[10px] font-bold uppercase tracking-widest text-[#3B241A]/40 mb-2">Cover Assets</h3>
-              <div className="space-y-2">
-                <label className="flex items-center gap-2 text-[10px] uppercase font-bold text-[#3B241A]/60"><ImageIcon size={12}/> Image URL</label>
-                <input
-                  type="text"
-                  value={formData.image}
-                  onChange={(e) => setFormData({...formData, image: e.target.value})}
-                  className="w-full bg-[#FAF0E6]/50 rounded-xl p-3 text-sm border border-[#3B241A]/5 focus:bg-white focus:border-[#F2A7A7] outline-none transition-all placeholder:text-[#3B241A]/20"
-                  placeholder="https://..."
-                />
+              <div className="flex items-center justify-between mb-2">
+                <h3 className="text-[10px] font-bold uppercase tracking-widest text-[#3B241A]/40">Cover Image</h3>
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => setMediaSelectorOpen(true)}
+                  className="text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-lg bg-[#3B241A]/5 text-[#3B241A]/60 hover:bg-[#F2A7A7]/20 hover:text-[#F2A7A7] transition-colors"
+                >
+                  📁 From Library
+                </motion.button>
               </div>
 
-              {/* Visual Preview */}
-              <div className="relative w-full h-40 bg-[#FAF0E6] rounded-xl overflow-hidden border border-[#3B241A]/10 flex items-center justify-center">
-                {formData.image ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img src={formData.image} alt="Preview" className="w-full h-full object-cover" />
-                ) : (
-                  <div className="flex flex-col items-center gap-2 text-[#3B241A]/20">
-                    <ImageIcon size={24} />
-                    <span className="text-[10px] font-bold uppercase tracking-widest">No Preview</span>
+              <CloudinaryUpload
+                currentImage={formData.image}
+                onUploadComplete={(url) => setFormData({...formData, image: url})}
+                folder="blogs"
+              />
+
+              {/* Alternative: Manual URL Input (optional) */}
+              <div className="pt-4 border-t border-[#3B241A]/5">
+                <details className="group">
+                  <summary className="cursor-pointer text-[10px] font-bold uppercase tracking-widest text-[#3B241A]/40 hover:text-[#3B241A]/60 transition-colors list-none flex items-center gap-2">
+                    <span>Or paste URL manually</span>
+                    <svg className="w-3 h-3 transition-transform group-open:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </summary>
+                  <div className="mt-3">
+                    <input
+                      type="text"
+                      value={formData.image}
+                      onChange={(e) => setFormData({...formData, image: e.target.value})}
+                      className="w-full bg-[#FAF0E6]/50 rounded-xl p-3 text-sm border border-[#3B241A]/5 focus:bg-white focus:border-[#F2A7A7] outline-none transition-all placeholder:text-[#3B241A]/20"
+                      placeholder="https://..."
+                    />
                   </div>
-                )}
+                </details>
               </div>
             </div>
 
@@ -395,6 +405,14 @@ export default function EditBlogPage() {
           box-shadow: 0 4px 12px rgba(0,0,0,0.1) !important;
         }
       `}</style>
+
+      {/* Media Selector Modal */}
+      <MediaSelector
+        isOpen={mediaSelectorOpen}
+        onClose={() => setMediaSelectorOpen(false)}
+        onSelect={(url) => setFormData({...formData, image: url})}
+        type="image"
+      />
     </div>
   );
 }

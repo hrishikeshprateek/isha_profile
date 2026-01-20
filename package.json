@@ -10,13 +10,15 @@
     "create-user": "node scripts/create-user.js",
     "create-admin": "node scripts/create-admin-firebase-fixed.js",
     "create-admin-firebase": "node scripts/create-admin-firebase-fixed.js",
-    "test-db": "node scripts/test-mongodb.js"
+    "test-db": "node scripts/test-mongodb.js",
+    "test-cloudinary": "node scripts/test-cloudinary.js"
   },
   "dependencies": {
     "@radix-ui/react-slot": "^1.2.4",
     "@radix-ui/react-toast": "^1.2.15",
     "bcryptjs": "^3.0.3",
     "class-variance-authority": "^0.7.1",
+    "cloudinary": "^2.9.0",
     "clsx": "^2.1.1",
     "dotenv": "^17.2.3",
     "firebase": "^12.7.0",
@@ -25,6 +27,7 @@
     "lucide-react": "^0.562.0",
     "mongodb": "^7.0.0",
     "next": "16.1.1",
+    "next-cloudinary": "^6.17.5",
     "quill": "^2.0.3",
     "react": "19.2.3",
     "react-dom": "19.2.3",

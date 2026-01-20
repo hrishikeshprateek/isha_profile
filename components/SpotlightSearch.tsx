@@ -28,13 +28,15 @@ const SEARCHABLE_ITEMS = [
   // Standalone Pages
   { title: 'My Journey', description: 'Edit journey page', href: '/admin/my-journey', category: 'Pages' },
   { title: 'Build / Projects', description: 'Manage projects', href: '/admin/build', category: 'Pages' },
-  { title: 'Wall of Love', description: 'Testimonials', href: '/admin/wall', category: 'Pages' },
+  { title: 'Wall of Love', description: 'Gallery & portfolio items', href: '/admin/wall', category: 'Pages' },
   { title: 'Digital VCard', description: 'Edit vCard', href: '/admin/vcard', category: 'Pages' },
 
   // Media
   { title: 'Gallery Assets', description: 'Media library', href: '/admin/media', category: 'Media' },
 
   // Community
+  { title: 'Testimonials', description: 'Manage client reviews', href: '/admin/testimonials', category: 'Community' },
+  { title: 'Create Testimonial', description: 'Add new testimonial', href: '/admin/testimonials/create', category: 'Community' },
   { title: 'Enquiries', description: 'View contact submissions', href: '/admin/enquiries', category: 'Community' },
   { title: 'Subscribers', description: 'Newsletter subscribers', href: '/admin/subscribers', category: 'Community' },
 
