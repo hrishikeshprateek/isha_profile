@@ -52,4 +52,5 @@ export const Collections = {
   BLOGS: 'blogs',
   QUOTES: 'quotes',
   TESTIMONIALS: 'testimonials',
+  MEDIA: 'media',
 } as const;

@@ -29,18 +29,23 @@ export default function MediaSelector({ isOpen, onClose, onSelect, type = 'image
     const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
     const [showUploader, setShowUploader] = useState(false);
 
-    // Load media from localStorage on mount
+    // Load media from database on mount
     useEffect(() => {
-        const stored = localStorage.getItem('admin_media_library');
-        if (stored) {
-            try {
-                const parsedMedia = JSON.parse(stored);
-                setMedia(parsedMedia);
-            } catch {
-                setMedia([]);
-            }
-        }
+        loadMedia();
     }, []);
+
+    async function loadMedia() {
+        try {
+            const response = await fetch('/api/admin/media');
+            const data = await response.json();
+
+            if (data.success && data.items) {
+                setMedia(data.items);
+            }
+        } catch (error) {
+            console.error('Failed to load media:', error);
+        }
+    }
 
     // Filter media based on type and search
     let filteredMedia = media;
@@ -57,20 +62,36 @@ export default function MediaSelector({ isOpen, onClose, onSelect, type = 'image
     const paginatedMedia = filteredMedia.slice(startIndex, startIndex + ITEMS_PER_PAGE);
 
     // Handle upload
-    const handleUploadComplete = (url: string) => {
+    const handleUploadComplete = async (url: string) => {
         if (!url) return;
-        const newMedia: MediaFile = {
-            id: `media_${Date.now()}`,
-            url,
-            type: url.includes('video') ? 'video' : 'image',
-            name: `Media - ${new Date().toLocaleString()}`,
-            uploadedAt: new Date().toISOString(),
-        };
-        const updatedMedia = [newMedia, ...media];
-        setMedia(updatedMedia);
-        localStorage.setItem('admin_media_library', JSON.stringify(updatedMedia));
-        setShowUploader(false);
+
+        try {
+            // Add to database
+            const response = await fetch('/api/admin/media', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    url,
+                    type: url.includes('video') ? 'video' : 'image',
+                    name: `Upload - ${new Date().toLocaleString()}`,
+                    folder: 'media',
+                }),
+            });
+
+            if (response.ok) {
+                setSuccess('Media uploaded successfully!');
+                await loadMedia(); // Reload media list
+                setShowUploader(false);
+                setTimeout(() => setSuccess(''), 3000);
+            }
+        } catch (error) {
+            console.error('Failed to save media:', error);
+        }
     };
+
+    const [success, setSuccess] = useState('');
 
     // Handle select
     const handleSelect = (url: string) => {

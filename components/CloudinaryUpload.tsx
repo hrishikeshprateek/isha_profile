@@ -85,30 +85,7 @@ export default function CloudinaryUpload({
             setPreview(data.url);
             setUploadProgress(100);
 
-            // Save to media library localStorage
-            try {
-              const stored = localStorage.getItem('admin_media_library');
-              let mediaList = [];
-              if (stored) {
-                mediaList = JSON.parse(stored);
-              }
-
-              const newMedia = {
-                id: `media_${Date.now()}`,
-                url: data.url,
-                type: 'image',
-                name: `Upload - ${new Date().toLocaleString()}`,
-                uploadedAt: new Date().toISOString(),
-              };
-
-              mediaList.unshift(newMedia);
-              localStorage.setItem('admin_media_library', JSON.stringify(mediaList));
-              console.log('Media saved to library');
-            } catch (err) {
-              console.error('Failed to save to media library:', err);
-            }
-
-            // Give visual feedback of completion, then call callback
+            // Only report URL to parent; saving to DB handled by caller
             setTimeout(() => {
               onUploadComplete(data.url);
               setError('');
@@ -125,7 +102,6 @@ export default function CloudinaryUpload({
           console.error('Upload error:', err);
           setError(errorMsg);
           setUploadProgress(0);
-        } finally {
           setUploading(false);
         }
       };
@@ -288,4 +264,3 @@ export default function CloudinaryUpload({
     </div>
   );
 }
-

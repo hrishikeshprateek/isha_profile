@@ -1,11 +1,10 @@
 "use client";
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { onAuthStateChanged } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
 import {
-    Plus,
     Trash2,
     Copy,
     Download,
@@ -18,7 +17,6 @@ import {
     Play,
     Grid,
     List,
-    Loader2,
     Upload,
     Check
 } from 'lucide-react';
@@ -42,12 +40,10 @@ export default function AdminMediaPage() {
     const [loading, setLoading] = useState(true);
     const [isAuthorized, setIsAuthorized] = useState(false);
     const [media, setMedia] = useState<MediaFile[]>([]);
-    const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
     const [currentPage, setCurrentPage] = useState(1);
     const [searchQuery, setSearchQuery] = useState('');
     const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
-    const [uploading, setUploading] = useState(false);
     const [selectedForCopy, setSelectedForCopy] = useState<string | null>(null);
     const [showUploader, setShowUploader] = useState(false);
 
@@ -76,66 +72,101 @@ export default function AdminMediaPage() {
         return () => unsubscribe();
     }, [router]);
 
-    // Fetch stored media from localStorage (in production, use database)
+    const getAuthHeaders = useCallback(() => {
+        const token = typeof window !== 'undefined' ? localStorage.getItem('admin_token') : '';
+        return {
+            'Content-Type': 'application/json',
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        };
+    }, []);
+
+    // Fetch media from MongoDB API
+    const fetchMedia = useCallback(async () => {
+        try {
+            const response = await fetch('/api/admin/media', {
+                headers: getAuthHeaders(),
+            });
+            const data = await response.json();
+
+            if (data.success && data.items) {
+                setMedia(data.items);
+            } else {
+                setMedia([]);
+            }
+        } catch (error) {
+            console.error('Failed to fetch media:', error);
+            setMedia([]);
+        }
+    }, [getAuthHeaders]);
+
     useEffect(() => {
         if (isAuthorized) {
-            const stored = localStorage.getItem('admin_media_library');
-            if (stored) {
-                try {
-                    setMedia(JSON.parse(stored));
-                } catch {
-                    setMedia([]);
-                }
-            }
+            fetchMedia();
+        }
+    }, [isAuthorized, fetchMedia]);
 
-            // Listen for storage changes from other tabs/windows or components
-            const handleStorageChange = () => {
-                const updated = localStorage.getItem('admin_media_library');
-                if (updated) {
-                    try {
-                        setMedia(JSON.parse(updated));
-                    } catch {
-                        setMedia([]);
-                    }
-                }
+    // Refresh media periodically (every 5 seconds to check for new uploads)
+    useEffect(() => {
+        if (isAuthorized) {
+            const interval = setInterval(() => {
+                fetchMedia();
+            }, 5000);
+
+            return () => clearInterval(interval);
+        }
+    }, [isAuthorized, fetchMedia]);
+
+    // Handle upload complete (persist to DB and refresh)
+    const handleUploadComplete = async (url: string) => {
+        if (!url) return;
+        try {
+            const payload = {
+                url,
+                type: url.includes('video') ? 'video' : 'image',
+                name: `Media - ${new Date().toLocaleString()}`,
+                size: 0,
+                folder: 'media',
             };
 
-            window.addEventListener('storage', handleStorageChange);
-            return () => window.removeEventListener('storage', handleStorageChange);
+            const res = await fetch('/api/admin/media', {
+                method: 'POST',
+                headers: getAuthHeaders(),
+                body: JSON.stringify(payload),
+            });
+
+            if (res.ok) {
+                setSuccess('Media uploaded successfully!');
+                await fetchMedia();
+                setShowUploader(false);
+                setTimeout(() => setSuccess(''), 3000);
+            }
+        } catch (err) {
+            console.error('Upload save error:', err);
         }
-    }, [isAuthorized]);
-
-    // Handle upload complete
-    const handleUploadComplete = (url: string) => {
-        if (!url) return;
-
-        const newMedia: MediaFile = {
-            id: `media_${Date.now()}`,
-            url,
-            type: url.includes('video') ? 'video' : 'image',
-            name: `Media - ${new Date().toLocaleString()}`,
-            size: 0,
-            uploadedAt: new Date().toISOString(),
-            publicId: url
-        };
-
-        const updatedMedia = [newMedia, ...media];
-        setMedia(updatedMedia);
-        localStorage.setItem('admin_media_library', JSON.stringify(updatedMedia));
-        setSuccess('Media uploaded successfully!');
-        setTimeout(() => setSuccess(''), 3000);
-        setShowUploader(false);
     };
 
     // Delete media
     const handleDelete = async (id: string) => {
         if (!window.confirm('Delete this media file?')) return;
 
-        const updatedMedia = media.filter(item => item.id !== id);
-        setMedia(updatedMedia);
-        localStorage.setItem('admin_media_library', JSON.stringify(updatedMedia));
-        setSuccess('Media deleted successfully!');
-        setTimeout(() => setSuccess(''), 3000);
+        try {
+            const response = await fetch(`/api/admin/media?id=${id}`, {
+                method: 'DELETE',
+                headers: getAuthHeaders(),
+            });
+
+            const data = await response.json();
+
+            if (response.ok && data.success) {
+                setSuccess('Media deleted successfully!');
+                fetchMedia(); // Refresh list
+                setTimeout(() => setSuccess(''), 3000);
+            } else {
+                console.error('Failed to delete:', data.error);
+            }
+        } catch (err) {
+            console.error('Delete error:', err);
+        }
     };
 
     // Copy URL to clipboard
@@ -219,15 +250,6 @@ export default function AdminMediaPage() {
                     )}
                 </AnimatePresence>
 
-                {error && (
-                    <motion.div
-                        initial={{ opacity: 0, y: -10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className="mb-6 p-4 bg-red-50 text-red-600 rounded-xl text-xs font-bold uppercase tracking-wide border border-red-100"
-                    >
-                        {error}
-                    </motion.div>
-                )}
 
                 {success && (
                     <motion.div
@@ -493,4 +515,3 @@ export default function AdminMediaPage() {
         </div>
     );
 }
-
