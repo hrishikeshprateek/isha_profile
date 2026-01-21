@@ -1,9 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getDatabase } from '@/lib/mongodb';
 import { ObjectId } from 'mongodb';
+import { verifyAdmin } from '@/lib/admin-auth';
 
 // GET /api/admin/media - List all media or fetch single by id
 export async function GET(request: NextRequest) {
+  // Verify admin authentication
+  const auth = await verifyAdmin(request);
+  if (!auth.authorized) {
+    return auth.response;
+  }
+
   try {
     const db = await getDatabase();
     const collection = db.collection('media');
@@ -82,6 +89,12 @@ export async function GET(request: NextRequest) {
 
 // POST /api/admin/media - Add new media to library
 export async function POST(request: NextRequest) {
+  // Verify admin authentication
+  const auth = await verifyAdmin(request);
+  if (!auth.authorized) {
+    return auth.response;
+  }
+
   try {
     const data = await request.json();
 
@@ -128,6 +141,12 @@ export async function POST(request: NextRequest) {
 
 // DELETE /api/admin/media - Delete media from library
 export async function DELETE(request: NextRequest) {
+  // Verify admin authentication
+  const auth = await verifyAdmin(request);
+  if (!auth.authorized) {
+    return auth.response;
+  }
+
   try {
     const id = request.nextUrl.searchParams.get('id');
 

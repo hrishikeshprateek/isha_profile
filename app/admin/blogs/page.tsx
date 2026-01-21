@@ -80,13 +80,25 @@ export default function AdminBlogsPage() {
             const queryString = params.toString();
             const url = `/api/admin/blogs${queryString ? `?${queryString}` : ''}`;
 
-            const res = await fetch(url);
+            // Get auth token
+            const token = localStorage.getItem('admin_token');
+            const headers: HeadersInit = {
+                'Content-Type': 'application/json',
+            };
+            if (token) {
+                headers['Authorization'] = `Bearer ${token}`;
+            }
+
+            const res = await fetch(url, { headers });
             const data = await res.json();
             if (res.ok && data.success) {
                 setBlogs(data.blogs || []);
                 setCurrentPage(1);
+            } else {
+                setError(data.error || 'Failed to load blogs');
             }
-        } catch {
+        } catch (err) {
+            console.error('Fetch blogs error:', err);
             setError('Failed to load blogs');
         } finally {
             setBlogLoading(false);
@@ -136,16 +148,28 @@ export default function AdminBlogsPage() {
     async function handleDelete(id: string) {
         if (!window.confirm('Delete this story? This cannot be undone.')) return;
         try {
-            const res = await fetch(`/api/admin/blogs?id=${id}`, { method: 'DELETE' });
+            const token = localStorage.getItem('admin_token');
+            const headers: HeadersInit = {
+                'Content-Type': 'application/json',
+            };
+            if (token) {
+                headers['Authorization'] = `Bearer ${token}`;
+            }
+
+            const res = await fetch(`/api/admin/blogs?id=${id}`, {
+                method: 'DELETE',
+                headers
+            });
             const data = await res.json();
             if (res.ok && data.success) {
                 setSuccess('Story deleted successfully.');
                 fetchBlogs();
                 setTimeout(() => setSuccess(''), 3000);
             } else {
-                setError('Failed to delete.');
+                setError(data.error || 'Failed to delete.');
             }
-        } catch {
+        } catch (err) {
+            console.error('Delete error:', err);
             setError('Error deleting story.');
         }
     }

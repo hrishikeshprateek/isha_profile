@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Search, X, Upload, Grid, List, ChevronLeft, ChevronRight, Check, Copy } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import CloudinaryUpload from '@/components/CloudinaryUpload';
@@ -28,15 +28,23 @@ export default function MediaSelector({ isOpen, onClose, onSelect, type = 'image
     const [searchQuery, setSearchQuery] = useState('');
     const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
     const [showUploader, setShowUploader] = useState(false);
+    const [success, setSuccess] = useState('');
 
-    // Load media from database on mount
-    useEffect(() => {
-        loadMedia();
-    }, []);
+    // Get auth headers
+    const getAuthHeaders = () => {
+        const token = typeof window !== 'undefined' ? localStorage.getItem('admin_token') : '';
+        return {
+            'Content-Type': 'application/json',
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        };
+    };
 
-    async function loadMedia() {
+    // Load media from database
+    const loadMedia = useCallback(async () => {
         try {
-            const response = await fetch('/api/admin/media');
+            const response = await fetch('/api/admin/media', {
+                headers: getAuthHeaders(),
+            });
             const data = await response.json();
 
             if (data.success && data.items) {
@@ -45,7 +53,14 @@ export default function MediaSelector({ isOpen, onClose, onSelect, type = 'image
         } catch (error) {
             console.error('Failed to load media:', error);
         }
-    }
+    }, []);
+
+    // Load media when modal opens
+    useEffect(() => {
+        if (isOpen) {
+            loadMedia();
+        }
+    }, [isOpen, loadMedia]);
 
     // Filter media based on type and search
     let filteredMedia = media;
@@ -69,9 +84,7 @@ export default function MediaSelector({ isOpen, onClose, onSelect, type = 'image
             // Add to database
             const response = await fetch('/api/admin/media', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
+                headers: getAuthHeaders(),
                 body: JSON.stringify({
                     url,
                     type: url.includes('video') ? 'video' : 'image',
@@ -91,7 +104,6 @@ export default function MediaSelector({ isOpen, onClose, onSelect, type = 'image
         }
     };
 
-    const [success, setSuccess] = useState('');
 
     // Handle select
     const handleSelect = (url: string) => {
@@ -151,6 +163,17 @@ export default function MediaSelector({ isOpen, onClose, onSelect, type = 'image
                                 </motion.div>
                             )}
                         </AnimatePresence>
+
+                        {/* Success Message */}
+                        {success && (
+                            <motion.div
+                                initial={{ opacity: 0, y: -10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                className="mx-6 mt-4 p-3 bg-green-50 text-green-700 rounded-lg text-xs font-bold border border-green-100"
+                            >
+                                {success}
+                            </motion.div>
+                        )}
 
                         {/* Search and Controls */}
                         <div className="p-6 bg-white/30 border-b border-[#3B241A]/10 space-y-4">

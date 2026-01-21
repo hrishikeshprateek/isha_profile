@@ -9,11 +9,32 @@ import Footer from "@/components/Footer";
 import Testimonials from "@/components/sections/Testimonials";
 import QuotesPreviewSection from "@/components/sections/QuotesPreviewSection";
 
-export default function D1Page() {
+async function getHeroData() {
+  try {
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
+    const res = await fetch(`${baseUrl}/api/hero`, {
+      cache: 'no-store', // Always fetch fresh data for SSR
+    });
+
+    if (!res.ok) {
+      return null;
+    }
+
+    const data = await res.json();
+    return data.success ? data.data : null;
+  } catch (error) {
+    console.error('Failed to fetch hero data:', error);
+    return null;
+  }
+}
+
+export default async function D1Page() {
+  const heroData = await getHeroData();
+
   return (
     <main className="min-h-screen bg-[#FAF0E6]">
       <Navbar />
-      <HeroSection />
+      <HeroSection heroData={heroData} />
       <AboutSection />
       <ServicesSection />
       <ExpertiseSection />

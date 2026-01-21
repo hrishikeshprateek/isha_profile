@@ -88,7 +88,15 @@ export default function EditBlogPage() {
   useEffect(() => {
     async function loadBlog() {
       try {
-        const res = await fetch(`/api/admin/blogs?id=${blogId}`);
+        const token = localStorage.getItem('admin_token');
+        const headers: HeadersInit = {
+          'Content-Type': 'application/json',
+        };
+        if (token) {
+          headers['Authorization'] = `Bearer ${token}`;
+        }
+
+        const res = await fetch(`/api/admin/blogs?id=${blogId}`, { headers });
         const data = await res.json();
         if (res.ok && data.success && data.blogs?.length) {
           const blog = data.blogs[0];
@@ -137,9 +145,17 @@ export default function EditBlogPage() {
         date: new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }),
       };
 
+      const token = localStorage.getItem('admin_token');
+      const headers: HeadersInit = {
+        'Content-Type': 'application/json',
+      };
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+
       const res = await fetch('/api/admin/blogs', {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers,
         body: JSON.stringify(payload),
       });
 

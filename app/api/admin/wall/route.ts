@@ -1,9 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getDatabase, Collections } from '@/lib/mongodb';
 import { ObjectId } from 'mongodb';
+import { verifyAdmin } from '@/lib/admin-auth';
 
 // GET /api/admin/wall - List all testimonials or fetch single by id
 export async function GET(request: NextRequest) {
+  // Verify admin authentication
+  const auth = await verifyAdmin(request);
+  if (!auth.authorized) {
+    return auth.response;
+  }
+
   try {
     const db = await getDatabase();
     const collection = db.collection(Collections.TESTIMONIALS);
@@ -85,6 +92,12 @@ export async function GET(request: NextRequest) {
 
 // POST /api/admin/wall - Create new testimonial
 export async function POST(request: NextRequest) {
+  // Verify admin authentication
+  const auth = await verifyAdmin(request);
+  if (!auth.authorized) {
+    return auth.response;
+  }
+
   try {
     const data = await request.json();
 
@@ -123,6 +136,12 @@ export async function POST(request: NextRequest) {
 
 // PUT /api/admin/wall - Update testimonial
 export async function PUT(request: NextRequest) {
+  // Verify admin authentication
+  const auth = await verifyAdmin(request);
+  if (!auth.authorized) {
+    return auth.response;
+  }
+
   try {
     const data = await request.json();
 
@@ -162,6 +181,12 @@ export async function PUT(request: NextRequest) {
 
 // DELETE /api/admin/wall - Delete testimonial
 export async function DELETE(request: NextRequest) {
+  // Verify admin authentication
+  const auth = await verifyAdmin(request);
+  if (!auth.authorized) {
+    return auth.response;
+  }
+
   try {
     const id = request.nextUrl.searchParams.get('id');
 

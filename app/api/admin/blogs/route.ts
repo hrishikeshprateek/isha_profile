@@ -1,9 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getDatabase, Collections } from '@/lib/mongodb';
 import { ObjectId } from 'mongodb';
+import { verifyAdmin } from '@/lib/admin-auth';
 
 // GET /api/admin/blogs - List all blogs with filtering
 export async function GET(request: NextRequest) {
+  // Verify admin authentication
+  const auth = await verifyAdmin(request);
+  if (!auth.authorized) {
+    return auth.response;
+  }
+
   try {
     const db = await getDatabase();
     const collection = db.collection(Collections.BLOGS);
@@ -113,6 +120,12 @@ export async function GET(request: NextRequest) {
 
 // POST /api/admin/blogs - Create new blog
 export async function POST(request: NextRequest) {
+  // Verify admin authentication
+  const auth = await verifyAdmin(request);
+  if (!auth.authorized) {
+    return auth.response;
+  }
+
   try {
     const data = await request.json();
 
@@ -154,6 +167,12 @@ export async function POST(request: NextRequest) {
 
 // PUT /api/admin/blogs - Update blog
 export async function PUT(request: NextRequest) {
+  // Verify admin authentication
+  const auth = await verifyAdmin(request);
+  if (!auth.authorized) {
+    return auth.response;
+  }
+
   try {
     const data = await request.json();
 
@@ -194,6 +213,12 @@ export async function PUT(request: NextRequest) {
 
 // DELETE /api/admin/blogs?id=xxx - Delete blog
 export async function DELETE(request: NextRequest) {
+  // Verify admin authentication
+  const auth = await verifyAdmin(request);
+  if (!auth.authorized) {
+    return auth.response;
+  }
+
   try {
     const id = request.nextUrl.searchParams.get('id');
 

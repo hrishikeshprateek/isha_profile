@@ -4,6 +4,23 @@ import { Button } from "@/components/ui/button";
 import { ChevronDown } from "lucide-react";
 import Image from "next/image";
 import { useEffect, useState } from "react";
+import Link from "next/link";
+
+interface HeroData {
+    title?: string;
+    subtitle?: string;
+    description?: string;
+    ctaText?: string;
+    ctaLink?: string;
+    ctaSecondaryText?: string;
+    ctaSecondaryLink?: string;
+    backgroundImage?: string;
+    profileImage?: string;
+}
+
+interface HeroSectionProps {
+    heroData?: HeroData;
+}
 
 // Matches the Social Icon style from your FeaturedBlogs/Blog page
 const SocialIcon = ({ children }: { children: React.ReactNode }) => (
@@ -17,13 +34,18 @@ const SocialIcon = ({ children }: { children: React.ReactNode }) => (
 
 const roles = ["UI/UX Designer", "Content Creator", "Content Writer", "Designer"];
 
-const HeroSection = () => {
+const HeroSection = ({ heroData }: HeroSectionProps) => {
     const [displayText, setDisplayText] = useState("");
     const [roleIndex, setRoleIndex] = useState(0);
     const [isDeleting, setIsDeleting] = useState(false);
 
+    // Use heroData subtitle if provided (split by comma for multiple roles), otherwise use default roles
+    const typingRoles = heroData?.subtitle
+        ? heroData.subtitle.split(',').map(role => role.trim()).filter(role => role.length > 0)
+        : roles;
+
     useEffect(() => {
-        const currentRole = roles[roleIndex];
+        const currentRole = typingRoles[roleIndex];
         const timeout = setTimeout(() => {
             if (!isDeleting) {
                 if (displayText.length < currentRole.length) {
@@ -36,13 +58,13 @@ const HeroSection = () => {
                     setDisplayText(currentRole.slice(0, displayText.length - 1));
                 } else {
                     setIsDeleting(false);
-                    setRoleIndex((prev) => (prev + 1) % roles.length);
+                    setRoleIndex((prev) => (prev + 1) % typingRoles.length);
                 }
             }
         }, isDeleting ? 50 : 100);
 
         return () => clearTimeout(timeout);
-    }, [displayText, roleIndex, isDeleting]);
+    }, [displayText, roleIndex, isDeleting, typingRoles]);
 
     return (
         // Changed background to match Blog Page (#FAF0E6)
@@ -60,7 +82,7 @@ const HeroSection = () => {
                             <h1 className="text-4xl md:text-5xl lg:text-6xl font-medium text-[#3B241A]">
                                 <span className="italic">Hi,</span>
                                 <span className="font-light"> I&apos;m</span>{" "}
-                                <span className="font-semibold">Isha Rani</span>
+                                <span className="font-semibold">{heroData?.title || "Isha Rani"}</span>
                             </h1>
 
                             <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold mt-2">
@@ -74,27 +96,30 @@ const HeroSection = () => {
 
                         {/* Updated paragraph color to #A68B7E (Blog Body Text) */}
                         <p className="text-lg md:text-xl text-[#A68B7E] max-w-xl leading-relaxed">
-                            Crafting elegant digital experiences that blend beauty with purpose.
-                            Transforming ideas into intuitive designs that captivate and inspire.
+                            {heroData?.description || "Crafting elegant digital experiences that blend beauty with purpose. Transforming ideas into intuitive designs that captivate and inspire."}
                         </p>
 
                         <div className="flex flex-wrap gap-4 pt-4">
                             {/* Primary Button: Styled to match Blog's "Subscribe/Continue Reading" style */}
-                            <Button
-                                size="lg"
-                                className="bg-[#3B241A] text-[#FAF0E6] hover:bg-[#DC7C7C] border-none shadow-lg shadow-[#3B241A]/10 hover:shadow-xl transition-all duration-300 rounded-full"
-                            >
-                                View My Work
-                            </Button>
+                            <Link href={heroData?.ctaLink || "/my_journey"}>
+                                <Button
+                                    size="lg"
+                                    className="bg-[#3B241A] text-[#FAF0E6] hover:bg-[#DC7C7C] border-none shadow-lg shadow-[#3B241A]/10 hover:shadow-xl transition-all duration-300 rounded-full"
+                                >
+                                    {heroData?.ctaText || "View My Work"}
+                                </Button>
+                            </Link>
 
                             {/* Secondary Button: Outline style using Blog's dark brown */}
-                            <Button
-                                variant="outline"
-                                size="lg"
-                                className="border-2 border-[#3B241A] text-[#3B241A] bg-transparent hover:bg-[#3B241A] hover:text-[#FAF0E6] rounded-full transition-all duration-300"
-                            >
-                                Download CV
-                            </Button>
+                            <Link href={heroData?.ctaSecondaryLink || "/contact"}>
+                                <Button
+                                    variant="outline"
+                                    size="lg"
+                                    className="border-2 border-[#3B241A] text-[#3B241A] bg-transparent hover:bg-[#3B241A] hover:text-[#FAF0E6] rounded-full transition-all duration-300"
+                                >
+                                    {heroData?.ctaSecondaryText || "Download CV"}
+                                </Button>
+                            </Link>
                         </div>
 
                         {/* Social Icons */}

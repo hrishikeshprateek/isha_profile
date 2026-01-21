@@ -1,9 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getDatabase, Collections } from '@/lib/mongodb';
 import { ObjectId } from 'mongodb';
+import { verifyAdmin } from '@/lib/admin-auth';
 
 // GET /api/admin/quotes - List all quotes with filtering or fetch a specific quote
 export async function GET(request: NextRequest) {
+  // Verify admin authentication
+  const auth = await verifyAdmin(request);
+  if (!auth.authorized) {
+    return auth.response;
+  }
+
   try {
     const db = await getDatabase();
     const collection = db.collection(Collections.QUOTES);
@@ -103,6 +110,12 @@ export async function GET(request: NextRequest) {
 
 // POST /api/admin/quotes - Create new quote
 export async function POST(request: NextRequest) {
+  // Verify admin authentication
+  const auth = await verifyAdmin(request);
+  if (!auth.authorized) {
+    return auth.response;
+  }
+
   try {
     const data = await request.json();
 
@@ -138,6 +151,12 @@ export async function POST(request: NextRequest) {
 
 // PUT /api/admin/quotes - Update quote
 export async function PUT(request: NextRequest) {
+  // Verify admin authentication
+  const auth = await verifyAdmin(request);
+  if (!auth.authorized) {
+    return auth.response;
+  }
+
   try {
     const data = await request.json();
 
@@ -177,6 +196,12 @@ export async function PUT(request: NextRequest) {
 
 // DELETE /api/admin/quotes - Delete quote
 export async function DELETE(request: NextRequest) {
+  // Verify admin authentication
+  const auth = await verifyAdmin(request);
+  if (!auth.authorized) {
+    return auth.response;
+  }
+
   try {
     const id = request.nextUrl.searchParams.get('id');
 

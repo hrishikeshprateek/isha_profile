@@ -1,26 +1,30 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { withAdminAuth, DecodedToken } from '@/lib/auth-middleware';
+import { verifyAdmin } from '@/lib/admin-auth';
 
 /**
- * Example protected admin API endpoint
- * Demonstrates how to use withAdminAuth middleware to verify Firebase token and admin claims
+ * Admin dashboard API endpoint
+ * Protected with unified admin authentication
  *
  * Usage:
  * - GET /api/admin/dashboard - Returns admin dashboard data
  * - Authorization header: Bearer <firebase_id_token>
  */
-export const GET = withAdminAuth(async (request: NextRequest, user: DecodedToken) => {
+export async function GET(request: NextRequest) {
+  // Verify admin authentication
+  const auth = await verifyAdmin(request);
+  if (!auth.authorized) {
+    return auth.response;
+  }
+
   try {
-    // user is the decoded Firebase token with admin claim verified
-    // Access user properties: user.uid, user.email, user.admin, etc.
+    // auth.uid is the authenticated admin user ID
 
     return NextResponse.json({
       success: true,
       message: 'Welcome to admin dashboard',
       user: {
-        uid: user.uid,
-        email: user.email,
-        isAdmin: user.admin,
+        uid: auth.uid,
+        isAdmin: true,
       },
       timestamp: new Date().toISOString(),
     });
@@ -30,5 +34,5 @@ export const GET = withAdminAuth(async (request: NextRequest, user: DecodedToken
       { status: 500 }
     );
   }
-});
+}
 
