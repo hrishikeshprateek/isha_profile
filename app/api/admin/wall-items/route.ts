@@ -4,7 +4,6 @@ import { verifyAdmin } from '@/lib/admin-auth';
 
 // GET /api/admin/wall-items - Get all portfolio items
 export async function GET(request: NextRequest) {
-  // Verify admin authentication
   const auth = await verifyAdmin(request);
   if (!auth.authorized) {
     return auth.response;
@@ -16,13 +15,13 @@ export async function GET(request: NextRequest) {
 
     const items = await collection
       .find({})
-      .sort({ createdAt: -1 })
+      .sort({ order: 1, createdAt: -1 })
       .toArray();
 
     return NextResponse.json({
       success: true,
-      items: items.map(item => ({
-        id: item._id?.toString(),
+      items: items.map((item, index) => ({
+        id: item._id?.toString() || index.toString(),
         type: item.type,
         category: item.category,
         src: item.src,
@@ -44,7 +43,6 @@ export async function GET(request: NextRequest) {
 
 // PUT /api/admin/wall-items - Update all portfolio items
 export async function PUT(request: NextRequest) {
-  // Verify admin authentication
   const auth = await verifyAdmin(request);
   if (!auth.authorized) {
     return auth.response;
@@ -56,12 +54,11 @@ export async function PUT(request: NextRequest) {
     const db = await getDatabase();
     const collection = db.collection('wall_items');
 
-    // Clear existing items
+    // Clear and rebuild
     await collection.deleteMany({});
 
-    // Insert new items
     if (data.items && Array.isArray(data.items)) {
-      const itemsToInsert = data.items.map((item: any) => ({
+      const itemsToInsert = data.items.map((item: any, index: number) => ({
         type: item.type,
         category: item.category,
         src: item.src,
@@ -70,6 +67,7 @@ export async function PUT(request: NextRequest) {
         client: item.client,
         desc: item.desc,
         published: item.published !== false,
+        order: index,
         createdAt: new Date(),
       }));
 

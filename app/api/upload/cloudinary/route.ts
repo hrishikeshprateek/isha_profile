@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { v2 as cloudinary } from 'cloudinary';
+import { getDatabase } from '@/lib/mongodb';
 
 // Configure Cloudinary
 cloudinary.config({
@@ -28,6 +29,31 @@ export async function POST(request: NextRequest) {
         { quality: 'auto', fetch_format: 'auto' }
       ]
     });
+
+    // Save to MongoDB media collection for gallery picker
+    try {
+      const db = await getDatabase();
+      const mediaCollection = db.collection('media');
+
+      await mediaCollection.insertOne({
+        url: result.secure_url,
+        type: result.resource_type === 'video' ? 'video' : 'image',
+        name: `Upload - ${new Date().toLocaleString()}`,
+        publicId: result.public_id,
+        format: result.format,
+        width: result.width,
+        height: result.height,
+        size: result.bytes,
+        folder: folder,
+        uploadedAt: new Date(),
+        createdAt: new Date(),
+      });
+
+      console.log('Media saved to database:', result.secure_url);
+    } catch (dbError) {
+      console.error('Failed to save media to database:', dbError);
+      // Don't fail the upload if DB save fails
+    }
 
     return NextResponse.json({
       success: true,

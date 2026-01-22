@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -12,13 +12,25 @@ import {
     Layers
 } from "lucide-react";
 
-// --- MOCK DATA (The "Feed") ---
-const PORTFOLIO_ITEMS = [
+// --- INTERFACE ---
+interface PortfolioItem {
+    id: number;
+    type: "video" | "image";
+    category: string;
+    src: string;
+    thumb: string;
+    title: string;
+    client: string;
+    desc: string;
+}
+
+// --- DEFAULT MOCK DATA (Fallback) ---
+const DEFAULT_PORTFOLIO_ITEMS: PortfolioItem[] = [
     {
         id: 1,
         type: "video",
         category: "Reels",
-        src: "https://assets.mixkit.co/videos/preview/mixkit-girl-in-neon-sign-1232-large.mp4", // Mock Video
+        src: "https://assets.mixkit.co/videos/preview/mixkit-girl-in-neon-sign-1232-large.mp4",
         thumb: "https://images.unsplash.com/photo-1516035069371-29a1b244cc32?auto=format&fit=crop&q=80&w=800",
         title: "Neon Campaigns",
         client: "Urban Outfitters",
@@ -76,16 +88,40 @@ const PORTFOLIO_ITEMS = [
     }
 ];
 
-const FILTERS = ["All", "Reels", "Photography", "Branding"];
-
 export default function WorkPage() {
+    const [portfolioItems, setPortfolioItems] = useState<PortfolioItem[]>(DEFAULT_PORTFOLIO_ITEMS);
+    const [loading, setLoading] = useState(true);
     const [activeFilter, setActiveFilter] = useState("All");
     const [selectedId, setSelectedId] = useState<number | null>(null);
 
+    // Fetch portfolio items from database
+    useEffect(() => {
+        async function fetchPortfolioItems() {
+            try {
+                const response = await fetch('/api/wall-items');
+                const data = await response.json();
+
+                if (data.success && Array.isArray(data.items) && data.items.length > 0) {
+                    setPortfolioItems(data.items);
+                }
+            } catch (error) {
+                console.error('Failed to fetch portfolio items:', error);
+                // Use default items as fallback
+            } finally {
+                setLoading(false);
+            }
+        }
+
+        fetchPortfolioItems();
+    }, []);
+
+    // Get unique categories from items
+    const categories = ["All", ...Array.from(new Set(portfolioItems.map(item => item.category)))];
+
     // Filter Logic
     const filteredItems = activeFilter === "All"
-        ? PORTFOLIO_ITEMS
-        : PORTFOLIO_ITEMS.filter(item => item.category === activeFilter);
+        ? portfolioItems
+        : portfolioItems.filter(item => item.category === activeFilter);
 
     // Find active item index for the "Story Viewer"
     const selectedIndex = filteredItems.findIndex(item => item.id === selectedId);
@@ -125,7 +161,7 @@ export default function WorkPage() {
 
                     {/* Filter Pills */}
                     <div className="flex flex-wrap gap-2">
-                        {FILTERS.map((f) => (
+                        {categories.map((f) => (
                             <button
                                 key={f}
                                 onClick={() => setActiveFilter(f)}

@@ -4,7 +4,7 @@ import { getDatabase } from '@/lib/mongodb';
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
-// GET /api/wall-items - Public API for portfolio items (SSR)
+// GET /api/wall-items - Public API for portfolio items
 export async function GET() {
   try {
     const db = await getDatabase();
@@ -12,25 +12,13 @@ export async function GET() {
 
     const items = await collection
       .find({ published: { $ne: false } })
-      .sort({ createdAt: -1 })
+      .sort({ order: 1, createdAt: -1 })
       .toArray();
 
     if (!items || items.length === 0) {
-      // Return default items if none exist
       return NextResponse.json({
         success: true,
-        items: [
-          {
-            id: 1,
-            type: "image",
-            category: "Photography",
-            src: "https://images.unsplash.com/photo-1492633423870-43d1cd2775eb?auto=format&fit=crop&q=80&w=800",
-            thumb: "https://images.unsplash.com/photo-1492633423870-43d1cd2775eb?auto=format&fit=crop&q=80&w=800",
-            title: "Sample Portfolio Item",
-            client: "Sample Client",
-            desc: "Add your portfolio items from the admin panel"
-          }
-        ]
+        items: []
       });
     }
 
@@ -49,7 +37,6 @@ export async function GET() {
     });
   } catch (error) {
     console.error('Get wall items error:', error);
-    // Return default items on error
     return NextResponse.json(
       {
         success: false,
