@@ -67,9 +67,17 @@ export default function CreateQuotePage() {
                 date: new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
             };
 
+            const token = localStorage.getItem('admin_token');
+            const headers: HeadersInit = {
+                'Content-Type': 'application/json',
+            };
+            if (token) {
+                headers['Authorization'] = `Bearer ${token}`;
+            }
+
             const res = await fetch('/api/admin/quotes', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers,
                 body: JSON.stringify(payload),
             });
 
@@ -86,6 +94,7 @@ export default function CreateQuotePage() {
             }
         } catch (err) {
             setError('An error occurred while saving.');
+            console.error('Save error:', err);
         } finally {
             setSaving(false);
         }

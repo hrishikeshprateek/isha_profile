@@ -64,7 +64,15 @@ export default function EditTestimonialPage() {
     useEffect(() => {
         async function loadTestimonial() {
             try {
-                const res = await fetch(`/api/admin/wall?id=${testimonialId}`);
+                const token = localStorage.getItem('admin_token');
+                const headers: HeadersInit = {
+                    'Content-Type': 'application/json',
+                };
+                if (token) {
+                    headers['Authorization'] = `Bearer ${token}`;
+                }
+
+                const res = await fetch(`/api/admin/wall?id=${testimonialId}`, { headers });
                 const data = await res.json();
                 if (res.ok && data.success && data.items?.length) {
                     const item = data.items[0];
@@ -101,6 +109,14 @@ export default function EditTestimonialPage() {
         }
 
         try {
+            const token = localStorage.getItem('admin_token');
+            const headers: HeadersInit = {
+                'Content-Type': 'application/json',
+            };
+            if (token) {
+                headers['Authorization'] = `Bearer ${token}`;
+            }
+
             const payload = {
                 id: testimonialId,
                 ...formData,
@@ -109,7 +125,7 @@ export default function EditTestimonialPage() {
 
             const res = await fetch('/api/admin/wall', {
                 method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
+                headers,
                 body: JSON.stringify(payload),
             });
 

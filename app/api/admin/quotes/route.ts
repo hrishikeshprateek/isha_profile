@@ -104,7 +104,15 @@ export async function GET(request: NextRequest) {
     });
   } catch (error) {
     console.error('Get quotes error:', error);
-    return NextResponse.json({ error: 'Failed to fetch quotes' }, { status: 500 });
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    return NextResponse.json(
+      {
+        error: 'Failed to fetch quotes',
+        details: errorMessage,
+        code: error instanceof Error && 'code' in error ? (error as any).code : 'UNKNOWN'
+      },
+      { status: 500 }
+    );
   }
 }
 

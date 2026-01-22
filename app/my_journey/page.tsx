@@ -1,46 +1,98 @@
 "use client";
 
-import React, { useRef } from "react";
+import React, { useRef, useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { motion, useScroll, useTransform } from "framer-motion";
-import { Star, Heart, Coffee, Camera, ArrowRight, Zap, Play } from "lucide-react";
+import { Star, Heart, Coffee, ArrowRight, Play, Camera, Zap } from "lucide-react";
 import Footer from "@/components/Footer";
 
-// --- CHAPTER DATA ---
-const chapters = [
+interface Chapter {
+    id: string;
+    year: string;
+    title: string;
+    text: string;
+    image: string;
+    icon?: string;
+}
+
+interface JourneyData {
+    title: string;
+    subtitle: string;
+    description: string;
+    chapters: Chapter[];
+}
+
+// --- DEFAULT CHAPTER DATA (Fallback) ---
+const DEFAULT_CHAPTERS: Chapter[] = [
     {
-        id: 1,
+        id: "1",
         year: "The Beginning",
         title: "It started with a lens.",
         text: "I didn't start as a designer. I started as an observer. Picked up my first DSLR at 16 and realized that framing a shot is just like framing a user experience—it's all about what you choose to focus on.",
         image: "https://images.unsplash.com/photo-1516035069371-29a1b244cc32?auto=format&fit=crop&q=80&w=800&h=1000",
-        icon: Camera,
+        icon: "Camera",
     },
     {
-        id: 2,
+        id: "2",
         year: "The Pivot",
         title: "From Pixel to Code.",
         text: "Photography taught me aesthetics, but I wanted interactivity. I dove into UI/UX and Frontend Dev. I realized that a beautiful image is art, but a beautiful interface is a solution.",
         image: "https://images.unsplash.com/photo-1507238691740-187a5b1d37b8?auto=format&fit=crop&q=80&w=800&h=1000",
-        icon: Zap,
+        icon: "Zap",
     },
     {
-        id: 3,
+        id: "3",
         year: "The Now",
         title: "Building Digital Empires.",
         text: "Today, I merge strategy with storytelling. I don't just build websites; I build digital homes for brands. My goal is to make the web feel a little less like a machine and a little more human.",
         image: "https://images.unsplash.com/photo-1557804506-669a67965ba0?auto=format&fit=crop&q=80&w=800&h=1000",
-        icon: Heart,
+        icon: "Heart",
     }
 ];
 
 export default function AboutPage() {
     const containerRef = useRef(null);
+    const [journeyData, setJourneyData] = useState<JourneyData | null>(null);
     const { scrollYProgress } = useScroll({
         target: containerRef,
         offset: ["start start", "end end"]
     });
+
+    // Fetch journey data from API
+    useEffect(() => {
+        async function fetchJourneyData() {
+            try {
+                const response = await fetch('/api/my-journey');
+                const data = await response.json();
+
+                if (data.success && data.data) {
+                    setJourneyData(data.data);
+                } else {
+                    // Fallback to defaults
+                    setJourneyData({
+                        title: 'My Journey',
+                        subtitle: 'A story of growth, learning, and digital creation',
+                        description: 'Discover how I evolved from a photographer to a digital creator',
+                        chapters: DEFAULT_CHAPTERS,
+                    });
+                }
+            } catch (error) {
+                console.error('Failed to fetch journey data:', error);
+                // Fallback to defaults
+                setJourneyData({
+                    title: 'My Journey',
+                    subtitle: 'A story of growth, learning, and digital creation',
+                    description: 'Discover how I evolved from a photographer to a digital creator',
+                    chapters: DEFAULT_CHAPTERS,
+                });
+            }
+        }
+
+        fetchJourneyData();
+    }, []);
+
+    const chapters = journeyData?.chapters || DEFAULT_CHAPTERS;
 
     return (
         <div ref={containerRef} className="bg-[#FAF0E6] min-h-screen relative overflow-hidden text-[#3B241A] font-sans selection:bg-[#F2A7A7] selection:text-[#3B241A]">
@@ -71,8 +123,7 @@ export default function AboutPage() {
                         Behind <br/> <span className="italic opacity-60">The Pixels</span>
                     </h1>
                     <p className="text-lg md:text-xl text-[#6E5045] max-w-lg mx-auto leading-relaxed">
-                        Isha Rani. Designer. Creator. Storyteller. <br/>
-                        This is how I got here.
+                        {journeyData?.subtitle || 'Isha Rani. Designer. Creator. Storyteller. This is how I got here.'}
                     </p>
                 </motion.div>
 
@@ -203,9 +254,23 @@ export default function AboutPage() {
 }
 
 // --- SUB-COMPONENT: INDIVIDUAL CHAPTER ---
-function Chapter({ data, index }: { data: any, index: number }) {
+function Chapter({ data, index }: { data: Chapter, index: number }) {
     const isEven = index % 2 === 0;
     const ref = useRef(null);
+
+    // Icon mapping
+    const iconMap: Record<string, React.ReactNode> = {
+        Camera: <Camera size={24} className="text-[#3B241A]" />,
+        Zap: <Zap size={24} className="text-[#3B241A]" />,
+        Heart: <Heart size={24} className="text-[#3B241A]" />,
+        Star: <Star size={24} className="text-[#3B241A]" />,
+        Coffee: <Coffee size={24} className="text-[#3B241A]" />,
+    };
+
+    const getIcon = (iconName?: string) => {
+        if (!iconName) return <Star size={24} className="text-[#3B241A]" />;
+        return iconMap[iconName] || <Star size={24} className="text-[#3B241A]" />;
+    };
 
     // Parallax Effect for Image
     const { scrollYProgress } = useScroll({
@@ -226,7 +291,7 @@ function Chapter({ data, index }: { data: any, index: number }) {
             {/* TEXT SIDE */}
             <div className={`flex-1 ${isEven ? "md:text-right" : "md:text-left"} text-center md:text-left`}>
                 <div className={`inline-flex items-center justify-center w-12 h-12 rounded-full bg-[#F2A7A7] text-[#3B241A] mb-6 md:hidden`}>
-                    <data.icon size={20} />
+                    {getIcon(data.icon)}
                 </div>
 
                 <span className="text-[#F2A7A7] font-bold text-sm tracking-widest uppercase mb-3 block">
@@ -247,7 +312,7 @@ function Chapter({ data, index }: { data: any, index: number }) {
 
                 {/* The Node */}
                 <div className="w-16 h-16 rounded-full bg-[#FAF0E6] border-4 border-[#3B241A] shadow-2xl flex items-center justify-center relative z-20">
-                    <data.icon size={24} className="text-[#3B241A]" />
+                    {getIcon(data.icon) || <Star size={24} className="text-[#3B241A]" />}
                 </div>
             </div>
 

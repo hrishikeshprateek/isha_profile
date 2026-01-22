@@ -71,7 +71,7 @@ const MENU: MenuItem[] = [
         children: [
             { id: 'journey', title: 'My Journey', href: '/admin/my-journey' },
             { id: 'build', title: 'Build / Projects', href: '/admin/build' },
-            { id: 'wall', title: 'Wall of Love', href: '/admin/wall' },
+            { id: 'portfolio', title: 'Portfolio Gallery', href: '/admin/portfolio' },
             { id: 'vcard', title: 'Digital VCard', href: '/admin/vcard' },
         ],
     },

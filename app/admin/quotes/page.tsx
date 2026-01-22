@@ -73,13 +73,25 @@ export default function AdminQuotesPage() {
             const queryString = params.toString();
             const url = `/api/admin/quotes${queryString ? `?${queryString}` : ''}`;
 
-            const res = await fetch(url);
+            // Get auth token
+            const token = localStorage.getItem('admin_token');
+            const headers: HeadersInit = {
+                'Content-Type': 'application/json',
+            };
+            if (token) {
+                headers['Authorization'] = `Bearer ${token}`;
+            }
+
+            const res = await fetch(url, { headers });
             const data = await res.json();
             if (res.ok && data.success) {
                 setQuotes(data.quotes || []);
                 setCurrentPage(1);
+            } else {
+                setError(data.error || 'Failed to load quotes');
             }
-        } catch {
+        } catch (err) {
+            console.error('Fetch quotes error:', err);
             setError('Failed to load quotes');
         } finally {
             setQuoteLoading(false);
@@ -129,16 +141,28 @@ export default function AdminQuotesPage() {
     async function handleDelete(id: string) {
         if (!window.confirm('Delete this quote? This cannot be undone.')) return;
         try {
-            const res = await fetch(`/api/admin/quotes?id=${id}`, { method: 'DELETE' });
+            const token = localStorage.getItem('admin_token');
+            const headers: HeadersInit = {
+                'Content-Type': 'application/json',
+            };
+            if (token) {
+                headers['Authorization'] = `Bearer ${token}`;
+            }
+
+            const res = await fetch(`/api/admin/quotes?id=${id}`, {
+                method: 'DELETE',
+                headers
+            });
             const data = await res.json();
             if (res.ok && data.success) {
                 setSuccess('Quote deleted successfully.');
                 fetchQuotes();
                 setTimeout(() => setSuccess(''), 3000);
             } else {
-                setError('Failed to delete.');
+                setError(data.error || 'Failed to delete.');
             }
-        } catch {
+        } catch (err) {
+            console.error('Delete error:', err);
             setError('Error deleting quote.');
         }
     }

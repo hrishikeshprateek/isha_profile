@@ -41,7 +41,15 @@ export default function EditQuotePage() {
     useEffect(() => {
         async function fetchQuote() {
             try {
-                const res = await fetch(`/api/admin/quotes?id=${quoteId}`);
+                const token = localStorage.getItem('admin_token');
+                const headers: HeadersInit = {
+                    'Content-Type': 'application/json',
+                };
+                if (token) {
+                    headers['Authorization'] = `Bearer ${token}`;
+                }
+
+                const res = await fetch(`/api/admin/quotes?id=${quoteId}`, { headers });
                 const data = await res.json();
                 if (data.success && data.quotes && data.quotes.length > 0) {
                     const quote = data.quotes[0];
@@ -53,6 +61,7 @@ export default function EditQuotePage() {
                 }
             } catch (err) {
                 setError('Failed to load quote');
+                console.error('Fetch quote error:', err);
             }
         }
 
@@ -88,9 +97,17 @@ export default function EditQuotePage() {
         }
 
         try {
+            const token = localStorage.getItem('admin_token');
+            const headers: HeadersInit = {
+                'Content-Type': 'application/json',
+            };
+            if (token) {
+                headers['Authorization'] = `Bearer ${token}`;
+            }
+
             const res = await fetch('/api/admin/quotes', {
                 method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
+                headers,
                 body: JSON.stringify({
                     id: quoteId,
                     ...formData,
