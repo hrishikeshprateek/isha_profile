@@ -130,7 +130,7 @@ export default function AdminHeroPage() {
 
     return (
         <div className="min-h-screen bg-[#FAF0E6] text-[#3B241A] p-4 pt-24 md:p-10">
-            <div className="max-w-4xl mx-auto">
+            <div className="max-w-6xl mx-auto">
 
                 {/* Header */}
                 <div className="mb-8">
@@ -160,10 +160,10 @@ export default function AdminHeroPage() {
                 )}
 
                 {/* Form */}
-                <div className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
 
                     {/* Title */}
-                    <div className="bg-white p-6 rounded-2xl border border-[#3B241A]/10 shadow-sm space-y-4">
+                    <div className="bg-white p-6 rounded-2xl border border-[#3B241A]/10 shadow-sm space-y-4 md:col-span-2">
                         <label className="flex items-center gap-2 text-sm font-bold text-[#3B241A]">
                             <Type size={16} /> Main Title
                         </label>
@@ -177,7 +177,7 @@ export default function AdminHeroPage() {
                     </div>
 
                     {/* Subtitle */}
-                    <div className="bg-white p-6 rounded-2xl border border-[#3B241A]/10 shadow-sm space-y-4">
+                    <div className="bg-white p-6 rounded-2xl border border-[#3B241A]/10 shadow-sm space-y-4 md:col-span-2">
                         <div>
                             <label className="flex items-center gap-2 text-sm font-bold text-[#3B241A]">
                                 <Type size={16} /> Subtitle / Roles (Typing Effect)
@@ -196,7 +196,7 @@ export default function AdminHeroPage() {
                     </div>
 
                     {/* Description */}
-                    <div className="bg-white p-6 rounded-2xl border border-[#3B241A]/10 shadow-sm space-y-4">
+                    <div className="bg-white p-6 rounded-2xl border border-[#3B241A]/10 shadow-sm space-y-4 md:col-span-2">
                         <label className="flex items-center gap-2 text-sm font-bold text-[#3B241A]">
                             <AlignLeft size={16} /> Description
                         </label>
@@ -210,7 +210,7 @@ export default function AdminHeroPage() {
                     </div>
 
                     {/* CTA Buttons */}
-                    <div className="bg-white p-6 rounded-2xl border border-[#3B241A]/10 shadow-sm space-y-6">
+                    <div className="bg-white p-6 rounded-2xl border border-[#3B241A]/10 shadow-sm space-y-6 md:col-span-2">
                         <h3 className="text-sm font-bold text-[#3B241A]">Call-to-Action Buttons</h3>
 
                         {/* Primary CTA */}
@@ -328,7 +328,7 @@ export default function AdminHeroPage() {
                         whileTap={{ scale: 0.98 }}
                         onClick={handleSave}
                         disabled={saving}
-                        className="w-full flex items-center justify-center gap-2 px-6 py-4 rounded-xl bg-[#3B241A] text-[#FAF0E6] font-bold uppercase tracking-widest hover:bg-[#F2A7A7] hover:text-[#3B241A] transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
+                        className="w-full md:col-span-2 flex items-center justify-center gap-2 px-6 py-4 rounded-xl bg-[#3B241A] text-[#FAF0E6] font-bold uppercase tracking-widest hover:bg-[#F2A7A7] hover:text-[#3B241A] transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
                     >
                         {saving ? (
                             <>
@@ -362,4 +362,3 @@ export default function AdminHeroPage() {
         </div>
     );
 }
-

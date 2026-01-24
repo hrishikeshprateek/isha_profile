@@ -177,7 +177,7 @@ export default function AdminWallPage() {
 
             {/* --- HEADER --- */}
             <div className="fixed top-0 left-0 right-0 z-40 bg-[#FAF0E6]/95 backdrop-blur-md border-b border-[#3B241A]/5 px-6 py-4">
-                <div className="w-full flex items-center justify-between">
+                <div className="w-full flex flex-wrap items-start gap-3 justify-between">
                     <div className="flex items-center gap-6">
                         <button onClick={() => router.back()} className="p-2 hover:bg-[#3B241A]/5 rounded-full transition-colors text-[#3B241A]/60 hover:text-[#3B241A]">
                             <ArrowLeft size={20}/>
@@ -188,7 +188,7 @@ export default function AdminWallPage() {
                         </div>
                     </div>
 
-                    <div className="flex items-center gap-3">
+                    <div className="flex flex-wrap items-center gap-3 justify-end flex-1 min-w-[220px]">
                         <AnimatePresence>
                             {success && (
                                 <motion.span initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0 }} className="text-xs font-bold text-green-700 bg-green-50 px-3 py-1.5 rounded-lg flex items-center gap-1">
@@ -207,7 +207,7 @@ export default function AdminWallPage() {
                         <button
                             onClick={handleSave}
                             disabled={saving}
-                            className="flex items-center gap-2 px-6 py-2 rounded-lg bg-[#3B241A] text-[#FAF0E6] text-xs font-bold uppercase tracking-widest hover:bg-[#F2A7A7] hover:text-[#3B241A] transition-colors disabled:opacity-50 shadow-lg"
+                            className="hidden sm:flex items-center gap-2 px-6 py-2 rounded-lg bg-[#3B241A] text-[#FAF0E6] text-xs font-bold uppercase tracking-widest hover:bg-[#F2A7A7] hover:text-[#3B241A] transition-colors disabled:opacity-50 shadow-lg"
                         >
                             {saving ? <Loader2 size={14} className="animate-spin"/> : <Save size={14}/>}
                             <span>{saving ? 'Saving...' : 'Save Changes'}</span>
@@ -217,7 +217,7 @@ export default function AdminWallPage() {
             </div>
 
             {/* --- GRID CONTENT --- */}
-            <div className="w-full px-6 pt-24 pb-20 relative z-10">
+            <div className="w-full px-6 pt-[120px] sm:pt-[110px] md:pt-24 pb-28 sm:pb-20 relative z-10">
                 {error && <div className="mb-8 text-center bg-red-50 text-red-600 py-2 rounded-lg text-sm font-bold border border-red-100 max-w-xl mx-auto">{error}</div>}
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
@@ -505,6 +505,24 @@ export default function AdminWallPage() {
                 )}
             </AnimatePresence>
 
-        </div>
-    );
-}
+            {/* Mobile Action Bar */}
+            <div className="sm:hidden fixed inset-x-0 bottom-0 z-40 bg-[#FAF0E6]/98 backdrop-blur-md border-t border-[#3B241A]/10 shadow-2xl p-4 flex items-center gap-3">
+                <button
+                    onClick={addItem}
+                    className="flex-1 flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-white border border-[#3B241A]/10 text-[#3B241A] text-xs font-bold uppercase tracking-widest hover:bg-[#FAF0E6] transition-colors"
+                >
+                    <Plus size={14}/> Add
+                </button>
+                <button
+                    onClick={handleSave}
+                    disabled={saving}
+                    className="flex-1 flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-[#3B241A] text-[#FAF0E6] text-xs font-bold uppercase tracking-widest hover:bg-[#F2A7A7] hover:text-[#3B241A] transition-colors disabled:opacity-50 shadow-lg"
+                >
+                    {saving ? <Loader2 size={14} className="animate-spin"/> : <Save size={14}/>}
+                    <span>{saving ? 'Saving...' : 'Save'}</span>
+                </button>
+            </div>
+
+         </div>
+     );
+ }

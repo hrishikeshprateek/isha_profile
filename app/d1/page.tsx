@@ -28,14 +28,27 @@ async function getHeroData() {
   }
 }
 
+async function getAboutData() {
+  try {
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
+    const res = await fetch(`${baseUrl}/api/about`, { cache: 'no-store' });
+    if (!res.ok) return null;
+    const data = await res.json();
+    return data.success ? data.data : null;
+  } catch (error) {
+    console.error('Failed to fetch about data:', error);
+    return null;
+  }
+}
+
 export default async function D1Page() {
-  const heroData = await getHeroData();
+  const [heroData, aboutData] = await Promise.all([getHeroData(), getAboutData()]);
 
   return (
     <main className="min-h-screen bg-[#FAF0E6]">
       <Navbar />
       <HeroSection heroData={heroData} />
-      <AboutSection />
+      <AboutSection aboutData={aboutData || undefined} />
       <ServicesSection />
       <ExpertiseSection />
         <QuotesPreviewSection/>
@@ -47,6 +60,3 @@ export default async function D1Page() {
     </main>
   );
 }
-
-
-

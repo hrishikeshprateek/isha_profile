@@ -70,6 +70,32 @@ export default function AdminMyJourneyPage() {
         };
     }, []);
 
+    // Load existing journey data once authorized
+    useEffect(() => {
+        async function loadJourney() {
+            try {
+                const res = await fetch('/api/admin/my-journey', { headers: getAuthHeaders() });
+                const data = await res.json();
+                if (res.ok && data?.success && data.data) {
+                    setFormData({
+                        title: data.data.title || 'My Journey',
+                        subtitle: data.data.subtitle || '',
+                        description: data.data.description || '',
+                        chapters: Array.isArray(data.data.chapters) ? data.data.chapters.map((ch: Chapter) => ({
+                            ...ch,
+                            image: ch.image || '',
+                        })) : [],
+                    });
+                }
+            } catch (err) {
+                console.error('Failed to load journey data', err);
+            }
+        }
+        if (isAuthorized) {
+            loadJourney();
+        }
+    }, [isAuthorized, getAuthHeaders]);
+
     // Auth check
     useEffect(() => {
         if (!auth) { router.push('/admin/login'); return; }
@@ -436,4 +462,3 @@ export default function AdminMyJourneyPage() {
         </div>
     );
 }
-

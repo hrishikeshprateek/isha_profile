@@ -19,10 +19,12 @@ export default function CloudinaryUpload({
   const [preview, setPreview] = useState(currentImage || '');
   const [error, setError] = useState('');
   const [uploadProgress, setUploadProgress] = useState(0);
+  const cacheBusterRef = useRef<number>(Date.now());
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Sync preview with currentImage prop
+  // Sync preview with currentImage prop and bust cache so refresh shows latest
   useEffect(() => {
+    cacheBusterRef.current = Date.now();
     setPreview(currentImage || '');
   }, [currentImage]);
 
@@ -82,20 +84,21 @@ export default function CloudinaryUpload({
 
           if (data.success && data.url) {
             console.log('Upload successful, URL:', data.url);
-            setPreview(data.url);
+            cacheBusterRef.current = Date.now();
+            setPreview(`${data.url}`);
             setUploadProgress(100);
-
-            // Only report URL to parent; saving to DB handled by caller
             setTimeout(() => {
               onUploadComplete(data.url);
               setError('');
               setUploadProgress(0);
+              setUploading(false);
             }, 300);
           } else {
             const errorMsg = data.error || 'Upload failed';
             console.error('Upload error:', errorMsg);
             setError(errorMsg);
             setUploadProgress(0);
+            setUploading(false);
           }
         } catch (err) {
           const errorMsg = 'Failed to upload image';
@@ -150,7 +153,7 @@ export default function CloudinaryUpload({
             <div className="relative w-full h-48 bg-[#FAF0E6] rounded-xl overflow-hidden border-2 border-[#3B241A]/10">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
-                src={preview}
+                src={preview ? `${preview}${preview.includes('?') ? '&' : '?'}v=${cacheBusterRef.current}` : ''}
                 alt="Preview"
                 className="w-full h-full object-cover"
                 onError={(e) => {
