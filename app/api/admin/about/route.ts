@@ -23,7 +23,11 @@ export async function PUT(request: NextRequest) {
   try {
     const payload = await request.json();
     const db = await getDatabase();
-    await db.collection('about').updateOne({}, { $set: { ...payload, updatedAt: new Date() } }, { upsert: true });
+
+    // Remove _id from payload to avoid modifying immutable field
+    const { _id, ...updateData } = payload;
+
+    await db.collection('about').updateOne({}, { $set: { ...updateData, updatedAt: new Date() } }, { upsert: true });
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error('Admin About PUT error', error);
