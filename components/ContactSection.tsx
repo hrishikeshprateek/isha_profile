@@ -3,8 +3,47 @@
 import Link from "next/link";
 import { Mail, ArrowRight, Zap, ArrowUpRight, Copy } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useState } from "react";
 
 const ContactSection = () => {
+    const [name, setName] = useState('');
+    const [email, setEmail] = useState('');
+    const [message, setMessage] = useState('');
+    const [loading, setLoading] = useState(false);
+    const [success, setSuccess] = useState('');
+    const [error, setError] = useState('');
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setError('');
+        setSuccess('');
+        if (!name.trim() || !email.trim() || !message.trim()) {
+            setError('Please fill out all fields.');
+            return;
+        }
+        try {
+            setLoading(true);
+            const res = await fetch('/api/contact', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name, email, message }),
+            });
+            const data = await res.json();
+            if (!res.ok || !data?.success) {
+                throw new Error(data?.error || 'Failed to send');
+            }
+            setSuccess('Thanks! I’ll get back to you soon.');
+            setName('');
+            setEmail('');
+            setMessage('');
+        } catch (err) {
+            const msg = err instanceof Error ? err.message : 'Something went wrong';
+            setError(msg);
+        } finally {
+            setLoading(false);
+        }
+    };
+
     return (
         <section className="py-16 bg-[#FAF0E6] relative overflow-hidden flex items-center justify-center">
 
@@ -29,13 +68,15 @@ const ContactSection = () => {
                             </p>
                         </div>
 
-                        <form className="space-y-5">
+                        <form className="space-y-5" onSubmit={handleSubmit}>
                             <div className="grid grid-cols-2 gap-5">
                                 <div className="group relative">
                                     <input
                                         type="text"
                                         id="name"
                                         required
+                                        value={name}
+                                        onChange={(e) => setName(e.target.value)}
                                         className="peer w-full bg-transparent border-b border-[#3B241A]/20 py-2 text-base text-[#3B241A] font-medium placeholder-transparent focus:outline-none focus:border-[#F2A7A7] transition-all"
                                         placeholder="Name"
                                     />
@@ -48,6 +89,8 @@ const ContactSection = () => {
                                         type="email"
                                         id="email"
                                         required
+                                        value={email}
+                                        onChange={(e) => setEmail(e.target.value)}
                                         className="peer w-full bg-transparent border-b border-[#3B241A]/20 py-2 text-base text-[#3B241A] font-medium placeholder-transparent focus:outline-none focus:border-[#F2A7A7] transition-all"
                                         placeholder="Email"
                                     />
@@ -62,6 +105,8 @@ const ContactSection = () => {
                                     id="message"
                                     rows={2}
                                     required
+                                    value={message}
+                                    onChange={(e) => setMessage(e.target.value)}
                                     className="peer w-full bg-transparent border-b border-[#3B241A]/20 py-2 text-base text-[#3B241A] font-medium placeholder-transparent focus:outline-none focus:border-[#F2A7A7] transition-all resize-none"
                                     placeholder="Message"
                                 />
@@ -70,10 +115,16 @@ const ContactSection = () => {
                                 </label>
                             </div>
 
-                            <div className="pt-2">
-                                <Button className="w-full sm:w-auto bg-[#3B241A] hover:bg-[#F2A7A7] hover:text-[#3B241A] text-[#FAF0E6] rounded-full px-6 py-2 h-10 text-sm font-bold transition-all duration-300 shadow-lg group">
-                                    Send Message
-                                    <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+                            <div className="pt-2 space-y-3">
+                                {error && <p className="text-sm text-red-600">{error}</p>}
+                                {success && <p className="text-sm text-green-700">{success}</p>}
+                                <Button
+                                    type="submit"
+                                    disabled={loading}
+                                    className="w-full sm:w-auto bg-[#3B241A] hover:bg-[#F2A7A7] hover:text-[#3B241A] text-[#FAF0E6] rounded-full px-6 py-2 h-10 text-sm font-bold transition-all duration-300 shadow-lg group disabled:opacity-70 disabled:cursor-not-allowed"
+                                >
+                                    {loading ? 'Sending...' : 'Send Message'}
+                                    {!loading && <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />}
                                 </Button>
                             </div>
                         </form>

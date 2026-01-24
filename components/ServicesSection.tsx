@@ -11,47 +11,62 @@ import {
     ArrowRight,
     Layers,
     X,
-    Eye,
     Zap,
-    BookOpen
 } from "lucide-react";
 
-// Service Data
-const services = [
+type IconName = 'Type' | 'Palette' | 'Video' | 'Camera' | 'Layers';
+type ServiceItem = {
+  id: string;
+  title: string;
+  description: string;
+  icon: IconName;
+  tags: string[];
+};
+
+const iconMap: Record<IconName, React.ComponentType<{ size?: number; strokeWidth?: number }>> = {
+  Type,
+  Palette,
+  Video,
+  Camera,
+  Layers,
+};
+
+// Service Data (defaults)
+const defaultServices: ServiceItem[] = [
     {
         id: "01",
         title: "Content Writing",
-        description: "Compelling narratives that define your voice. From blog posts to social captions, I write copy that converts.",
-        icon: Type,
-        tags: ["Copywriting", "Blogs", "Scriptwriting"]
+        description: "From SEO-optimized blogs to compelling copy that converts. I craft narratives that resonate with your audience.",
+        icon: 'Type',
+        tags: ["Blog Posts", "SEO", "Copywriting"]
     },
     {
         id: "02",
-        title: "Graphic & UI/UX",
-        description: "Visuals that stick. I design intuitive interfaces and stunning graphics that merge aesthetics with functionality.",
-        icon: Palette,
-        tags: ["Web Design", "App UI", "Social Graphics"]
-    },
-    {
-        id: "03",
         title: "Video Editing",
-        description: "Turning raw footage into cinematic stories. specialized in fast-paced social edits and long-form storytelling.",
-        icon: Video,
+        description: "Turning raw footage into cinematic stories. Specialized in fast-paced social edits and long-form storytelling.",
+        icon: 'Video',
         tags: ["Reels/Shorts", "YouTube", "Color Grading"]
     },
     {
-        id: "04",
+        id: "03",
         title: "Photography",
         description: "Capturing moments with a unique perspective. Professional shooting for products, portraits, and events.",
-        icon: Camera,
+        icon: 'Camera',
         tags: ["Portrait", "Product", "Event"]
     },
     {
-        id: "05",
+        id: "04",
         title: "Branding",
         description: "More than just a logo. I build cohesive brand identities that resonate with your target audience.",
-        icon: Layers,
+        icon: 'Palette',
         tags: ["Logo Design", "Strategy", "Tone of Voice"]
+    },
+    {
+        id: "05",
+        title: "Digital Strategy",
+        description: "Strategic planning for your digital presence. From market analysis to execution roadmaps.",
+        icon: 'Layers',
+        tags: ["Planning", "Analytics", "Growth"]
     }
 ];
 
@@ -67,15 +82,14 @@ const cardVariants = {
         opacity: 1,
         y: 0,
         transition: {
-            duration: 0.5,
-            // FIX: Added 'as const' here to satisfy TypeScript
             ease: [0.4, 0, 0.2, 1] as const
         }
     }
 };
 
-export default function ServicesSection() {
-    const [selectedService, setSelectedService] = useState<typeof services[0] | null>(null);
+export default function ServicesSection({ servicesData }: { servicesData?: ServiceItem[] }) {
+    const data = Array.isArray(servicesData) && servicesData.length ? servicesData : defaultServices;
+    const [selectedService, setSelectedService] = useState<ServiceItem | null>(null);
 
     // Helper to determine where the "View" button goes
     const getPortfolioLink = (id: string) => {
@@ -91,9 +105,8 @@ export default function ServicesSection() {
             <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-[#DC7C7C]/10 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2" />
 
             <div className="container mx-auto px-6 relative z-10">
-
-                {/* Section Header */}
-                <div className="text-center max-w-3xl mx-auto mb-16">
+                {/* Header */}
+                <div className="mb-16">
                     <h2 className="text-4xl md:text-5xl font-bold text-[#3B241A] mb-6">
                         Crafting digital experiences <br />
                         with <span className="text-[#DC7C7C] italic">purpose.</span>
@@ -111,7 +124,7 @@ export default function ServicesSection() {
                     viewport={{ once: true }}
                     className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
                 >
-                    {services.map((service) => (
+                    {data.map((service) => (
                         <motion.div
                             key={service.id}
                             layoutId={`card-${service.id}`}
@@ -127,9 +140,12 @@ export default function ServicesSection() {
                                 {/* Card Header */}
                                 <div className="flex justify-between items-start mb-6">
                                     <div className="w-14 h-14 rounded-full bg-white/60 flex items-center justify-center text-[#DC7C7C] shadow-sm group-hover:bg-[#DC7C7C] group-hover:text-white transition-all duration-500">
-                                        <service.icon size={26} strokeWidth={1.5} />
+                                        {(() => {
+                                          const Icon = iconMap[service.icon] || Type;
+                                          return <Icon size={26} strokeWidth={1.5} />;
+                                        })()}
                                     </div>
-                                    <span className="text-4xl font-bold text-[#3B241A]/5 group-hover:text-[#F2A7A7]/20 transition-colors duration-500 select-none">
+                                    <span className="text-xs font-bold text-[#3B241A]/40 uppercase tracking-wider">
                                         {service.id}
                                     </span>
                                 </div>
@@ -146,19 +162,16 @@ export default function ServicesSection() {
                             </div>
 
                             {/* Footer */}
-                            <div className="mt-auto">
-                                <div className="w-full h-[1px] bg-[#3B241A]/5 mb-4 group-hover:bg-[#F2A7A7]/30 transition-colors" />
-                                <div className="flex justify-between items-end">
-                                    <div className="flex flex-wrap gap-2 max-w-[80%]">
-                                        {service.tags.map((tag, i) => (
-                                            <span key={i} className="text-[10px] font-semibold uppercase tracking-wider text-[#3B241A]/60 bg-white/50 px-2.5 py-1 rounded-full border border-transparent group-hover:border-[#F2A7A7]/30 transition-all">
-                                                {tag}
-                                            </span>
-                                        ))}
-                                    </div>
-                                    <div className="transform translate-x-2 opacity-0 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300 text-[#DC7C7C]">
-                                        <ArrowRight size={20} />
-                                    </div>
+                            <div className="flex items-center justify-between">
+                                <div className="flex flex-wrap gap-2 max-w-[80%]">
+                                    {service.tags.map((tag, i) => (
+                                        <span key={i} className="text-[10px] font-semibold uppercase tracking-wider text-[#3B241A]/60 bg-white/50 px-2.5 py-1 rounded-full border border-transparent group-hover:border-[#F2A7A7]/30 transition-all">
+                                            {tag}
+                                        </span>
+                                    ))}
+                                </div>
+                                <div className="transform translate-x-2 opacity-0 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300 text-[#DC7C7C]">
+                                    <ArrowRight size={20} />
                                 </div>
                             </div>
                         </motion.div>
@@ -217,7 +230,10 @@ export default function ServicesSection() {
                             <div className="flex justify-between items-start mb-8 relative z-10">
                                 <div className="flex items-center gap-4">
                                     <div className="w-12 h-12 rounded-full bg-[#3B241A] text-[#FAF0E6] flex items-center justify-center">
-                                        <selectedService.icon size={24} />
+                                        {(() => {
+                                          const Icon = iconMap[selectedService.icon] || Type;
+                                          return <Icon size={24} />;
+                                        })()}
                                     </div>
                                     <div>
                                         <h3 className="text-2xl font-bold text-[#3B241A]">{selectedService.title}</h3>
@@ -238,10 +254,10 @@ export default function ServicesSection() {
                                 {/* Path 1: DYNAMIC LINK (Blogs or Wall) */}
                                 <Link href={getPortfolioLink(selectedService.id)} className="group">
                                     <div className="h-full bg-white border border-[#3B241A]/10 rounded-2xl p-6 hover:border-[#DC7C7C] hover:shadow-lg transition-all duration-300 flex flex-col justify-between gap-4">
-                                        <div className="w-10 h-10 rounded-full bg-[#FAF0E6] flex items-center justify-center text-[#3B241A] group-hover:bg-[#DC7C7C] group-hover:text-white transition-colors">
-                                            {/* Swap icon based on service type */}
-                                            {selectedService.id === "01" ? <BookOpen size={20} /> : <Eye size={20} />}
-                                        </div>
+                                        {(() => {
+                                          const Icon = iconMap[selectedService.icon] || Type;
+                                          return <Icon size={24} />;
+                                        })()}
                                         <div>
                                             <h4 className="font-bold text-[#3B241A] text-lg">
                                                 {selectedService.id === "01" ? "Read Blogs" : "View Portfolio"}
@@ -285,4 +301,5 @@ export default function ServicesSection() {
 
         </section>
     );
-};
+}
+

@@ -41,22 +41,36 @@ async function getAboutData() {
   }
 }
 
+async function getServicesData() {
+  try {
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
+    const res = await fetch(`${baseUrl}/api/services`, { cache: 'no-store' });
+    if (!res.ok) return [];
+    const data = await res.json();
+    return data.success ? data.data : [];
+  } catch (error) {
+    console.error('Failed to fetch services data:', error);
+    return [];
+  }
+}
+
 export default async function D1Page() {
-  const [heroData, aboutData] = await Promise.all([getHeroData(), getAboutData()]);
+  const [heroData, aboutData, servicesData] = await Promise.all([getHeroData(), getAboutData(), getServicesData()]);
 
   return (
-    <main className="min-h-screen bg-[#FAF0E6]">
+    <div className="bg-[#FAF0E6]">
       <Navbar />
-      <HeroSection heroData={heroData} />
-      <AboutSection aboutData={aboutData || undefined} />
-      <ServicesSection />
-      <ExpertiseSection />
-        <QuotesPreviewSection/>
-      <FeaturedBlogs />
-
-        <Testimonials/>
-      <ContactSection />
-      <Footer />
-    </main>
+      <main>
+        <HeroSection heroData={heroData} />
+        <AboutSection aboutData={aboutData} />
+        <ServicesSection servicesData={servicesData} />
+        <ExpertiseSection />
+        <FeaturedBlogs />
+        <Testimonials />
+        <QuotesPreviewSection />
+        <ContactSection />
+        <Footer />
+      </main>
+    </div>
   );
 }
