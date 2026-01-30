@@ -27,6 +27,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 interface Blog {
     id?: string;
     _id?: string;
+    slug?: string;
     title: string;
     excerpt: string;
     content: string;
@@ -352,10 +353,11 @@ export default function AdminBlogsPage() {
                     {/* Desktop Headers */}
                     <div className="hidden md:grid grid-cols-12 gap-4 px-6 py-4 border-b border-[#3B241A]/5 bg-[#FAF0E6]/30 text-[10px] font-bold uppercase tracking-[0.15em] text-[#A68B7E]">
                         <span className="col-span-2">Cover</span>
-                        <span className="col-span-4">Title</span>
+                        <span className="col-span-3">Title</span>
+                        <span className="col-span-2">Slug</span>
                         <span className="col-span-2">Category</span>
                         <span className="col-span-2">Published</span>
-                        <span className="col-span-2 text-right">Actions</span>
+                        <span className="col-span-1 text-right">Actions</span>
                     </div>
 
                     <div className="divide-y divide-[#3B241A]/5">
@@ -402,18 +404,21 @@ export default function AdminBlogsPage() {
                                         </h3>
                                         <p className="text-xs text-[#A68B7E] md:hidden mt-1 line-clamp-1">{blog.excerpt}</p>
                                     </div>
+                                    <div className="md:col-span-2 flex items-center text-xs text-[#6E5045] font-mono truncate">
+                                        {blog.slug || '-'}
+                                    </div>
                                     <div className="md:col-span-2 flex items-center">
                                         <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-[#FAF0E6] border border-[#3B241A]/5 text-[10px] font-bold uppercase tracking-wider text-[#3B241A]/60">
                                             <Tag size={10} /> {blog.category || 'Uncategorized'}
                                         </span>
                                     </div>
-                                    <div className="md:col-span-2 flex items-center text-xs text-[#A68B7E] font-medium">
+                                    <div className="md:col-span-1 flex items-center text-xs text-[#A68B7E] font-medium">
                                         <Calendar size={12} className="mr-2 opacity-50"/>
                                         {blog.date || 'Draft'}
                                     </div>
-                                    <div className="md:col-span-2 flex items-center md:justify-end gap-2 mt-2 md:mt-0 border-t md:border-t-0 border-[#3B241A]/5 pt-4 md:pt-0">
+                                    <div className="md:col-span-1 flex items-center md:justify-end gap-2 mt-2 md:mt-0 border-t md:border-t-0 border-[#3B241A]/5 pt-4 md:pt-0">
                                         <button
-                                            onClick={() => router.push(`/blogs/${blog.id || blog._id}`)}
+                                            onClick={() => router.push(`/blogs/${blog.slug || blog.id || blog._id}`)}
                                             className="flex-1 md:flex-none flex items-center justify-center gap-2 px-3 py-2 rounded-lg bg-[#FAF0E6] text-[#3B241A] text-xs font-bold hover:bg-[#3B241A] hover:text-[#FAF0E6] transition-colors"
                                         >
                                             <Eye size={14}/> <span className="md:hidden">View</span>

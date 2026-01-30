@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import Toolbar from '@/components/Toolbar';
 import {
     Calendar,
@@ -18,7 +18,9 @@ import {
 } from 'lucide-react';
 import { useParams } from 'next/navigation';
 import { motion, useScroll, useSpring } from 'framer-motion';
+import Image from 'next/image';
 import Footer from '@/components/Footer';
+import Link from 'next/link';
 
 // --- TYPES ---
 interface BlogPost {
@@ -32,32 +34,31 @@ interface BlogPost {
     image: string;
     content: string;
     tags: string[];
+    likes?: number;
+    shares?: number;
 }
 
 export default function BlogPostPage() {
     const params = useParams();
 
-    // --- HOOKS (keep them in stable order, always called) ---
+    // --- HOOKS (stable order) ---
     const [post, setPost] = useState<BlogPost | null>(null);
-    const [loading, setLoading] = useState(true);
-    const [notFound, setNotFound] = useState(false);
+    const [loading, setLoading] = useState<boolean>(true);
+    const [notFound, setNotFound] = useState<boolean>(false);
 
-    // UI interaction hooks must be declared here (before any conditional returns)
-    const [isLiked, setIsLiked] = useState(false);
-    const [isSaved, setIsSaved] = useState(false);
-    const [copied, setCopied] = useState(false);
+    const [isLiked, setIsLiked] = useState<boolean>(false);
+    const [isSaved, setIsSaved] = useState<boolean>(false);
+    const [copied, setCopied] = useState<boolean>(false);
 
-    // Scroll/progress hooks (also must be unconditional)
     const { scrollYProgress } = useScroll();
-    const scaleX = useSpring(scrollYProgress, {
-        stiffness: 100,
-        damping: 30,
-        restDelta: 0.001
-    });
+    const scaleX = useSpring(scrollYProgress, { stiffness: 100, damping: 30, restDelta: 0.001 });
+
+    const [likes, setLikes] = useState<number>(0);
+    const [shares, setShares] = useState<number>(0);
 
     // normalize param id safely
     const rawParams = params as { id?: string | string[] | undefined };
-    const idParam = Array.isArray(rawParams.id) ? rawParams.id[0] : rawParams.id;
+    const idParam = Array.isArray(rawParams?.id) ? rawParams.id[0] : rawParams?.id;
 
     useEffect(() => {
         let cancelled = false;
@@ -73,40 +74,60 @@ export default function BlogPostPage() {
             }
 
             try {
-                const url = new URL('/api/blogs', window.location.origin);
-                url.searchParams.append('id', idParam);
-                const res = await fetch(url.toString());
+                const url = `/api/blogs?id=${encodeURIComponent(idParam)}`;
+                const res = await fetch(url);
                 const data = await res.json();
 
                 if (data && data.success && data.blog) {
                     const b = data.blog as Record<string, unknown>;
                     const getStr = (k: string) => {
-                        const v = b[k];
+                        const v = (b as Record<string, unknown>)[k];
                         if (typeof v === 'string') return v;
                         if (typeof v === 'number') return String(v);
                         return '';
                     };
 
+                    // resolve _id safely to a string (handles ObjectId or { $oid } shapes)
+                    const rawId = (b as Record<string, unknown>)['_id'];
+                    let resolvedId = getStr('id') || (idParam || '');
+                    if (typeof rawId === 'string') {
+                        resolvedId = rawId;
+                    } else if (rawId && typeof (rawId as { toString?: unknown }).toString === 'function') {
+                        resolvedId = String((rawId as { toString: () => string }).toString());
+                    }
+
                     const blog: BlogPost = {
-                        id: getStr('id') || getStr('_id') || idParam,
-                        title: getStr('title'),
-                        excerpt: getStr('excerpt'),
-                        category: getStr('category'),
-                        date: getStr('date'),
-                        readTime: getStr('readTime'),
-                        author: getStr('author'),
+                        id: resolvedId,
+                        title: getStr('title') || 'Untitled',
+                        excerpt: getStr('excerpt') || '',
+                        category: getStr('category') || 'General',
+                        date: getStr('date') || '',
+                        readTime: getStr('readTime') || '',
+                        author: getStr('author') || 'Isha Rani',
                         image: getStr('image') || '/isha_a.png',
-                        tags: Array.isArray(b['tags']) ? (b['tags'] as string[]) : [],
-                        content: getStr('content')
+                        tags: Array.isArray(b.tags) ? (b.tags as string[]) : [],
+                        content: getStr('content') || '',
+                        likes: typeof b.likes === 'number' ? b.likes : Number(b.likes || 0),
+                        shares: typeof b.shares === 'number' ? b.shares : Number(b.shares || 0)
                     };
 
-                    if (!cancelled) setPost(blog);
+                    if (!cancelled) {
+                        setPost(blog);
+                        setLikes(blog.likes || 0);
+                        setShares(blog.shares || 0);
+                        try {
+                            const key = `blog_liked_${blog.id}`;
+                            const val = typeof window !== 'undefined' ? localStorage.getItem(key) : null;
+                            setIsLiked(val === '1');
+                        } catch {
+                            // ignore
+                        }
+                    }
                 } else {
                     if (!cancelled) setNotFound(true);
                 }
-            } catch (err) {
-                // eslint-disable-next-line no-console
-                console.warn('Failed to load blog from API', err);
+            } catch {
+                console.error('Error loading blog');
                 if (!cancelled) setNotFound(true);
             } finally {
                 if (!cancelled) setLoading(false);
@@ -114,8 +135,88 @@ export default function BlogPostPage() {
         }
 
         load();
-        return () => { cancelled = true; };
+
+        return () => {
+            cancelled = true;
+        };
     }, [idParam]);
+
+    // Handlers (keep existing implementation)
+    const handleCopyLink = async () => {
+        if (!post) return;
+        try {
+            const url = typeof window !== 'undefined' ? window.location.href : '';
+            await navigator.clipboard.writeText(url);
+            setCopied(true);
+            setTimeout(() => setCopied(false), 2000);
+        } catch {}
+    };
+
+    const handleLike = async () => {
+        if (!post) return;
+        const key = `blog_liked_${post.id}`;
+        const already = (() => {
+            try { return typeof window !== 'undefined' && localStorage.getItem(key) === '1'; } catch { return false; }
+        })();
+
+        const delta = already ? -1 : 1;
+        setIsLiked(!already);
+        setLikes((s) => Math.max(0, s + delta));
+
+        try {
+            const res = await fetch('/api/blogs/like', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id: post.id, delta })
+            });
+            const data = await res.json();
+            if (data && data.success && typeof data.likes === 'number') {
+                setLikes(data.likes);
+                try {
+                    if (delta === 1) localStorage.setItem(key, '1'); else localStorage.removeItem(key);
+                } catch {}
+            } else {
+                setIsLiked(already);
+                setLikes((s) => Math.max(0, s - delta));
+            }
+        } catch {
+            setIsLiked(already);
+            setLikes((s) => Math.max(0, s - delta));
+        }
+    };
+
+    const handleShare = async () => {
+        if (!post) return;
+        const url = typeof window !== 'undefined' ? window.location.href : '';
+        try {
+            if (navigator.share) {
+                await navigator.share({ title: post.title, text: post.excerpt, url });
+            } else {
+                await navigator.clipboard.writeText(url);
+                setCopied(true);
+                setTimeout(() => setCopied(false), 2000);
+            }
+
+            // After successful share/copy, update share counts via API
+            try {
+                const res = await fetch('/api/blogs/share', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ id: post.id })
+                });
+                const data = await res.json();
+                if (data && data.success && typeof data.shares === 'number') {
+                    setShares(data.shares);
+                } else {
+                    setShares((s) => s + 1);
+                }
+            } catch {
+                setShares((s) => s + 1);
+            }
+        } catch {
+            // share/copy failed - do nothing
+        }
+    };
 
     // Not found view
     if (!loading && notFound) {
@@ -127,9 +228,9 @@ export default function BlogPostPage() {
                 <div className="pt-36 max-w-4xl mx-auto px-6">
                     <div className="text-center py-20">
                         <h2 className="text-2xl font-serif font-bold text-[#3B241A] mb-4">Blog not found</h2>
-                        <p className="text-[#6E5045]">The blog you&#39;re looking for doesn&#39;t exist or has been removed.</p>
+                        <p className="text-[#6E5045]">The blog you&apos;re looking for doesn&apos;t exist or has been removed.</p>
                         <div className="mt-6">
-                            <a href="/blogs" className="inline-block px-4 py-2 bg-[#F2A7A7] text-white rounded-full">Back to Journal</a>
+                            <Link href="/blogs" className="inline-block px-4 py-2 bg-[#F2A7A7] text-white rounded-full">Back to Journal</Link>
                         </div>
                     </div>
                 </div>
@@ -152,20 +253,13 @@ export default function BlogPostPage() {
             <div className="min-h-screen bg-[#FAF0E6] font-sans flex items-center justify-center">
                 <div className="text-center">
                     <h2 className="text-xl font-serif font-bold text-[#3B241A]">Blog not found</h2>
-                    <a href="/blogs" className="mt-4 inline-block px-4 py-2 bg-[#F2A7A7] text-white rounded-full">Back to Journal</a>
+                    <Link href="/blogs" className="mt-4 inline-block px-4 py-2 bg-[#F2A7A7] text-white rounded-full">Back to Journal</Link>
                 </div>
             </div>
         );
     }
 
-    // At this point, we have a valid `post`
-
-    const handleCopyLink = () => {
-        navigator.clipboard.writeText(window.location.href);
-        setCopied(true);
-        setTimeout(() => setCopied(false), 2000);
-    };
-
+    // Main render - match provided UI while keeping logic intact
     return (
         <div className="min-h-screen bg-[#FAF0E6] text-[#3B241A] font-sans selection:bg-[#F2A7A7] selection:text-[#3B241A]">
 
@@ -199,7 +293,7 @@ export default function BlogPostPage() {
                         <div className="flex items-center gap-2">
                             <div className="w-6 h-6 md:w-8 md:h-8 rounded-full bg-gradient-to-tr from-[#F2A7A7] to-[#3B241A] p-[2px]">
                                 <div className="w-full h-full rounded-full bg-white overflow-hidden">
-                                    <img src="/isha_a.png" alt="Isha" className="w-full h-full object-cover" />
+                                    <Image src="/isha_a.png" alt="Isha" width={32} height={32} className="w-full h-full object-cover" />
                                 </div>
                             </div>
                             <span className="text-[#3B241A]">{post.author}</span>
@@ -211,7 +305,7 @@ export default function BlogPostPage() {
 
                 <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.4 }} className="max-w-6xl mx-auto px-4 sm:px-6 mb-12">
                     <div className="relative aspect-[4/3] md:aspect-[21/9] rounded-2xl md:rounded-[2.5rem] overflow-hidden shadow-xl shadow-[#3B241A]/10">
-                        <img src={post.image} alt={post.title} className="w-full h-full object-cover" />
+                        <Image src={post.image || '/isha_a.png'} alt={post.title} fill className="object-cover" priority sizes="(max-width: 768px) 100vw, 1200px" />
                         <div className="absolute inset-0 bg-[#3B241A]/5 mix-blend-multiply" />
                     </div>
                 </motion.div>
@@ -220,7 +314,7 @@ export default function BlogPostPage() {
                     <div className="hidden lg:block lg:col-span-2 relative">
                         <div className="sticky top-40 flex flex-col gap-4 items-center">
                             <p className="text-xs font-bold text-[#A68B7E] uppercase tracking-widest mb-2 writing-vertical-lr transform rotate-180">Share</p>
-                            <button onClick={() => setIsLiked(!isLiked)} className={`p-3 rounded-full transition-all duration-300 ${isLiked ? 'bg-[#F2A7A7] text-white shadow-lg' : 'bg-white text-[#3B241A] hover:bg-[#F2A7A7]/20'}`}>
+                            <button onClick={handleLike} className={`p-3 rounded-full transition-all duration-300 ${isLiked ? 'bg-[#F2A7A7] text-white shadow-lg' : 'bg-white text-[#3B241A] hover:bg-[#F2A7A7]/20'}`}>
                                 <Heart className={`w-5 h-5 ${isLiked ? 'fill-current' : ''}`} />
                             </button>
                             <button onClick={() => setIsSaved(!isSaved)} className={`p-3 rounded-full transition-all duration-300 ${isSaved ? 'bg-[#3B241A] text-white' : 'bg-white text-[#3B241A] hover:bg-[#3B241A]/10'}`}>
@@ -229,6 +323,11 @@ export default function BlogPostPage() {
                             <div className="w-8 h-[1px] bg-[#3B241A]/10 my-2" />
                             <button onClick={handleCopyLink} className="p-3 rounded-full bg-white text-[#3B241A] hover:bg-[#FAF0E6] transition-colors relative">
                                 {copied ? <Check className="w-5 h-5 text-green-500" /> : <Copy className="w-5 h-5" />}
+                            </button>
+                            <button onClick={handleShare} className="p-3 rounded-full bg-white text-[#3B241A] hover:bg-[#FAF0E6] transition-colors relative flex items-center gap-2">
+                                {copied ? <Check className="w-5 h-5 text-green-500" /> : <Copy className="w-5 h-5" />}
+                                {/* small shares count badge (keeps UI minimal) */}
+                                {shares > 0 ? <span className="text-xs text-[#6E5045]">{shares}</span> : null}
                             </button>
                             <button className="p-3 rounded-full bg-white text-[#3B241A] hover:bg-[#F2A7A7]/20 transition-colors relative group">
                                 <MessageCircle className="w-5 h-5" />
@@ -256,7 +355,7 @@ export default function BlogPostPage() {
                             <div className="flex flex-col md:flex-row gap-6 items-center md:items-start text-center md:text-left">
                                 <div className="w-20 h-20 md:w-24 md:h-24 rounded-full p-1 bg-gradient-to-br from-[#F2A7A7] to-[#3B241A] shrink-0">
                                     <div className="w-full h-full rounded-full bg-white overflow-hidden">
-                                        <img src="/isha_a.png" alt="Isha" className="w-full h-full object-cover" />
+                                        <Image src="/isha_a.png" alt="Isha" width={96} height={96} className="object-cover" />
                                     </div>
                                 </div>
                                 <div className="flex-1">
@@ -281,9 +380,9 @@ export default function BlogPostPage() {
                 <div className="h-24 lg:h-0" />
 
                 <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-lg border-t border-[#3B241A]/10 p-3 pb-safe flex justify-around items-center z-50 shadow-[0_-5px_20px_rgba(0,0,0,0.05)]">
-                    <button onClick={() => setIsLiked(!isLiked)} className="flex flex-col items-center gap-1 min-w-[60px]">
+                    <button onClick={handleLike} className="flex flex-col items-center gap-1 min-w-[60px]">
                         <Heart className={`w-5 h-5 ${isLiked ? 'fill-[#F2A7A7] text-[#F2A7A7]' : 'text-[#6E5045]'}`} />
-                        <span className={`text-[10px] font-medium ${isLiked ? 'text-[#F2A7A7]' : 'text-[#6E5045]'}`}>{isLiked ? '124' : 'Like'}</span>
+                        <span className={`text-[10px] font-medium ${isLiked ? 'text-[#F2A7A7]' : 'text-[#6E5045]'}`}>{likes > 0 ? likes : 'Like'}</span>
                     </button>
                     <button onClick={() => setIsSaved(!isSaved)} className="flex flex-col items-center gap-1 min-w-[60px]">
                         <Bookmark className={`w-5 h-5 ${isSaved ? 'fill-[#3B241A] text-[#3B241A]' : 'text-[#6E5045]'}`} />

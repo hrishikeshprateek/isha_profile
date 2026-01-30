@@ -9,6 +9,7 @@ import { motion } from 'framer-motion';
 // Interface for blog post data
 interface BlogPost {
     id: string;
+    slug?: string;
     title: string;
     excerpt: string;
     category: string;
@@ -51,7 +52,8 @@ const Blogs = () => {
                     const dateVal = bb.date as string | undefined | Date;
                     return {
                         id: String(id || ''),
-                        title: String(bb.title ?? ''),
+                        slug: String(bb.slug ?? ''),
+                        title: String(bb.title ?? 'Untitled'),
                         excerpt: String(bb.excerpt ?? ''),
                         category: String(bb.category ?? 'General'),
                         date: typeof dateVal === 'string' ? dateVal : (dateVal ? new Date(String(dateVal)).toLocaleDateString() : ''),
@@ -148,7 +150,7 @@ const Blogs = () => {
                 ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-12">
                         {blogs.map((blog, index) => (
-                            <Link key={blog.id} href={`/blogs/${blog.id}`}>
+                            <Link key={blog.id} href={`/blogs/${blog.slug || blog.id}`}>
                                 <motion.div
                                     initial={{ opacity: 0, y: 20 }}
                                     animate={{ opacity: 1, y: 0 }}
@@ -160,7 +162,8 @@ const Blogs = () => {
                                         {/* eslint-disable-next-line @next/next/no-img-element */}
                                         <img
                                             src={blog.image || '/isha_a.png'}
-                                            alt={blog.title}
+                                            alt={blog.title || 'Cover'}
+                                            loading="lazy"
                                             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
                                         />
                                         <div className="absolute top-4 left-4">
@@ -183,7 +186,7 @@ const Blogs = () => {
                                         </h3>
 
                                         <p className="text-sm text-[#3B241A]/60 line-clamp-3 leading-relaxed mb-4 flex-grow">
-                                            {blog.excerpt}
+                                            {blog.excerpt || 'Read more about this story.'}
                                         </p>
 
                                         <div className="flex items-center text-sm font-bold text-[#3B241A] underline decoration-1 underline-offset-4 decoration-[#3B241A]/30 group-hover:decoration-[#F2A7A7] transition-all">
@@ -214,3 +217,4 @@ const Blogs = () => {
 };
 
 export default Blogs;
+

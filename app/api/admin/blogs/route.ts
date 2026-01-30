@@ -1,7 +1,56 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getDatabase, Collections } from '@/lib/mongodb';
-import { ObjectId } from 'mongodb';
+import { ObjectId, Collection, Document } from 'mongodb';
 import { verifyAdmin } from '@/lib/admin-auth';
+
+// Helper: slugify a string to kebab-case (a-z0-9 and hyphens)
+function slugify(input: string | undefined): string {
+  if (!input) return '';
+  return input
+    .toString()
+    .toLowerCase()
+    .normalize('NFKD')
+    .replace(/[^a-z0-9\s-]/g, '') // remove invalid chars
+    .trim()
+    .replace(/[\s_-]+/g, '-') // collapse whitespace and underscores to -
+    .replace(/^-+|-+$/g, ''); // trim leading/trailing -
+}
+
+function escapeRegExp(s: string) {
+  return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+// Generate a unique slug by checking existing slugs in the collection.
+// If excludeId is provided, that document is ignored (useful for updates).
+async function generateUniqueSlug(collection: Collection<Document>, base: string, excludeId?: ObjectId | string) {
+  if (!base) base = String(Date.now());
+  const escaped = escapeRegExp(base);
+  // match base or base-123 pattern
+  const regex = new RegExp(`^${escaped}(-\\d+)?$`);
+
+  const query: Record<string, unknown> = { slug: { $regex: regex } };
+  if (excludeId) {
+    try {
+      query._id = { $ne: typeof excludeId === 'string' ? new ObjectId(excludeId) : excludeId } as unknown;
+    } catch {
+      // ignore invalid id
+    }
+  }
+
+  const docs = await collection.find(query as Document, { projection: { slug: 1 } }).toArray();
+  const existing = new Set(docs.map((d: Document) => (d.slug as string) || ''));
+
+  if (!existing.has(base)) return base;
+
+  // find smallest available suffix
+  for (let i = 1; i < 10000; i++) {
+    const candidate = `${base}-${i}`;
+    if (!existing.has(candidate)) return candidate;
+  }
+
+  // fallback
+  return `${base}-${Date.now()}`;
+}
 
 // GET /api/admin/blogs - List all blogs with filtering
 export async function GET(request: NextRequest) {
@@ -61,15 +110,15 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    const filter: Record<string, any> = {};
+    const filter: Record<string, unknown> = {};
 
     // Apply filters
     if (category && category !== 'All') {
-      filter.category = category;
+      filter['category'] = category;
     }
 
     if (search) {
-      filter.$or = [
+      filter['$or'] = [
         { title: { $regex: search, $options: 'i' } },
         { excerpt: { $regex: search, $options: 'i' } },
         { content: { $regex: search, $options: 'i' } }
@@ -78,17 +127,18 @@ export async function GET(request: NextRequest) {
 
     // Add date range filtering
     if (startDate || endDate) {
-      filter.date = {};
+      const dateFilter: Record<string, unknown> = {};
       if (startDate) {
-        filter.date.$gte = new Date(startDate).toISOString().split('T')[0];
+        dateFilter['$gte'] = new Date(startDate).toISOString().split('T')[0];
       }
       if (endDate) {
-        filter.date.$lte = new Date(endDate).toISOString().split('T')[0];
+        dateFilter['$lte'] = new Date(endDate).toISOString().split('T')[0];
       }
+      filter['date'] = dateFilter;
     }
 
     const blogs = await collection
-      .find(filter, {
+      .find(filter as Document, {
         projection: {
           _id: 1,
           title: 1,
@@ -136,6 +186,10 @@ export async function POST(request: NextRequest) {
     const db = await getDatabase();
     const collection = db.collection(Collections.BLOGS);
 
+    // generate SEO-friendly slug and ensure uniqueness
+    const baseSlug = slugify(data.slug || data.title || String(Date.now()));
+    const uniqueSlug = await generateUniqueSlug(collection, baseSlug);
+
     const newBlog = {
       title: data.title,
       excerpt: data.excerpt || '',
@@ -149,7 +203,7 @@ export async function POST(request: NextRequest) {
       createdAt: new Date(),
       updatedAt: new Date(),
       published: data.published !== false,
-      slug: data.title.toLowerCase().replace(/[^a-z0-9]+/g, '-')
+      slug: uniqueSlug,
     };
 
     const result = await collection.insertOne(newBlog);
@@ -157,7 +211,8 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       success: true,
       message: 'Blog created successfully',
-      id: result.insertedId.toString()
+      id: result.insertedId.toString(),
+      slug: uniqueSlug
     });
   } catch (error) {
     console.error('Create blog error:', error);
@@ -183,14 +238,19 @@ export async function PUT(request: NextRequest) {
     const db = await getDatabase();
     const collection = db.collection(Collections.BLOGS);
 
-    const updateData = {
+    // regenerate slug if title changed or slug provided
+    const baseSlug = slugify(data.slug || data.title || '');
+    const uniqueSlug = baseSlug ? await generateUniqueSlug(collection, baseSlug, data.id) : undefined;
+
+    const updateData: Record<string, unknown> = {
       ...data,
       updatedAt: new Date(),
-      slug: data.title.toLowerCase().replace(/[^a-z0-9]+/g, '-')
     };
 
-    delete updateData.id;
-    delete updateData._id;
+    if (uniqueSlug) updateData['slug'] = uniqueSlug;
+
+    delete updateData['id'];
+    delete updateData['_id'];
 
     const result = await collection.updateOne(
       { _id: new ObjectId(data.id) },
@@ -203,7 +263,8 @@ export async function PUT(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      message: 'Blog updated successfully'
+      message: 'Blog updated successfully',
+      slug: uniqueSlug
     });
   } catch (error) {
     console.error('Update blog error:', error);

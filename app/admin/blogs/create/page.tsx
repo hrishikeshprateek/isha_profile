@@ -44,6 +44,7 @@ export default function CreateBlogPage() {
 
     const [formData, setFormData] = useState({
         title: '',
+        slug: '',
         excerpt: '',
         content: '',
         category: '',
@@ -259,6 +260,8 @@ export default function CreateBlogPage() {
                                     placeholder="e.g. 5 min read"
                                 />
                             </div>
+
+                            {/* Slug is handled automatically by the server; kept in formData but hidden to preserve old UI */}
                         </div>
 
                         {/* Cover Media Card */}
@@ -377,4 +380,3 @@ export default function CreateBlogPage() {
         </div>
     );
 }
-
