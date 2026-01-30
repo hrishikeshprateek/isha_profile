@@ -8,6 +8,41 @@ export async function GET(request: NextRequest) {
     const db = await getDatabase();
     const collection = db.collection(Collections.BLOGS);
 
+    // Support fetching a single blog by id for public detail view
+    const idParam = request.nextUrl.searchParams.get('id');
+    if (idParam) {
+      try {
+        const blog = await collection.findOne(
+          { _id: new ObjectId(idParam), published: true },
+          {
+            projection: {
+              _id: 1,
+              title: 1,
+              excerpt: 1,
+              content: 1,
+              category: 1,
+              date: 1,
+              readTime: 1,
+              image: 1,
+              author: 1,
+              tags: 1,
+              slug: 1,
+              published: 1
+            }
+          }
+        );
+
+        if (blog) {
+          return NextResponse.json({ success: true, blog: { ...blog, id: blog._id?.toString() } });
+        }
+      } catch (err) {
+        console.error('Error fetching blog by id:', err);
+        return NextResponse.json({ error: 'Invalid blog ID' }, { status: 400 });
+      }
+
+      return NextResponse.json({ error: 'Blog not found' }, { status: 404 });
+    }
+
     // Get query parameters for filtering
     const category = request.nextUrl.searchParams.get('category');
     const search = request.nextUrl.searchParams.get('search');
@@ -60,9 +95,9 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(
       {
         success: true,
-        blogs: blogs.map(blog => ({
+        blogs: (blogs || []).map(blog => ({
           ...blog,
-          id: blog._id?.toString()
+          id: blog._id?.toString() ?? String(blog.id ?? ''),
         }))
       },
       {
@@ -76,4 +111,3 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'Failed to fetch blogs' }, { status: 500 });
   }
 }
-

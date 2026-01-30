@@ -27,28 +27,57 @@ const Blogs = () => {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        fetchBlogs();
-    }, [selectedCategory]);
+        // move fetch inside effect to avoid dependency issues
+        let cancelled = false;
+        async function doFetch() {
+            try {
+                setLoading(true);
+                const url = new URL('/api/blogs', window.location.origin);
+                if (selectedCategory !== 'All') {
+                    url.searchParams.append('category', selectedCategory);
+                }
 
-    async function fetchBlogs() {
-        try {
-            setLoading(true);
-            const url = new URL('/api/blogs', window.location.origin);
-            if (selectedCategory !== 'All') {
-                url.searchParams.append('category', selectedCategory);
-            }
+                const res = await fetch(url.toString());
+                const data = await res.json();
 
-            const res = await fetch(url);
-            const data = await res.json();
-            if (data.success) {
-                setBlogs(data.blogs || []);
+                console.debug('Blogs API response:', data);
+
+                // Normalise response to expected BlogPost[] shape
+                const rawBlogs = Array.isArray(data.blogs) ? data.blogs : (data && (data as any).blogs) || [];
+
+                const normalized = (rawBlogs as unknown[]).map((b) => {
+                    const bb = b as Record<string, unknown>;
+                    const id = bb.id ?? bb._id ?? '';
+                    const dateVal = bb.date as string | undefined | Date;
+                    return {
+                        id: String(id || ''),
+                        title: String(bb.title ?? ''),
+                        excerpt: String(bb.excerpt ?? ''),
+                        category: String(bb.category ?? 'General'),
+                        date: typeof dateVal === 'string' ? dateVal : (dateVal ? new Date(String(dateVal)).toLocaleDateString() : ''),
+                        readTime: String(bb.readTime ?? ''),
+                        image: String(bb.image ?? '/isha_a.png'),
+                        author: String(bb.author ?? 'Isha Rani'),
+                        tags: Array.isArray(bb.tags) ? (bb.tags as string[]) : []
+                    } as BlogPost;
+                });
+
+                if (!cancelled) {
+                    setBlogs(normalized);
+                }
+            } catch (err) {
+                console.warn('Failed to fetch blogs:', err);
+                if (!cancelled) setBlogs([]);
+            } finally {
+                if (!cancelled) setLoading(false);
             }
-        } catch (err) {
-            console.warn('Failed to fetch blogs:', err);
-        } finally {
-            setLoading(false);
         }
-    }
+
+        doFetch();
+        return () => {
+            cancelled = true;
+        };
+    }, [selectedCategory]);
 
     return (
         <div className="min-h-screen bg-[#FAF0E6] font-sans selection:bg-[#F2A7A7] selection:text-[#3B241A]">
