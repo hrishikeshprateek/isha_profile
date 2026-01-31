@@ -9,35 +9,38 @@ export async function GET(request: NextRequest) {
 
     // Get query parameters for filtering
     const category = request.nextUrl.searchParams.get('category');
-    const limit = parseInt(request.nextUrl.searchParams.get('limit') || '50');
+    const limitParam = parseInt(request.nextUrl.searchParams.get('limit') || '50', 10);
+    const pageParam = parseInt(request.nextUrl.searchParams.get('page') || '1', 10);
     const random = request.nextUrl.searchParams.get('random') === 'true';
+    const search = request.nextUrl.searchParams.get('search')?.trim();
 
-    const filter: Record<string, any> = {
-      published: true // Only show published quotes
-    };
+    const DEFAULT_LIMIT = 50;
+    const MAX_LIMIT = 200;
+    let limit = Number.isNaN(limitParam) ? DEFAULT_LIMIT : Math.min(Math.max(1, limitParam), MAX_LIMIT);
+    const page = Number.isNaN(pageParam) || pageParam < 1 ? 1 : pageParam;
+
+    const filter: { [key: string]: unknown } = { published: true };
 
     // Apply category filter if provided
     if (category && category !== 'All') {
       filter.category = category;
     }
 
-    let query = collection.find(filter, {
-      projection: {
-        _id: 1,
-        text: 1,
-        author: 1,
-        category: 1,
-        date: 1
-      }
-    });
+    // Apply search filter
+    if (search) {
+      filter['$or'] = [
+        { text: { $regex: search, $options: 'i' } },
+        { author: { $regex: search, $options: 'i' } }
+      ];
+    }
 
-    // Apply sorting
     if (random) {
-      // Get random quotes using aggregation
+      // When random is requested, return a sampled set (respect limit)
+      const sampleSize = Math.min(limit, 100);
       const quotes = await collection
         .aggregate([
           { $match: filter },
-          { $sample: { size: Math.min(limit, 50) } },
+          { $sample: { size: sampleSize } },
           {
             $project: {
               _id: 1,
@@ -52,28 +55,39 @@ export async function GET(request: NextRequest) {
 
       return NextResponse.json({
         success: true,
-        quotes: quotes.map(quote => ({
-          ...quote,
-          id: quote._id?.toString()
-        }))
-      });
-    } else {
-      const quotes = await query
-        .sort({ date: -1 })
-        .limit(limit)
-        .toArray();
-
-      return NextResponse.json({
-        success: true,
-        quotes: quotes.map(quote => ({
-          ...quote,
-          id: quote._id?.toString()
-        }))
+        quotes: quotes.map(quote => ({ ...quote, id: quote._id?.toString() })),
+        total: quotes.length,
+        page: 1,
+        limit: sampleSize
       });
     }
+
+    // Otherwise, perform a paginated find
+    const total = await collection.countDocuments(filter);
+    const quotes = await collection
+      .find(filter, {
+        projection: {
+          _id: 1,
+          text: 1,
+          author: 1,
+          category: 1,
+          date: 1
+        }
+      })
+      .sort({ date: -1 })
+      .skip((page - 1) * limit)
+      .limit(limit)
+      .toArray();
+
+    return NextResponse.json({
+      success: true,
+      quotes: quotes.map(quote => ({ ...quote, id: quote._id?.toString() })),
+      total,
+      page,
+      limit
+    });
   } catch (error) {
     console.error('Get quotes error:', error);
     return NextResponse.json({ error: 'Failed to fetch quotes' }, { status: 500 });
   }
 }
-

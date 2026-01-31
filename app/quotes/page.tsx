@@ -5,7 +5,6 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
     Quote,
     Copy,
-    Heart,
     Search,
     Sparkles
 } from "lucide-react";
@@ -58,7 +57,16 @@ const FALLBACK_QUOTES: Quote[] = [
     }
 ];
 
-const CATEGORIES = ['All', 'Inspiration', 'Wisdom', 'Motivation', 'Life', 'Travel', 'General'];
+// API quote shape (safely typed)
+type ApiQuote = {
+    _id?: { toString(): string } | string;
+    id?: string;
+    text?: string;
+    author?: string;
+    category?: string;
+    date?: string;
+    published?: boolean;
+};
 
 export default function QuotesPage() {
     const [copiedId, setCopiedId] = useState<string | null>(null);
@@ -67,26 +75,55 @@ export default function QuotesPage() {
     const [categories, setCategories] = useState<string[]>(["All"]);
     const [activeCategory, setActiveCategory] = useState("All");
     const [searchTerm, setSearchTerm] = useState("");
+    // Pagination
+    const [page, setPage] = useState<number>(1);
+    const [limit, setLimit] = useState<number>(12);
+    const [total, setTotal] = useState<number>(0);
 
     // Fetch quotes from API
     useEffect(() => {
         async function fetchQuotes() {
             try {
-                const res = await fetch('/api/admin/quotes');
+                const params = new URLSearchParams();
+                params.set('limit', String(limit));
+                params.set('page', String(page));
+                if (activeCategory && activeCategory !== 'All') params.set('category', activeCategory);
+                if (searchTerm) params.set('search', searchTerm);
+
+                const res = await fetch(`/api/quotes?${params.toString()}`);
                 const data = await res.json();
 
                 if (res.ok && data.success && data.quotes) {
-                    const fetchedQuotes = data.quotes.map((q: Quote) => ({
-                        ...q,
-                        id: q._id?.toString() || q.id
-                    }));
+                    const fetchedQuotes = (data.quotes as ApiQuote[]).map((q) => {
+                        // derive id safely without using `any`
+                        let idVal: string | undefined = q.id;
+                        if (q._id) {
+                            if (typeof q._id === 'string') {
+                                idVal = q._id;
+                            } else {
+                                const maybe = q._id as unknown;
+                                if (maybe && typeof (maybe as { toString?: unknown }).toString === 'function') {
+                                    idVal = (maybe as { toString: () => string }).toString();
+                                }
+                            }
+                        }
 
-                    setQuotes(fetchedQuotes);
+                        return {
+                            id: idVal,
+                            text: q.text || '',
+                            author: q.author || 'Unknown',
+                            category: q.category || 'General',
+                            date: q.date,
+                            published: !!q.published
+                        } as Quote;
+                    });
+                     setQuotes(fetchedQuotes);
 
-                    // Extract unique categories
+                    // If categories are not set yet, derive from fetched data OR maintain existing
                     const categorySet = new Set(fetchedQuotes.map((q: Quote) => q.category));
                     const uniqueCategories: string[] = ['All', ...(Array.from(categorySet) as string[])];
                     setCategories(uniqueCategories);
+                    setTotal(typeof data.total === 'number' ? data.total : fetchedQuotes.length);
                 } else {
                     setQuotes(FALLBACK_QUOTES);
                 }
@@ -99,7 +136,9 @@ export default function QuotesPage() {
         }
 
         fetchQuotes();
-    }, []);
+    }, [page, limit, activeCategory, searchTerm]);
+
+    const totalPages = Math.max(1, Math.ceil(total / limit));
 
     const handleCopy = (text: string, id: string | undefined) => {
         if (!id) return;
@@ -129,15 +168,6 @@ export default function QuotesPage() {
 
     return (
         <div className="flex flex-col min-h-screen !bg-[#3B241A] !text-[#FAF0E6] font-sans selection:!bg-[#F2A7A7] selection:!text-[#3B241A]">
-            <style jsx global>{`
-                .no-scrollbar::-webkit-scrollbar {
-                    display: none;
-                }
-                .no-scrollbar {
-                    -ms-overflow-style: none;
-                    scrollbar-width: none;
-                }
-            `}</style>
 
             {/* 1. TOOLBAR */}
             <Toolbar
@@ -227,7 +257,7 @@ export default function QuotesPage() {
 
                                             {/* Quote Text */}
                                             <p className="leading-[1.5] !text-[#FAF0E6] mb-4 text-lg md:text-xl font-serif font-bold tracking-tight">
-                                                "{quote.text}"
+                                                “{quote.text}”
                                             </p>
 
                                             {/* Author */}
@@ -273,12 +303,27 @@ export default function QuotesPage() {
                             )}
                         </AnimatePresence>
                     </div>
-                </div>
-            </main>
 
-            {/* 4. FOOTER */}
-            <Footer />
-        </div>
-    );
-}
+                    {/* Pagination Controls */}
+                    <div className="mt-8 flex items-center justify-between gap-4">
+                        <div className="text-sm text-[#FAF0E6]/70">Showing <span className="font-bold">{Math.min((page-1)*limit + 1, total || quotes.length)}</span> - <span className="font-bold">{Math.min(page*limit, total || quotes.length)}</span> of <span className="font-bold">{total || quotes.length}</span></div>
+                        <div className="flex items-center gap-2">
+                            <select value={limit} onChange={(e) => { setLimit(Number(e.target.value)); setPage(1); }} className="px-3 py-1 rounded-full bg-[#FAF0E6]/5 text-xs">
+                                {[6,12,24,48].map(n => <option key={n} value={n}>{n}</option>)}
+                            </select>
+                            <button onClick={() => setPage(1)} disabled={page === 1} className="px-3 py-1 rounded-full bg-white/10">First</button>
+                            <button onClick={() => setPage(p => Math.max(1, p-1))} disabled={page === 1} className="px-3 py-1 rounded-full bg-white/10">Prev</button>
+                            <div className="px-3 py-1 rounded-full bg-white/5">{page} / {totalPages}</div>
+                            <button onClick={() => setPage(p => Math.min(totalPages, p+1))} disabled={page >= totalPages} className="px-3 py-1 rounded-full bg-white/10">Next</button>
+                            <button onClick={() => setPage(totalPages)} disabled={page >= totalPages} className="px-3 py-1 rounded-full bg-white/10">Last</button>
+                        </div>
+                    </div>
 
+                 </div>
+             </main>
+
+             {/* 4. FOOTER */}
+             <Footer />
+         </div>
+     );
+ }

@@ -241,3 +241,7 @@ html {
     -webkit-box-orient: vertical;
     overflow: hidden;
 }
+
+/* No-scrollbar utility used across the app (for horizontal scrollers) */
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
