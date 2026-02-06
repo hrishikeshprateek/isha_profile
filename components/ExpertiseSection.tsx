@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useRef } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import Image from "next/image";
 import { motion, useSpring, useTransform, MotionValue } from "framer-motion";
 import {
@@ -51,7 +51,8 @@ interface ToolNodeProps {
     lineColor: string;
 }
 
-const networkData = [
+// Default fallback data
+const defaultNetworkData = [
     {
         id: "design",
         label: "Design",
@@ -171,14 +172,73 @@ export default function InteractiveGraph() {
     const coreX = useSpring(centerX, { stiffness: 150, damping: 20 });
     const coreY = useSpring(centerY, { stiffness: 150, damping: 20 });
 
+    // State for dynamic data
+    const [title, setTitle] = useState('My Creative Universe');
+    const [subtitle, setSubtitle] = useState('Drag the icons to explore the connections.');
+    const [networkData, setNetworkData] = useState<Category[]>([]);
+    const [loading, setLoading] = useState(true);
+
+    // Fetch data from API
+    useEffect(() => {
+        // Icon mapping
+        const iconMap: Record<string, React.ComponentType<{ size: number; className: string }>> = {
+            design: PenTool,
+            photo: Camera,
+            video: Video,
+            content: Type
+        };
+
+        async function loadData() {
+            try {
+                const res = await fetch('/api/expertise');
+                const result = await res.json();
+
+                if (result.success && result.data) {
+                    setTitle(result.data.title || 'My Creative Universe');
+                    setSubtitle(result.data.subtitle || 'Drag the icons to explore the connections.');
+
+                    // Map categories with icon components
+                    const categories = result.data.categories.map((cat: { id: string }) => ({
+                        ...cat,
+                        icon: iconMap[cat.id] || PenTool
+                    }));
+
+                    setNetworkData(categories);
+                }
+            } catch (error) {
+                console.error('Failed to load expertise data:', error);
+                // Fallback to default networkData if fetch fails
+                setNetworkData(defaultNetworkData);
+            } finally {
+                setLoading(false);
+            }
+        }
+
+        loadData();
+    }, []);
+
+    if (loading) {
+        return (
+            <section className="bg-[#F2E4D8] py-10 md:py-12 relative overflow-hidden select-none min-h-[600px] flex items-center justify-center">
+                <div className="animate-spin rounded-full h-12 w-12 border-4 border-[#F2A7A7] border-t-transparent"></div>
+            </section>
+        );
+    }
+
     return (
         <section className="bg-[#F2E4D8] py-10 md:py-12 relative overflow-hidden select-none">
 
             <div className="text-center mb-4 md:mb-12 relative z-10 px-6 pointer-events-none">
                 <h2 className="text-3xl md:text-5xl font-serif font-bold text-[#3B241A]">
-                    My Creative <span className="text-[#F2A7A7] italic">Universe</span>
+                    {title.split(' ').map((word, i) => {
+                        if (word.toLowerCase() === 'universe' || word.toLowerCase() === 'creative') {
+                            return <span key={i} className="text-[#F2A7A7] italic">{word} </span>;
+                        }
+                        return <span key={i}>{word} </span>;
+                    })}
                 </h2>
                 <p className="text-[#6E5045]/60 text-sm mt-2 max-w-xs mx-auto md:max-w-none">
+                    {subtitle}
                     Drag the icons to explore the connections.
                 </p>
             </div>
