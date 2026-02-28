@@ -16,7 +16,17 @@ import Link from "next/link";
 import ShareButton from "@/components/ShareButton";
 
 // --- MOCK DATA (Fallback) ---
-const FALLBACK_QUOTES: Quote[] = [
+type QuoteItem = {
+    id?: string;
+    _id?: { toString(): string } | string | null;
+    text: string;
+    author: string;
+    category?: string;
+    date?: string;
+    published?: boolean;
+}
+
+const FALLBACK_QUOTES: QuoteItem[] = [
     {
         text: "Design is not just what it looks like and feels like. Design is how it works.",
         author: "Steve Jobs",
@@ -62,7 +72,7 @@ type ApiQuote = {
 
 export default function QuotesPage() {
     const [copiedId, setCopiedId] = useState<string | null>(null);
-    const [quotes, setQuotes] = useState<Quote[]>([]);
+    const [quotes, setQuotes] = useState<QuoteItem[]>([]);
     const [loading, setLoading] = useState(true);
     const [categories, setCategories] = useState<string[]>(["All"]);
     const [activeCategory, setActiveCategory] = useState("All");
@@ -106,12 +116,13 @@ export default function QuotesPage() {
 
                         return {
                             id: idVal,
+                            _id: q._id,
                             text: q.text || '',
                             author: q.author || 'Unknown',
                             category: q.category || 'General',
                             date: q.date,
                             published: !!q.published
-                        } as Quote;
+                        } as QuoteItem;
                     });
                     // Ensure newest quotes appear first (sort by date desc). If date is missing, keep original order.
                     fetchedQuotes.sort((a, b) => {
@@ -122,7 +133,7 @@ export default function QuotesPage() {
                      setQuotes(fetchedQuotes);
 
                     // If categories are not set yet, derive from fetched data OR maintain existing
-                    const categorySet = new Set(fetchedQuotes.map((q: Quote) => q.category));
+                    const categorySet = new Set(fetchedQuotes.map((q: QuoteItem) => q.category));
                     const uniqueCategories: string[] = ['All', ...(Array.from(categorySet) as string[])];
                     setCategories(uniqueCategories);
                     setTotal(typeof data.total === 'number' ? data.total : fetchedQuotes.length);
@@ -133,7 +144,7 @@ export default function QuotesPage() {
                         const db = b.date ? Date.parse(b.date) : 0;
                         return db - da;
                     });
-                    setQuotes(sortedFallback);
+                    setQuotes(sortedFallback as QuoteItem[]);
                 }
             } catch (error) {
                 console.error('Failed to fetch quotes:', error);
@@ -281,7 +292,7 @@ export default function QuotesPage() {
                                         initial={{ opacity: 0, y: 20 }}
                                         animate={{ opacity: 1, y: 0 }}
                                         exit={{ opacity: 0, scale: 0.95 }}
-                                        key={quote.id || quote._id}
+                                        key={quote.id || idToStringOrUndefined(quote._id)}
                                         className="break-inside-avoid relative group"
                                     >
                                         <div className="relative !bg-[#FAF0E6]/5 backdrop-blur-md border !border-[#FAF0E6]/10 p-6 rounded-3xl hover:border-[#F2A7A7]/30 transition-all">
@@ -322,7 +333,7 @@ export default function QuotesPage() {
                                                         <ShareButton quoteId={quote.id} title={quote.author} text={quote.text} />
                                                     ) : (
                                                         <button
-                                                            onClick={() => handleCopy(quote.text, quote.id || quote._id)}
+                                                            onClick={() => handleCopy(quote.text, quote.id || idToStringOrUndefined(quote._id))}
                                                             className="p-1.5 rounded-full hover:!bg-[#FAF0E6]/10 transition-colors"
                                                         >
                                                             {copiedId === (quote.id || quote._id) ? (
@@ -426,3 +437,17 @@ export default function QuotesPage() {
          </div>
      );
  }
+
+// Helper to safely convert various _id shapes to string or undefined
+function idToStringOrUndefined(id?: { toString?: unknown } | string | null): string | undefined {
+    if (!id) return undefined;
+    if (typeof id === 'string') return id;
+
+    type HasToString = { toString: () => string };
+    if (typeof id === 'object' && id !== null) {
+        const maybe = id as HasToString;
+        if (typeof maybe.toString === 'function') return maybe.toString();
+    }
+
+    return undefined;
+}
