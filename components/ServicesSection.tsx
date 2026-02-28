@@ -98,7 +98,7 @@ export default function ServicesSection({ servicesData }: { servicesData?: Servi
     };
 
     return (
-        <section className="py-12 bg-[#FAF0E6] relative overflow-hidden">
+        <section id="service" className="py-12 bg-[#FAF0E6] relative overflow-hidden">
 
             {/* Background Ambience */}
             <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-[#F2A7A7]/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />

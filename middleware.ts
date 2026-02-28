@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import Toolbar from '@/components/Toolbar';
 
 let maintenanceCache: { enabled: boolean; timestamp: number } | null = null;
 const CACHE_DURATION = 60 * 1000; // 1 minute
@@ -98,3 +99,20 @@ export const config = {
     '/((?!_next/static|_next/image|favicon.ico|public).*)',
   ],
 };
+
+// Example usage in a page/component:
+// <Toolbar
+//   title="IR"
+//   subtitle="ISHA RANI"
+//   navItems={[
+//     { label: 'Home', href: '/' },
+//     { label: 'Services', href: '/services' },
+//     { label: 'Blogs', href: '/blogs' },
+//     { label: 'Quotes', href: '/quotes' },
+//     { label: 'Contact', href: '/contact' },
+//     { label: 'Vcard', href: '/vcard' }
+//   ]}
+// />
+
+// To make all links functional, ensure Toolbar uses navItems prop to render links with hrefs.
+// If you want to update Toolbar globally, edit components/Toolbar.tsx to use navItems as above.
