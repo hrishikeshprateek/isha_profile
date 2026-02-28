@@ -34,7 +34,7 @@ async function getMaintenanceStatus(): Promise<boolean> {
   try {
     // Fetch from API
     const response = await fetch(
-      `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/api/admin/maintenance`,
+      `${process.env.NEXT_PUBLIC_APP_URL}/api/admin/maintenance`,
       { cache: 'no-store' }
     );
 
