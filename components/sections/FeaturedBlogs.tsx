@@ -1,5 +1,3 @@
-'use client';
-
 import React from 'react';
 import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
@@ -14,15 +12,49 @@ interface BlogPost {
     readTime: string;
     image: string;
     author: string;
-    content: string;
     tags: string[];
+    slug?: string;
 }
 
-// Load data and slice the first 4 items (Even number works best for 2x2 layouts)
-import blogPosts from '@/data/blogs.json';
-const recentPosts = blogPosts.slice(0, 4);
+// Get the base URL for API calls - works in both dev and production
+function getBaseUrl(): string {
+  // In production on Vercel, VERCEL_URL is automatically set
+  if (process.env.VERCEL_URL) {
+    return `https://${process.env.VERCEL_URL}`;
+  }
+  // Fallback to NEXT_PUBLIC_APP_URL for development or custom deployments
+  if (process.env.NEXT_PUBLIC_APP_URL) {
+    return process.env.NEXT_PUBLIC_APP_URL;
+  }
+  // Final fallback
+  return 'http://localhost:3000';
+}
 
-const FeaturedBlogs = () => {
+async function getLatestBlogs(): Promise<BlogPost[]> {
+    try {
+        const baseUrl = getBaseUrl();
+        const res = await fetch(`${baseUrl}/api/blogs`, {
+            cache: 'no-store',
+        });
+
+        if (!res.ok) {
+            console.error('Failed to fetch blogs');
+            return [];
+        }
+
+        const data = await res.json();
+        if (data.success && Array.isArray(data.blogs)) {
+            return data.blogs.slice(0, 4); // Get latest 4 blogs
+        }
+        return [];
+    } catch (error) {
+        console.error('Error fetching latest blogs:', error);
+        return [];
+    }
+}
+
+const FeaturedBlogs = async () => {
+    const recentPosts = await getLatestBlogs();
     return (
         <section className="py-24 bg-[#FAF0E6] relative overflow-hidden">
             {/* Decorative background */}
@@ -60,50 +92,66 @@ const FeaturedBlogs = () => {
                     - Medium (Tablet): 2 cols (Perfect 2x2 grid)
                     - Large (Desktop): 4 cols (Perfect 1x4 row)
                 */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                    {recentPosts.map((post, index) => (
-                        <Link key={post.id} href={`/blogs/${post.id}`} className="block h-full">
-                            <article
-                                className="h-full bg-white border border-[#3B241A]/5 rounded-3xl overflow-hidden hover:shadow-xl hover:shadow-[#DC7C7C]/10 hover:-translate-y-1 transition-all duration-500 group flex flex-col"
-                            >
-                                <div className="relative h-48 overflow-hidden">
-                                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                                    <img
-                                        src={post.image}
-                                        alt={post.title}
-                                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
-                                    />
-                                    <div className="absolute top-4 left-4">
-                                        <span className="px-3 py-1 rounded-full bg-white/90 backdrop-blur-md text-[10px] font-bold uppercase tracking-wider text-[#3B241A] shadow-sm">
-                                          {post.category}
-                                        </span>
-                                    </div>
-                                </div>
-
-                                <div className="p-6 flex flex-col flex-grow">
-                                    <div className="flex items-center gap-3 text-[10px] font-bold uppercase tracking-wider text-[#A68B7E] mb-3">
-                                        <span>{post.date}</span>
-                                        <span className="w-1 h-1 rounded-full bg-[#A68B7E]/50" />
-                                        <span>{post.readTime}</span>
-                                    </div>
-
-                                    <h3 className="text-lg font-bold text-[#3B241A] mb-3 group-hover:text-[#DC7C7C] transition-colors line-clamp-2 leading-tight">
-                                        {post.title}
-                                    </h3>
-
-                                    <p className="text-[#A68B7E] text-sm leading-relaxed mb-4 line-clamp-3 flex-grow">
-                                        {post.excerpt}
-                                    </p>
-
-                                    <div className="pt-4 mt-auto border-t border-[#3B241A]/5 flex items-center text-[#DC7C7C] font-bold text-xs uppercase tracking-wider group-hover:gap-2 transition-all">
-                                        Read Story
-                                        <ArrowRight className="w-3.5 h-3.5 ml-1 transition-transform group-hover:translate-x-1" />
-                                    </div>
-                                </div>
-                            </article>
+                {recentPosts.length === 0 ? (
+                    <div className="text-center py-12">
+                        <p className="text-[#A68B7E] text-lg">No blogs available yet. Check back soon!</p>
+                        <Link
+                            href="/blogs"
+                            className="inline-flex items-center gap-2 mt-6 px-6 py-3 rounded-full bg-[#DC7C7C] text-white font-bold hover:bg-[#3B241A] transition-all"
+                        >
+                            Explore All Articles
+                            <ArrowRight className="w-4 h-4" />
                         </Link>
-                    ))}
-                </div>
+                    </div>
+                ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                        {recentPosts.map((post) => {
+                            const blogUrl = post.slug ? `/blogs/${post.slug}` : `/blogs/${post.id}`;
+                            return (
+                                <Link key={post.id} href={blogUrl} className="block h-full">
+                                    <article
+                                        className="h-full bg-white border border-[#3B241A]/5 rounded-3xl overflow-hidden hover:shadow-xl hover:shadow-[#DC7C7C]/10 hover:-translate-y-1 transition-all duration-500 group flex flex-col"
+                                    >
+                                        <div className="relative h-48 overflow-hidden">
+                                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                                            <img
+                                                src={post.image}
+                                                alt={post.title}
+                                                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                                            />
+                                            <div className="absolute top-4 left-4">
+                                                <span className="px-3 py-1 rounded-full bg-white/90 backdrop-blur-md text-[10px] font-bold uppercase tracking-wider text-[#3B241A] shadow-sm">
+                                                  {post.category}
+                                                </span>
+                                            </div>
+                                        </div>
+
+                                        <div className="p-6 flex flex-col flex-grow">
+                                            <div className="flex items-center gap-3 text-[10px] font-bold uppercase tracking-wider text-[#A68B7E] mb-3">
+                                                <span>{post.date}</span>
+                                                <span className="w-1 h-1 rounded-full bg-[#A68B7E]/50" />
+                                                <span>{post.readTime}</span>
+                                            </div>
+
+                                            <h3 className="text-lg font-bold text-[#3B241A] mb-3 group-hover:text-[#DC7C7C] transition-colors line-clamp-2 leading-tight">
+                                                {post.title}
+                                            </h3>
+
+                                            <p className="text-[#A68B7E] text-sm leading-relaxed mb-4 line-clamp-3 flex-grow">
+                                                {post.excerpt}
+                                            </p>
+
+                                            <div className="pt-4 mt-auto border-t border-[#3B241A]/5 flex items-center text-[#DC7C7C] font-bold text-xs uppercase tracking-wider group-hover:gap-2 transition-all">
+                                                Read Story
+                                                <ArrowRight className="w-3.5 h-3.5 ml-1 transition-transform group-hover:translate-x-1" />
+                                            </div>
+                                        </div>
+                                    </article>
+                                </Link>
+                            );
+                        })}
+                    </div>
+                )}
 
                 {/* Mobile 'View All' Button */}
                 <div className="mt-10 text-center md:hidden">

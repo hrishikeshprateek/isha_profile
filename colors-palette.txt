@@ -1,0 +1,187 @@
+Isha Rani — Website Color Palette
+
+Generated: 2026-02-12
+Source: scanned project files (components, scripts, docs).
+
+Purpose: A compact, copyable reference for Instagram branding that matches the website theme. For each color below you'll find:
+- HEX code
+- Friendly name (approximate)
+- Where it's used in the codebase / examples
+- Suggested role (Primary / Accent / Neutral / Background / Text / Border)
+- Instagram palette pairing suggestions (3-color combos) and usage notes
+- Suggested CSS variables to add to your global CSS
+
+-----------------------------------------------------------------
+1) #FAF0E6
+- Name: Cream (main background)
+- Usage: page backgrounds across site (e.g., components/ContactSection.tsx, CloudinaryUpload), body backgrounds
+- Role: Background / Neutral (soft)
+- Instagram palette pairing: [#FAF0E6, #3B241A, #F2A7A7]
+- Notes: Use as full-bleed background; keep text dark for contrast.
+- CSS var: --color-bg-cream: #FAF0E6;
+
+2) #3B241A
+- Name: Deep Brown (primary text / headings)
+- Usage: primary headings, text, borders, shadows (many components and docs mention this as main brand brown)
+- Role: Primary / Text / Border
+- Instagram palette pairing: [#3B241A, #F2A7A7, #FAF0E6]
+- Notes: Works as primary for headings and icons. Use at 100% for strong contrast.
+- CSS var: --color-primary: #3B241A;
+
+3) #F2A7A7
+- Name: Warm Pink / Coral (accent)
+- Usage: CTA accents, gradients, highlights, loader/animated accents (seed and docs reference this as the accent)
+- Role: Accent / CTA / Highlight
+- Instagram palette pairing: [#F2A7A7, #3B241A, #FAF0E6]
+- Notes: Great for microinteractions and hover states; pair with dark brown text.
+- CSS var: --color-accent: #F2A7A7;
+
+4) #A68B7E
+- Name: Muted Brown / Taupe (muted text)
+- Usage: secondary text, meta text, placeholders (Seen in SpotlightSearch and docs)
+- Role: Secondary text / Meta
+- Instagram palette pairing: [#A68B7E, #FAF0E6, #3B241A]
+- Notes: Use for captions, metadata and subtle UI details.
+- CSS var: --color-muted: #A68B7E;
+
+5) #DC7C7C
+- Name: Dusty Rose (supporting accent)
+- Usage: Featured/blog highlights in the FeaturedBlogs component and hover states
+- Role: Accent / Hover
+- Instagram palette pairing: [#DC7C7C, #3B241A, #FAF0E6]
+- Notes: Slightly deeper than the main pink; good for hover/active states.
+- CSS var: --color-rose: #DC7C7C;
+
+6) #15C39A
+- Name: Teal (bright accent)
+- Usage: scripts/seed-expertise, small UI accents in expertise tiles
+- Role: Accent / Tag / Badge
+- Instagram palette pairing: [#15C39A, #2FA3F7, #001E36]
+- Notes: Use sparingly; pairs well with blues and navy.
+- CSS var: --color-teal: #15C39A;
+
+7) #2FA3F7
+- Name: Sky Blue
+- Usage: expertise, informational accents (seed-expertise)
+- Role: Accent / Link
+- Instagram palette pairing: [#2FA3F7, #00C4CC, #001E36]
+- Notes: Works well for primary link accent or subtle CTA.
+- CSS var: --color-sky: #2FA3F7;
+
+8) #00C4CC
+- Name: Cyan (vivid)
+- Usage: gradient starts in some expertise tiles
+- Role: Accent / Gradient
+- Instagram palette pairing: [#00C4CC, #7D2AE8, #FAF0E6]
+- Notes: Blends nicely into purple for modern gradients.
+- CSS var: --color-cyan: #00C4CC;
+
+9) #7D2AE8
+- Name: Electric Purple
+- Usage: gradient ends in expertise tiles
+- Role: Gradient / Accent
+- Instagram palette pairing: [#7D2AE8, #00C4CC, #2FA3F7]
+- Notes: Strong when used in gradients; keep text light when on top.
+- CSS var: --color-purple: #7D2AE8;
+
+10) #9999FF
+- Name: Lavender / Soft Blue
+- Usage: seed-expertise (example color)
+- Role: Accent / Badge
+- Instagram palette pairing: [#9999FF, #001E36, #FAF0E6]
+- CSS var: --color-lavender: #9999FF;
+
+11) #21759B
+- Name: Deep Cyan / Teal-Blue
+- Usage: seed-expertise tiles
+- Role: Accent / Background for tiles
+- Instagram palette pairing: [#21759B, #74AA9C, #FAF0E6]
+- CSS var: --color-deep-cyan: #21759B;
+
+12) #74AA9C
+- Name: Seafoam Green
+- Usage: seed-expertise
+- Role: Accent / Tile
+- Instagram palette pairing: [#74AA9C, #15C39A, #001E36]
+- CSS var: --color-seafoam: #74AA9C;
+
+13) #001E36
+- Name: Deep Navy
+- Usage: dark backgrounds for certain expertise tiles
+- Role: Dark neutral / Accent background
+- Instagram palette pairing: [#001E36, #2FA3F7, #FAF0E6]
+- Notes: Use for strong contrast background, sparingly.
+- CSS var: --color-navy: #001E36;
+
+14) #330000
+- Name: Very Dark Red / Maroon
+- Usage: seed-expertise sample class
+- Role: Decorative / Background
+- Instagram palette pairing: [#330000, #F2A7A7, #FAF0E6]
+- CSS var: --color-maroon: #330000;
+
+15) #1E1E1E
+- Name: Almost Black / Charcoal
+- Usage: fallback dark text or icon color
+- Role: Text / Icon
+- Instagram palette pairing: [#1E1E1E, #F2A7A7, #FAF0E6]
+- CSS var: --color-charcoal: #1E1E1E;
+
+-----------------------------------------------------------------
+Suggested Instagram color palettes (3-color combos) matching the site look
+- Palette A (Brand primary): [#3B241A, #F2A7A7, #FAF0E6]
+  - Use: profile image frame, highlights, post backgrounds, story stickers
+- Palette B (Warm travel): [#DC7C7C, #A68B7E, #FAF0E6]
+  - Use: photo overlays, highlight covers, muted post templates
+- Palette C (Creative / gradient): [#00C4CC, #7D2AE8, #2FA3F7]
+  - Use: gradient backgrounds, reels cover, promotional posts
+- Palette D (Professional): [#001E36, #2FA3F7, #FAF0E6]
+  - Use: business posts, link highlight, CTA buttons
+
+Usage tips for Instagram
+- Profile/photo: use a circular crop with a thin ring in #F2A7A7 over #FAF0E6 background.
+- Story highlights: use single-color icons on #FAF0E6 circular backgrounds; icon color #3B241A.
+- Post templates: use the cream background (#FAF0E6) with a bold heading in #3B241A, accent details in #F2A7A7 and microcopy in #A68B7E.
+- Gradient covers: use cyan -> purple (#00C4CC -> #7D2AE8) for promotional reels or travel teasers.
+
+Accessibility / Contrast notes
+- Primary text (#3B241A) on cream (#FAF0E6) has good contrast for headings.
+- Accent #F2A7A7 on cream is decorative; avoid as main text color.
+- For any CTA using #F2A7A7 on light backgrounds, ensure text on the CTA is dark (#3B241A) for readability.
+
+Suggested CSS variables snippet (add to global CSS or tailwind config):
+:root {
+  --color-bg-cream: #FAF0E6;
+  --color-primary: #3B241A;
+  --color-accent: #F2A7A7;
+  --color-muted: #A68B7E;
+  --color-rose: #DC7C7C;
+  --color-teal: #15C39A;
+  --color-sky: #2FA3F7;
+  --color-cyan: #00C4CC;
+  --color-purple: #7D2AE8;
+  --color-lavender: #9999FF;
+  --color-deep-cyan: #21759B;
+  --color-seafoam: #74AA9C;
+  --color-navy: #001E36;
+  --color-maroon: #330000;
+  --color-charcoal: #1E1E1E;
+}
+
+Where to apply these in the codebase
+- Backgrounds: use --color-bg-cream
+- Headings/icons: --color-primary
+- CTAs and hover highlights: --color-accent / --color-rose
+- Secondary metadata and placeholders: --color-muted
+- Gradients: use --color-cyan -> --color-purple and/or --color-sky
+
+-----------------------------------------------------------------
+Notes / Next steps I can do for you if you'd like:
+- Convert these into a Tailwind theme extension (colors) and update tailwind.config.js
+- Replace inline hex values with CSS variables across components automatically
+- Generate a small set of Instagram-ready templates (PNG + color overlays) using the palette
+
+If you want me to also replace the inline color usages with variables in the codebase, tell me and I will make a small PR-style patch.
+
+End of file
+

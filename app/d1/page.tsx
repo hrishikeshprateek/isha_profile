@@ -9,11 +9,25 @@ import Footer from "@/components/Footer";
 import Testimonials from "@/components/sections/Testimonials";
 import QuotesPreviewSection from "@/components/sections/QuotesPreviewSection";
 
+// Get the base URL for API calls - works in both dev and production
+function getBaseUrl(): string {
+  // In production on Vercel, VERCEL_URL is automatically set
+  if (process.env.VERCEL_URL) {
+    return `https://${process.env.VERCEL_URL}`;
+  }
+  // Fallback to NEXT_PUBLIC_APP_URL for development or custom deployments
+  if (process.env.NEXT_PUBLIC_APP_URL) {
+    return process.env.NEXT_PUBLIC_APP_URL;
+  }
+  // Final fallback
+  return 'http://localhost:3000';
+}
+
 async function getHeroData() {
   try {
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
+    const baseUrl = getBaseUrl();
     const res = await fetch(`${baseUrl}/api/hero`, {
-      cache: 'no-store', // Always fetch fresh data for SSR
+      cache: 'no-store',
     });
 
     if (!res.ok) {
@@ -30,7 +44,7 @@ async function getHeroData() {
 
 async function getAboutData() {
   try {
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
+    const baseUrl = getBaseUrl();
     const res = await fetch(`${baseUrl}/api/about`, { cache: 'no-store' });
     if (!res.ok) return null;
     const data = await res.json();
@@ -43,7 +57,7 @@ async function getAboutData() {
 
 async function getServicesData() {
   try {
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
+    const baseUrl = getBaseUrl();
     const res = await fetch(`${baseUrl}/api/services`, { cache: 'no-store' });
     if (!res.ok) return [];
     const data = await res.json();

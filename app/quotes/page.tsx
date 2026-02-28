@@ -12,16 +12,8 @@ import {
 // --- IMPORT YOUR COMPONENTS ---
 import Footer from "@/components/Footer";
 import Toolbar from "@/components/Toolbar";
-
-interface Quote {
-    id?: string;
-    _id?: string;
-    text: string;
-    author: string;
-    category: string;
-    date?: string;
-    published?: boolean;
-}
+import Link from "next/link";
+import ShareButton from "@/components/ShareButton";
 
 // --- MOCK DATA (Fallback) ---
 const FALLBACK_QUOTES: Quote[] = [
@@ -79,6 +71,8 @@ export default function QuotesPage() {
     const [page, setPage] = useState<number>(1);
     const [limit, setLimit] = useState<number>(12);
     const [total, setTotal] = useState<number>(0);
+    // Sorting: 'desc' = newest first (default), 'asc' = oldest first
+    const [sortOrder, setSortOrder] = useState<'desc' | 'asc'>('desc');
 
     // Fetch quotes from API
     useEffect(() => {
@@ -87,6 +81,8 @@ export default function QuotesPage() {
                 const params = new URLSearchParams();
                 params.set('limit', String(limit));
                 params.set('page', String(page));
+                // Include sort preference as a hint to the API (server may honor it)
+                params.set('sort', sortOrder);
                 if (activeCategory && activeCategory !== 'All') params.set('category', activeCategory);
                 if (searchTerm) params.set('search', searchTerm);
 
@@ -117,6 +113,12 @@ export default function QuotesPage() {
                             published: !!q.published
                         } as Quote;
                     });
+                    // Ensure newest quotes appear first (sort by date desc). If date is missing, keep original order.
+                    fetchedQuotes.sort((a, b) => {
+                        const da = a.date ? Date.parse(a.date) : 0;
+                        const db = b.date ? Date.parse(b.date) : 0;
+                        return db - da;
+                    });
                      setQuotes(fetchedQuotes);
 
                     // If categories are not set yet, derive from fetched data OR maintain existing
@@ -125,7 +127,13 @@ export default function QuotesPage() {
                     setCategories(uniqueCategories);
                     setTotal(typeof data.total === 'number' ? data.total : fetchedQuotes.length);
                 } else {
-                    setQuotes(FALLBACK_QUOTES);
+                    // Use fallback but ensure newest-first ordering for consistency
+                    const sortedFallback = [...FALLBACK_QUOTES].sort((a, b) => {
+                        const da = a.date ? Date.parse(a.date) : 0;
+                        const db = b.date ? Date.parse(b.date) : 0;
+                        return db - da;
+                    });
+                    setQuotes(sortedFallback);
                 }
             } catch (error) {
                 console.error('Failed to fetch quotes:', error);
@@ -136,7 +144,7 @@ export default function QuotesPage() {
         }
 
         fetchQuotes();
-    }, [page, limit, activeCategory, searchTerm]);
+    }, [page, limit, activeCategory, searchTerm, sortOrder]);
 
     const totalPages = Math.max(1, Math.ceil(total / limit));
 
@@ -153,6 +161,12 @@ export default function QuotesPage() {
         const matchesSearch = q.text.toLowerCase().includes(searchTerm.toLowerCase()) ||
                              q.author.toLowerCase().includes(searchTerm.toLowerCase());
         return matchesCategory && matchesSearch;
+    });
+    // Apply client-side sorting based on date (newest-first by default). Falls back to original order when dates are missing.
+    const sortedFilteredQuotes = [...filteredQuotes].sort((a, b) => {
+        const da = a.date ? Date.parse(a.date) : 0;
+        const db = b.date ? Date.parse(b.date) : 0;
+        return sortOrder === 'desc' ? db - da : da - db;
     });
 
     if (loading) {
@@ -213,6 +227,26 @@ export default function QuotesPage() {
                             />
                             <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 !text-[#FAF0E6]/30" size={14} />
                         </div>
+                        {/* Sort toggle placed next to search for quick access */}
+                        <div className="flex items-center gap-2">
+                            <span className="text-xs text-[#A68B7E] hidden md:inline">Sort:</span>
+                            <div className="inline-flex rounded-full bg-white/5 p-0.5">
+                                <button
+                                    onClick={() => setSortOrder('desc')}
+                                    aria-pressed={sortOrder === 'desc'}
+                                    className={`px-3 py-1 text-xs rounded-full ${sortOrder === 'desc' ? '!bg-[#3B241A] !text-[#FAF0E6]' : 'text-[#FAF0E6]/70'}`}
+                                >
+                                    Newest
+                                </button>
+                                <button
+                                    onClick={() => setSortOrder('asc')}
+                                    aria-pressed={sortOrder === 'asc'}
+                                    className={`px-3 py-1 text-xs rounded-full ${sortOrder === 'asc' ? '!bg-[#3B241A] !text-[#FAF0E6]' : 'text-[#FAF0E6]/70'}`}
+                                >
+                                    Oldest
+                                </button>
+                            </div>
+                        </div>
                     </div>
 
                     {/* CATEGORIES (No Scrollbar) */}
@@ -240,8 +274,8 @@ export default function QuotesPage() {
                     {/* QUOTES GRID (Compact) */}
                     <div className="columns-1 md:columns-2 lg:columns-3 gap-6 space-y-6 mt-8">
                         <AnimatePresence mode="popLayout">
-                            {filteredQuotes.length > 0 ? (
-                                filteredQuotes.map((quote) => (
+                            {sortedFilteredQuotes.length > 0 ? (
+                                sortedFilteredQuotes.map((quote) => (
                                     <motion.div
                                         layout
                                         initial={{ opacity: 0, y: 20 }}
@@ -275,49 +309,114 @@ export default function QuotesPage() {
                                                 </span>
 
                                                 {/* Copy Button */}
-                                                <button
-                                                    onClick={() => handleCopy(quote.text, quote.id || quote._id)}
-                                                    className="p-1.5 rounded-full hover:!bg-[#FAF0E6]/10 transition-colors"
-                                                >
-                                                    {copiedId === (quote.id || quote._id) ? (
-                                                        <span className="!text-[#F2A7A7] text-[9px] font-bold">Copied</span>
+                                                <div className="flex items-center gap-2">
+                                                    {/* View Link */}
+                                                    {quote.id ? (
+                                                        <Link href={`/quotes/${quote.id}-${encodeURIComponent((quote.author || 'quote').toLowerCase().replace(/[^a-z0-9]+/g, '-'))}`} className="text-xs font-bold !text-[#F2A7A7] hover:!text-[#FAF0E6]">
+                                                            View
+                                                        </Link>
+                                                    ) : null}
+
+                                                    {/* Share Button (client) */}
+                                                    {quote.id ? (
+                                                        <ShareButton quoteId={quote.id} title={quote.author} text={quote.text} />
                                                     ) : (
-                                                        <Copy size={16} className="!text-[#F2A7A7]" />
+                                                        <button
+                                                            onClick={() => handleCopy(quote.text, quote.id || quote._id)}
+                                                            className="p-1.5 rounded-full hover:!bg-[#FAF0E6]/10 transition-colors"
+                                                        >
+                                                            {copiedId === (quote.id || quote._id) ? (
+                                                                <span className="!text-[#F2A7A7] text-[9px] font-bold">Copied</span>
+                                                            ) : (
+                                                                <Copy size={16} className="!text-[#F2A7A7]" />
+                                                            )}
+                                                        </button>
                                                     )}
-                                                </button>
+                                                </div>
                                             </div>
                                         </div>
                                     </motion.div>
                                 ))
                             ) : (
-                                <div className="col-span-full flex flex-col items-center justify-center py-20 gap-4">
-                                    <Quote size={48} className="opacity-20" />
-                                    <p className="text-sm font-medium !text-[#FAF0E6]/50">No quotes found.</p>
-                                    <button
-                                        onClick={() => { setActiveCategory("All"); setSearchTerm(""); }}
-                                        className="text-xs font-bold uppercase tracking-widest !text-[#F2A7A7] hover:!text-[#FAF0E6] transition-colors"
-                                    >
-                                        Reset Filters
-                                    </button>
-                                </div>
-                            )}
-                        </AnimatePresence>
-                    </div>
+                                 <div className="col-span-full flex flex-col items-center justify-center py-20 gap-4">
+                                     <Quote size={48} className="opacity-20" />
+                                     <p className="text-sm font-medium !text-[#FAF0E6]/50">No quotes found.</p>
+                                     <button
+                                         onClick={() => { setActiveCategory("All"); setSearchTerm(""); }}
+                                         className="text-xs font-bold uppercase tracking-widest !text-[#F2A7A7] hover:!text-[#FAF0E6] transition-colors"
+                                     >
+                                         Reset Filters
+                                     </button>
+                                 </div>
+                             )}
+                         </AnimatePresence>
+                     </div>
 
-                    {/* Pagination Controls */}
-                    <div className="mt-8 flex items-center justify-between gap-4">
-                        <div className="text-sm text-[#FAF0E6]/70">Showing <span className="font-bold">{Math.min((page-1)*limit + 1, total || quotes.length)}</span> - <span className="font-bold">{Math.min(page*limit, total || quotes.length)}</span> of <span className="font-bold">{total || quotes.length}</span></div>
-                        <div className="flex items-center gap-2">
-                            <select value={limit} onChange={(e) => { setLimit(Number(e.target.value)); setPage(1); }} className="px-3 py-1 rounded-full bg-[#FAF0E6]/5 text-xs">
-                                {[6,12,24,48].map(n => <option key={n} value={n}>{n}</option>)}
-                            </select>
-                            <button onClick={() => setPage(1)} disabled={page === 1} className="px-3 py-1 rounded-full bg-white/10">First</button>
-                            <button onClick={() => setPage(p => Math.max(1, p-1))} disabled={page === 1} className="px-3 py-1 rounded-full bg-white/10">Prev</button>
-                            <div className="px-3 py-1 rounded-full bg-white/5">{page} / {totalPages}</div>
-                            <button onClick={() => setPage(p => Math.min(totalPages, p+1))} disabled={page >= totalPages} className="px-3 py-1 rounded-full bg-white/10">Next</button>
-                            <button onClick={() => setPage(totalPages)} disabled={page >= totalPages} className="px-3 py-1 rounded-full bg-white/10">Last</button>
-                        </div>
-                    </div>
+                     {/* Pagination Controls */}
+                     <nav className="mt-8" role="navigation" aria-label="Quotes pagination">
+                         <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+                             <div className="text-sm text-[#FAF0E6]/70 order-2 md:order-1">
+                                 Showing <span className="font-bold">{Math.min((page-1)*limit + 1, total || quotes.length)}</span> - <span className="font-bold">{Math.min(page*limit, total || quotes.length)}</span> of <span className="font-bold">{total || quotes.length}</span>
+                             </div>
+
+                             <div className="flex items-center gap-2 order-1 md:order-2">
+                                 {/* limit selector - hidden on small screens to save space */}
+                                 <select
+                                     value={limit}
+                                     onChange={(e) => { setLimit(Number(e.target.value)); setPage(1); }}
+                                     className="px-3 py-1 rounded-full bg-[#FAF0E6]/5 text-xs hidden md:inline-flex"
+                                     aria-label="Quotes per page"
+                                 >
+                                     {[6,12,24,48].map(n => <option key={n} value={n}>{n}</option>)}
+                                 </select>
+
+                                 {/* First - hidden on mobile */}
+                                 <button
+                                     onClick={() => setPage(1)}
+                                     disabled={page === 1}
+                                     className="px-3 py-1 rounded-full bg-white/10 hidden md:inline-flex"
+                                     aria-label="First page"
+                                 >
+                                     First
+                                 </button>
+
+                                 {/* Prev - always visible, touch-friendly on mobile */}
+                                 <button
+                                     onClick={() => setPage(p => Math.max(1, p-1))}
+                                     disabled={page === 1}
+                                     className="flex items-center justify-center gap-1 px-3 py-2 rounded-full bg-white/10 min-w-[44px] h-11"
+                                     aria-label="Previous page"
+                                 >
+                                     Prev
+                                 </button>
+
+                                 {/* Compact page indicator */}
+                                 <div className="px-3 py-1 rounded-full bg-white/5 text-xs">
+                                     Page <span className="font-bold">{page}</span> of <span className="font-bold">{totalPages}</span>
+                                 </div>
+
+                                 {/* Next - always visible */}
+                                 <button
+                                     onClick={() => setPage(p => Math.min(totalPages, p+1))}
+                                     disabled={page >= totalPages}
+                                     className="flex items-center justify-center gap-1 px-3 py-2 rounded-full bg-white/10 min-w-[44px] h-11"
+                                     aria-label="Next page"
+                                 >
+                                     Next
+                                 </button>
+
+                                 {/* Last - hidden on mobile */}
+                                 <button
+                                     onClick={() => setPage(totalPages)}
+                                     disabled={page >= totalPages}
+                                     className="px-3 py-1 rounded-full bg-white/10 hidden md:inline-flex"
+                                     aria-label="Last page"
+                                 >
+                                     Last
+                                 </button>
+                             </div>
+                         </div>
+                     </nav>
 
                  </div>
              </main>
