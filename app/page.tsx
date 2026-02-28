@@ -8,62 +8,130 @@ import FeaturedBlogs from "@/components/sections/FeaturedBlogs";
 import Footer from "@/components/Footer";
 import Testimonials from "@/components/sections/Testimonials";
 import QuotesPreviewSection from "@/components/sections/QuotesPreviewSection";
+import { getDatabase } from '@/lib/mongodb';
 
-// Get the base URL for API calls - works in both dev and production
-function getBaseUrl(): string {
-  // In production on Vercel, VERCEL_URL is automatically set
-  if (process.env.VERCEL_URL) {
-    return `https://${process.env.VERCEL_URL}`;
+// Local types for server-side shaping (named to avoid colliding with component-local types)
+type PageHeroData = {
+  title?: string;
+  subtitle?: string;
+  description?: string;
+  ctaText?: string;
+  ctaLink?: string;
+  ctaSecondaryText?: string;
+  ctaSecondaryLink?: string;
+  backgroundImage?: string;
+  profileImage?: string;
+};
+
+type RoleIcon = 'Video' | 'PenTool' | 'Monitor' | 'Camera';
+
+type PageAboutData = {
+  badge?: string;
+  heading?: string;
+  rolesIntro?: string;
+  detailText?: string;
+  tags?: string[];
+  roles?: { label: string; icon: RoleIcon }[];
+  profile?: { name?: string; title?: string; image?: string };
+};
+
+type PageServiceItem = {
+  id: string;
+  title: string;
+  description: string;
+  icon: 'Type' | 'Palette' | 'Video' | 'Camera' | 'Layers';
+  tags: string[];
+};
+
+// Server-side DB fetchers: use the database directly to avoid relying on internal HTTP calls
+async function getHeroData(): Promise<PageHeroData | undefined> {
+  try {
+    const db = await getDatabase();
+    const heroDataRes: unknown = await db.collection('hero').findOne({});
+    if (heroDataRes == null) return undefined;
+    const h = heroDataRes as Record<string, unknown>;
+    return {
+      title: typeof h.title === 'string' ? h.title : undefined,
+      subtitle: typeof h.subtitle === 'string' ? h.subtitle : undefined,
+      description: typeof h.description === 'string' ? h.description : undefined,
+      ctaText: typeof h.ctaText === 'string' ? h.ctaText : undefined,
+      ctaLink: typeof h.ctaLink === 'string' ? h.ctaLink : undefined,
+      ctaSecondaryText: typeof h.ctaSecondaryText === 'string' ? h.ctaSecondaryText : undefined,
+      ctaSecondaryLink: typeof h.ctaSecondaryLink === 'string' ? h.ctaSecondaryLink : undefined,
+      backgroundImage: typeof h.backgroundImage === 'string' ? h.backgroundImage : undefined,
+      profileImage: typeof h.profileImage === 'string' ? h.profileImage : undefined,
+    };
+  } catch (error) {
+    console.error('getHeroData error:', error);
+    return undefined;
   }
-  // Fallback to NEXT_PUBLIC_APP_URL for development or custom deployments
-  if (process.env.NEXT_PUBLIC_APP_URL) {
-    return process.env.NEXT_PUBLIC_APP_URL;
-  }
-  // Final fallback
-  return 'http://localhost:3000';
 }
 
-async function getHeroData() {
+async function getAboutData(): Promise<Partial<PageAboutData> | undefined> {
   try {
-    const baseUrl = getBaseUrl();
-    const res = await fetch(`${baseUrl}/api/hero`, {
-      cache: 'no-store',
+    const db = await getDatabase();
+    const docRes: unknown = await db.collection('about').findOne({});
+    if (docRes == null) return undefined;
+    const d = docRes as Record<string, unknown>;
+    const roles = Array.isArray(d.roles) ? (d.roles as unknown[]) : undefined;
+    return {
+      badge: typeof d.badge === 'string' ? (d.badge as string) : undefined,
+      heading: typeof d.heading === 'string' ? (d.heading as string) : undefined,
+      rolesIntro: typeof d.rolesIntro === 'string' ? (d.rolesIntro as string) : undefined,
+      detailText: typeof d.detailText === 'string' ? (d.detailText as string) : undefined,
+      tags: Array.isArray(d.tags) ? (d.tags as string[]) : undefined,
+      roles: roles
+        ? roles.map((r) => {
+            const rec = r as Record<string, unknown>;
+            const iconVal = typeof rec.icon === 'string' ? rec.icon : 'Video';
+            const icon: RoleIcon = ['Video', 'PenTool', 'Monitor', 'Camera'].includes(iconVal) ? (iconVal as RoleIcon) : 'Video';
+            return { label: typeof rec.label === 'string' ? (rec.label as string) : '', icon };
+          })
+        : undefined,
+      profile: (d.profile && typeof d.profile === 'object')
+        ? { name: String((d.profile as Record<string, unknown>).name || ''), title: String((d.profile as Record<string, unknown>).title || ''), image: String((d.profile as Record<string, unknown>).image || '') }
+        : undefined,
+    } as Partial<PageAboutData>;
+  } catch (error) {
+    console.error('getAboutData error:', error);
+    return undefined;
+  }
+}
+
+async function getServicesData(): Promise<PageServiceItem[]> {
+  try {
+    const db = await getDatabase();
+    const docsRes: unknown[] = await db.collection('services').find({}).toArray();
+    const docs = Array.isArray(docsRes) ? docsRes : [];
+    // small helper to safely stringify ids
+    const toStringSafe = (v: unknown): string | undefined => {
+      if (typeof v === 'string') return v;
+      if (v && typeof v === 'object' && typeof (v as { toString?: unknown }).toString === 'function') {
+        try { return String((v as { toString: () => string }).toString()); } catch { return undefined; }
+      }
+      return undefined;
+    };
+
+    return docs.map((dRaw: unknown, idx: number) => {
+      const d = dRaw as Record<string, unknown>;
+      const iconCandidates = ['Type', 'Palette', 'Video', 'Camera', 'Layers'];
+      const iconVal = typeof d.icon === 'string' ? d.icon : 'Type';
+      const icon = (iconCandidates.includes(iconVal) ? iconVal : 'Type') as PageServiceItem['icon'];
+      const tags = Array.isArray(d.tags) ? (d.tags as string[]) : (d.tags ? [String(d.tags)] : []);
+      const rawId = d.id ?? d._id ?? undefined;
+      const idStr = toStringSafe(rawId) ?? String(idx + 1);
+      const title = typeof d.title === 'string' ? d.title : (typeof d.name === 'string' ? d.name : `Service ${idx + 1}`);
+      const description = typeof d.description === 'string' ? d.description : (typeof d.summary === 'string' ? d.summary : '');
+      return {
+        id: idStr,
+        title,
+        description,
+        icon,
+        tags,
+      } as PageServiceItem;
     });
-
-    if (!res.ok) {
-      return null;
-    }
-
-    const data = await res.json();
-    return data.success ? data.data : null;
   } catch (error) {
-    console.error('Failed to fetch hero data:', error);
-    return null;
-  }
-}
-
-async function getAboutData() {
-  try {
-    const baseUrl = getBaseUrl();
-    const res = await fetch(`${baseUrl}/api/about`, { cache: 'no-store' });
-    if (!res.ok) return null;
-    const data = await res.json();
-    return data.success ? data.data : null;
-  } catch (error) {
-    console.error('Failed to fetch about data:', error);
-    return null;
-  }
-}
-
-async function getServicesData() {
-  try {
-    const baseUrl = getBaseUrl();
-    const res = await fetch(`${baseUrl}/api/services`, { cache: 'no-store' });
-    if (!res.ok) return [];
-    const data = await res.json();
-    return data.success ? data.data : [];
-  } catch (error) {
-    console.error('Failed to fetch services data:', error);
+    console.error('getServicesData error:', error);
     return [];
   }
 }
@@ -76,8 +144,11 @@ export default async function Home() {
       <Navbar />
       <main>
         <HeroSection heroData={heroData} />
-        <AboutSection aboutData={aboutData} />
-        <ServicesSection servicesData={servicesData} />
+        {/* Cast to the component's expected shape at the JSX boundary. */}
+        {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+        <AboutSection aboutData={aboutData as unknown as any} />
+        {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+        <ServicesSection servicesData={servicesData as unknown as any} />
         <ExpertiseSection />
         <FeaturedBlogs />
         <Testimonials />
