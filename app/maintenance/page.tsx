@@ -21,7 +21,7 @@ export default async function MaintenancePage() {
     const message = await getMaintenanceMessage();
 
     return (
-        <div className="min-h-screen bg-[#0F0A08] flex items-center justify-center px-6 relative overflow-hidden">
+        <div className="min-h-screen bg-gradient-to-br from-[#F2A7A7] to-[#DC7C7C] flex items-center justify-center px-6 relative overflow-hidden">
             {/* VIBRANT AMBIENT GLOWS - Increased opacity for visibility */}
             <div className="absolute top-[-15%] left-[-5%] w-[600px] h-[600px] bg-[#DC7C7C]/20 rounded-full blur-[140px] pointer-events-none" />
             <div className="absolute bottom-[-15%] right-[-5%] w-[600px] h-[600px] bg-[#A68B7E]/15 rounded-full blur-[140px] pointer-events-none" />
@@ -42,10 +42,10 @@ export default async function MaintenancePage() {
 
                 {/* HEADLINE - Brightened Porcelain color */}
                 <div className="space-y-4 mb-8">
-           <span className="text-[11px] uppercase tracking-[0.5em] text-[#F2A7A7] font-extrabold drop-shadow-sm">
+           <span className="text-[11px] uppercase tracking-[0.5em] text-[#3B241A] font-extrabold drop-shadow-sm">
             Status: Refining
           </span>
-                    <h1 className="text-5xl md:text-7xl font-serif italic text-[#FFF9F5] leading-tight drop-shadow-md">
+                    <h1 className="text-5xl md:text-7xl font-serif italic text-[#3B241A] leading-tight drop-shadow-md">
                         Polishing the <br/>
                         <span className="not-italic font-bold tracking-tighter">Creative Space</span>
                     </h1>
@@ -53,7 +53,7 @@ export default async function MaintenancePage() {
 
                 {/* MESSAGE - Warm mocha tone */}
                 <div className="max-w-md mx-auto mb-12">
-                    <p className="text-[#D4C3BB] text-xl leading-relaxed font-light italic">
+                    <p className="text-[#3B241A]/90 text-xl leading-relaxed font-light italic">
                         &ldquo;{message}&rdquo;
                     </p>
                 </div>
@@ -68,7 +68,7 @@ export default async function MaintenancePage() {
                         <a
                             key={social.label}
                             href={social.href}
-                            className="text-[#A68B7E] hover:text-[#F2A7A7] transition-all duration-300 transform hover:scale-110"
+                            className="text-[#3B241A]/80 hover:text-[#F2A7A7] transition-all duration-300 transform hover:scale-110"
                             aria-label={social.label}
                         >
                             {social.icon}
@@ -78,15 +78,15 @@ export default async function MaintenancePage() {
 
                 {/* PROGRESS INDICATOR - Refined bar */}
                 <div className="flex flex-col items-center gap-5">
-                    <div className="w-40 h-[1px] bg-white/10 relative overflow-hidden">
+                    <div className="w-40 h-[1px] bg-[#FAF0E6]/30 relative overflow-hidden">
                         <div className="absolute inset-0 bg-gradient-to-r from-transparent via-[#F2A7A7] to-transparent w-1/2 animate-shimmer" />
                     </div>
 
                     <div className="flex flex-col gap-1">
-                        <p className="text-[10px] uppercase tracking-[0.3em] text-[#FAF0E6]/40 font-bold">
+                        <p className="text-[10px] uppercase tracking-[0.3em] text-[#3B241A]/40 font-bold">
                             EST. 2026 • Patna, India
                         </p>
-                        <p className="text-[9px] text-[#A68B7E]/50 italic">
+                        <p className="text-[9px] text-[#3B241A]/60 italic">
                             Thank you for your patience
                         </p>
                     </div>
