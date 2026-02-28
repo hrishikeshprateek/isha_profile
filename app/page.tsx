@@ -103,6 +103,7 @@ async function getServicesData(): Promise<PageServiceItem[]> {
     const db = await getDatabase();
     const docsRes: unknown[] = await db.collection('services').find({}).toArray();
     const docs = Array.isArray(docsRes) ? docsRes : [];
+
     // small helper to safely stringify ids
     const toStringSafe = (v: unknown): string | undefined => {
       if (typeof v === 'string') return v;
