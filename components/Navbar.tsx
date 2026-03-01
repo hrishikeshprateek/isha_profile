@@ -6,7 +6,6 @@ const Navbar = () => {
     return (
         <Toolbar
             showBackButton={false}
-            navItems={["Home", "Services", "My Projects", "Reviews", "Contact"]}
             showContactButton={true}
             logoText="IR"
             logoTitle="ISHA RANI"

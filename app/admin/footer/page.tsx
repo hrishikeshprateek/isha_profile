@@ -107,7 +107,7 @@ export default function AdminFooterPage() {
 
   return (
     <div className="min-h-screen bg-[#FAF0E6] text-[#3B241A]">
-      <Toolbar title="Footer Links" showBackButton={true} backHref="/admin" navItems={["Home", "Services", "Work", "Contact"]} />
+      <Toolbar title="Footer Links" showBackButton={true} backHref="/admin" />
 
       <main className="max-w-4xl mx-auto p-6 pt-28">
         <h2 className="text-2xl font-serif font-bold mb-4">Footer Links</h2>

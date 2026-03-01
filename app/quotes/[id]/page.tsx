@@ -100,7 +100,7 @@ export default async function QuotePage({ params }: { params: Promise<{ id: stri
   return (
     <div className="flex flex-col min-h-screen !bg-[#3B241A] !text-[#FAF0E6] font-sans selection:!bg-[#F2A7A7] selection:!text-[#3B241A]">
       {/* 1. TOOLBAR */}
-      <Toolbar backHref="/quotes" navItems={["Home", "Services", "Work", "About", "Contact"]} />
+      <Toolbar backHref="/quotes" />
 
       {/* 2. BACKGROUND GLOW */}
       <div className="fixed top-0 left-0 w-full h-full pointer-events-none z-0">

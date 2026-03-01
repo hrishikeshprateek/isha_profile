@@ -12,7 +12,6 @@ export default function WallPage() {
                 title="Gallery"
                 showBackButton={true}
                 backHref="/d1"
-                navItems={["Home", "Services", "My Projects", "Reviews", "Contact"]}
             />
 
             {/* Main Content */}

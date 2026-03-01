@@ -197,7 +197,6 @@ export default function QuotesPage() {
             {/* 1. TOOLBAR */}
             <Toolbar
                 backHref="/"
-                navItems={["Home", "Services", "Work", "About", "Contact"]}
             />
 
             {/* 2. BACKGROUND GLOW */}

@@ -223,7 +223,7 @@ export default function BlogPostPage() {
         return (
             <div className="min-h-screen bg-[#FAF0E6] font-sans flex flex-col">
                 <div className="fixed top-0 left-0 right-0 z-40 bg-[#FAF0E6]/80 backdrop-blur-md">
-                    <Toolbar title="Journal" showBackButton={true} backHref="/blogs" navItems={["Home", "Services", "Work", "Contact"]} showContactButton={false} />
+                    <Toolbar title="Journal" showBackButton={true} backHref="/blogs" showContactButton={false} />
                 </div>
                 <div className="pt-36 max-w-4xl mx-auto px-6">
                     <div className="text-center py-20">
@@ -268,7 +268,7 @@ export default function BlogPostPage() {
 
             {/* Toolbar */}
             <div className="fixed top-0 left-0 right-0 z-40 bg-[#FAF0E6]/80 backdrop-blur-md transition-all duration-300">
-                <Toolbar title="Journal" showBackButton={true} backHref="/blogs" navItems={["Home", "Services", "Work", "Contact"]} showContactButton={false} />
+                <Toolbar title="Journal" showBackButton={true} backHref="/blogs" showContactButton={false} />
             </div>
 
             {/* Main content */}

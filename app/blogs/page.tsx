@@ -88,7 +88,6 @@ const Blogs = () => {
                 title="Journal"
                 showBackButton={true}
                 backHref="/d1"
-                navItems={["Home", "Services", "My Projects", "Reviews", "Contact"]}
                 showContactButton={false}
             />
 
