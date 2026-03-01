@@ -27,7 +27,7 @@ function getBaseUrl(): string {
     return process.env.NEXT_PUBLIC_APP_URL;
   }
   // Final fallback
-  return 'http://localhost:3000';
+  return 'https://isharani.in';
 }
 
 async function getLatestBlogs(): Promise<BlogPost[]> {
