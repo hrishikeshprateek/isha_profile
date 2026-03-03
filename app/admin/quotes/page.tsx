@@ -363,7 +363,7 @@ export default function AdminQuotesPage() {
                                 <div className="mb-4 flex gap-3">
                                     <Quote size={20} className="text-[#F2A7A7] flex-shrink-0 mt-1" />
                                     <blockquote className="flex-1">
-                                        <p className="text-base md:text-lg font-serif italic text-[#3B241A] leading-relaxed">
+                                        <p className="text-base md:text-lg font-serif italic text-[#3B241A] leading-relaxed whitespace-pre-line">
                                             {quote.text}
                                         </p>
                                     </blockquote>

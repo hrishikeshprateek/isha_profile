@@ -113,7 +113,7 @@ export default async function QuotePage({ params }: { params: Promise<{ id: stri
         <div className="container mx-auto max-w-2xl">
           {/* QUOTE DETAIL SECTION */}
           <article className="p-6 md:p-8 rounded-2xl bg-[#FAF0E6]/5 backdrop-blur-md border !border-[#FAF0E6]/10 hover:border-[#F2A7A7]/30 transition-all">
-            <p className="text-2xl md:text-3xl font-serif font-bold !text-[#FAF0E6] mb-6 leading-relaxed">
+            <p className="text-2xl md:text-3xl font-serif font-bold !text-[#FAF0E6] mb-6 leading-relaxed whitespace-pre-line">
               &quot;{quote.text}&quot;
             </p>
 

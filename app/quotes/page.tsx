@@ -300,8 +300,8 @@ export default function QuotesPage() {
                                             <Quote className="absolute top-5 left-5 w-6 h-6 !text-[#F2A7A7]/10 rotate-180" />
 
                                             {/* Quote Text */}
-                                            <p className="leading-[1.5] !text-[#FAF0E6] mb-4 text-lg md:text-xl font-serif font-bold tracking-tight">
-                                                “{quote.text}”
+                                            <p className="leading-[1.5] !text-[#FAF0E6] mb-4 text-lg md:text-xl font-serif font-bold tracking-tight whitespace-pre-line">
+                                                &#34;{quote.text}&#34;
                                             </p>
 
                                             {/* Author */}
