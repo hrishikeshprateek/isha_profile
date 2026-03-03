@@ -1,6 +1,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
+import { getDatabase, Collections } from '@/lib/mongodb';
 
 // Interface
 interface BlogPost {
@@ -16,39 +17,76 @@ interface BlogPost {
     slug?: string;
 }
 
-// Get the base URL for API calls - works in both dev and production
-function getBaseUrl(): string {
-  // In production on Vercel, VERCEL_URL is automatically set
-  if (process.env.VERCEL_URL) {
-    return `https://${process.env.VERCEL_URL}`;
-  }
-  // Fallback to NEXT_PUBLIC_APP_URL for development or custom deployments
-  if (process.env.NEXT_PUBLIC_APP_URL) {
-    return process.env.NEXT_PUBLIC_APP_URL;
-  }
-  // Final fallback
-  return 'https://isharani.in';
-}
+// Helper to safely convert _id to string (reusable)
+const idToString = (id: unknown): string => {
+    if (typeof id === 'string') return id;
+    if (id && typeof id === 'object') {
+        const obj = id as { toString?: () => string };
+        if (typeof obj.toString === 'function') return obj.toString();
+    }
+    return String(id);
+};
 
+// Get blogs directly from database with connection pooling
+// This uses the global connection pool from getDatabase()
 async function getLatestBlogs(): Promise<BlogPost[]> {
     try {
-        const baseUrl = getBaseUrl();
-        const res = await fetch(`${baseUrl}/api/blogs`, {
-            next: { revalidate: 3600 }, // ISR: Revalidate every hour (3600 seconds)
-        });
+        // Get database connection (uses connection pooling)
+        const db = await getDatabase();
 
-        if (!res.ok) {
-            console.error('Failed to fetch blogs');
+        // Optimized query with projection to fetch only needed fields (reduces memory/bandwidth)
+        const blogsData = await db
+            .collection(Collections.BLOGS)
+            .find(
+                { published: true },
+                {
+                    projection: {
+                        _id: 1,
+                        id: 1,
+                        title: 1,
+                        excerpt: 1,
+                        category: 1,
+                        date: 1,
+                        readTime: 1,
+                        image: 1,
+                        author: 1,
+                        tags: 1,
+                        slug: 1,
+                        createdAt: 1
+                    }
+                }
+            )
+            .sort({ createdAt: -1, date: -1 })
+            .limit(4)
+            .toArray();
+
+        // Early return for empty results
+        if (!blogsData || blogsData.length === 0) {
             return [];
         }
 
-        const data = await res.json();
-        if (data.success && Array.isArray(data.blogs)) {
-            return data.blogs.slice(0, 4); // Get latest 4 blogs
-        }
-        return [];
+        // Transform to BlogPost format with defensive checks
+        return blogsData.map((blog) => {
+            const b = blog as Record<string, unknown>;
+
+            return {
+                id: idToString(b._id || b.id),
+                title: String(b.title || 'Untitled'),
+                excerpt: String(b.excerpt || '').slice(0, 200), // Limit excerpt length
+                category: String(b.category || 'General'),
+                date: String(b.date || new Date().toLocaleDateString()),
+                readTime: String(b.readTime || '5 min read'),
+                image: String(b.image || '/isha_a.png'),
+                author: String(b.author || 'ISHA RANI'),
+                tags: Array.isArray(b.tags) ? (b.tags as string[]).slice(0, 5) : [], // Limit tags
+                slug: b.slug ? String(b.slug) : undefined,
+            };
+        });
     } catch (error) {
-        console.error('Error fetching latest blogs:', error);
+        // Log error but don't throw - graceful degradation
+        console.error('[FeaturedBlogs] Error fetching blogs from database:', error);
+
+        // Return empty array instead of crashing the page
         return [];
     }
 }
