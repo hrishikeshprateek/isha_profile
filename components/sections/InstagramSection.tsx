@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 
 declare global {
   interface Window {
@@ -10,6 +10,17 @@ declare global {
       };
     };
   }
+}
+
+interface InstagramPost {
+  id: string;
+  url: string;
+}
+
+interface InstagramData {
+  profileUrl: string;
+  profileHandle: string;
+  posts: InstagramPost[];
 }
 
 const SkeletonLoader = () => (
@@ -33,7 +44,36 @@ const SkeletonLoader = () => (
 );
 
 const InstagramSection = () => {
+    const [instagramData, setInstagramData] = useState<InstagramData | null>(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
 
+    // Fetch Instagram data from API
+    useEffect(() => {
+        const fetchInstagramData = async () => {
+            try {
+                setLoading(true);
+                const response = await fetch('/api/admin/instagram');
+                const data = await response.json();
+
+                if (data.success && data.data) {
+                    setInstagramData(data.data);
+                    setError(null);
+                } else {
+                    setError('Failed to load Instagram data');
+                }
+            } catch (err) {
+                console.error('Error fetching Instagram data:', err);
+                setError('Error loading Instagram section');
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchInstagramData();
+    }, []);
+
+    // Process Instagram embeds
     useEffect(() => {
         // Reuse existing script if already present
         const existing = document.querySelector<HTMLScriptElement>('script[src="https://www.instagram.com/embed.js"]');
@@ -69,7 +109,53 @@ const InstagramSection = () => {
         return () => {
             clearInterval(checkInstagram);
         };
-    }, []);
+    }, [instagramData]);
+
+    // Show skeleton while loading
+    if (loading) {
+        return (
+            <section className="py-12 md:py-16 bg-gradient-to-b from-[#FAF0E6] to-[#FFF5ED] relative overflow-hidden">
+                <div className="absolute top-0 left-0 w-96 h-96 bg-[#DC7C7C]/8 rounded-full blur-3xl -translate-y-1/2 -translate-x-1/2" />
+                <div className="absolute bottom-0 right-0 w-80 h-80 bg-[#DC7C7C]/5 rounded-full blur-3xl translate-y-1/2 translate-x-1/2" />
+
+                <div className="container mx-auto px-4 sm:px-6 relative z-10 max-w-[1200px]">
+                    <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-12 gap-6">
+                        <div className="max-w-2xl">
+                            <div className="inline-flex items-center gap-2 mb-3 opacity-70">
+                                <span className="text-xs font-bold uppercase tracking-widest text-[#DC7C7C] font-serif">On The Gram</span>
+                                <div className="w-8 h-px bg-[#DC7C7C]/40" />
+                            </div>
+                            <h3 className="text-4xl md:text-5xl font-bold text-[#3B241A] leading-tight mb-4">
+                                Instagram <span className="text-[#DC7C7C] italic font-light">Moments</span>
+                            </h3>
+                        </div>
+                    </div>
+                    <div className="flex justify-center">
+                        <div className="w-full grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-8 max-w-6xl">
+                            <div className="lg:col-span-1"><SkeletonLoader /></div>
+                            <div className="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8">
+                                <SkeletonLoader />
+                                <SkeletonLoader />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        );
+    }
+
+    // Show error state
+    if (error || !instagramData) {
+        return (
+            <section className="py-12 md:py-16 bg-gradient-to-b from-[#FAF0E6] to-[#FFF5ED] relative overflow-hidden">
+                <div className="container mx-auto px-4 sm:px-6 relative z-10 max-w-[1200px]">
+                    <div className="text-center">
+                        <p className="text-[#DC7C7C] font-semibold">{error || 'Unable to load Instagram section'}</p>
+                    </div>
+                </div>
+            </section>
+        );
+    }
 
     return (
         <section className="py-12 md:py-16 bg-gradient-to-b from-[#FAF0E6] to-[#FFF5ED] relative overflow-hidden">
@@ -100,17 +186,20 @@ const InstagramSection = () => {
 
                 {/* Main Grid Layout */}
                 <div className="flex justify-center">
-                    <div className="w-full grid grid-cols-1 lg:grid-cols-3 gap-8 max-w-6xl">
+                    <div className="w-full grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-8 max-w-6xl">
                         {/* Profile Card */}
-                        <div className="lg:col-span-1 flex flex-col gap-6">
-                            {/* Profile 1 */}
-                            <div className="relative flex flex-col">
-                                <div className="instagram-embed-wrapper opacity-0 transition-opacity duration-700 w-full flex items-center justify-center" style={{ transformOrigin: 'center' }}>
+                        <div className="lg:col-span-1 flex flex-col gap-4 md:gap-6">
+                            {/* Profile */}
+                            <div className="relative flex flex-col w-full">
+                                <div className="instagram-skeleton">
+                                    <SkeletonLoader />
+                                </div>
+                                <div className="instagram-embed-wrapper opacity-0 transition-opacity duration-700 w-full flex items-center justify-center" style={{ transformOrigin: 'center', minWidth: '0' }}>
                                     <blockquote
                                         className="instagram-media !m-0"
-                                        data-instgrm-permalink="https://www.instagram.com/moreofisha._/"
+                                        data-instgrm-permalink={instagramData.profileUrl}
                                         data-instgrm-version="14"
-                                        style={{ border: 'none', padding: '0px' }}
+                                        style={{ border: 'none', padding: '0px', maxWidth: '100%', width: '100%' }}
                                     />
                                 </div>
                             </div>
@@ -124,44 +213,35 @@ const InstagramSection = () => {
 
                             {/* Follow Button */}
                             <a
-                                href="https://instagram.com/moreofisha._"
+                                href={instagramData.profileUrl}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="inline-flex items-center justify-center gap-3 px-8 py-4 rounded-full bg-white/60 backdrop-blur-sm border border-[#DC7C7C]/20 text-[#3B241A] font-semibold hover:bg-white hover:border-[#DC7C7C]/40 transition-all duration-300 shadow-sm hover:shadow-md whitespace-nowrap w-full"
+                                className="inline-flex items-center justify-center gap-3 px-6 md:px-8 py-3 md:py-4 rounded-full bg-white/60 backdrop-blur-sm border border-[#DC7C7C]/20 text-[#3B241A] font-semibold hover:bg-white hover:border-[#DC7C7C]/40 transition-all duration-300 shadow-sm hover:shadow-md whitespace-nowrap w-full text-sm md:text-base"
                             >
                                 Follow on Instagram
-                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg className="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4m-4-6l6-6m0 0L21 3m-6 0v12" />
                                 </svg>
                             </a>
-
                         </div>
 
-                        {/* Right Column: 2 Posts Horizontal */}
-                        <div className="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-8">
-                            {/* Post 1 */}
-                            <div className="relative flex flex-col">
-                                <div className="instagram-embed-wrapper opacity-0 transition-opacity duration-700 w-full flex items-center justify-center" style={{ transformOrigin: 'center' }}>
-                                    <blockquote
-                                        className="instagram-media !m-0"
-                                        data-instgrm-permalink="https://www.instagram.com/p/DRpYFwQDyXb/"
-                                        data-instgrm-version="14"
-                                        style={{ border: 'none', padding: '0px' }}
-                                    />
+                        {/* Right Column: Posts (Dynamic) */}
+                        <div className="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8">
+                            {instagramData.posts.map((post) => (
+                                <div key={post.id} className="relative flex flex-col w-full">
+                                    <div className="instagram-skeleton">
+                                        <SkeletonLoader />
+                                    </div>
+                                    <div className="instagram-embed-wrapper opacity-0 transition-opacity duration-700 w-full flex items-center justify-center" style={{ transformOrigin: 'center', minWidth: '0' }}>
+                                        <blockquote
+                                            className="instagram-media !m-0"
+                                            data-instgrm-permalink={post.url}
+                                            data-instgrm-version="14"
+                                            style={{ border: 'none', padding: '0px', maxWidth: '100%', width: '100%' }}
+                                        />
+                                    </div>
                                 </div>
-                            </div>
-
-                            {/* Post 2 */}
-                            <div className="relative flex flex-col">
-                                <div className="instagram-embed-wrapper opacity-0 transition-opacity duration-700 w-full flex items-center justify-center" style={{ transformOrigin: 'center' }}>
-                                    <blockquote
-                                        className="instagram-media !m-0"
-                                        data-instgrm-permalink="https://www.instagram.com/p/DUBGMakE2s5/"
-                                        data-instgrm-version="14"
-                                        style={{ border: 'none', padding: '0px' }}
-                                    />
-                                </div>
-                            </div>
+                            ))}
                         </div>
 
                     </div>

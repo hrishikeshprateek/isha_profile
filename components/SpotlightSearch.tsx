@@ -24,6 +24,7 @@ const SEARCHABLE_ITEMS = [
   { title: 'Services', description: 'Manage services', href: '/admin/services', category: 'Sections' },
   { title: 'Expertise', description: 'Edit expertise section', href: '/admin/expertise', category: 'Sections' },
   { title: 'Contact Info', description: 'Update contact details', href: '/admin/contact', category: 'Sections' },
+  { title: 'Instagram Section', description: 'Manage Instagram posts & profile', href: '/admin/instagram', category: 'Sections' },
 
   // Standalone Pages
   { title: 'My Journey', description: 'Edit journey page', href: '/admin/my-journey', category: 'Pages' },

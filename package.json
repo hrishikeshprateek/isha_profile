@@ -11,7 +11,8 @@
     "create-admin": "node scripts/create-admin-firebase-fixed.js",
     "create-admin-firebase": "node scripts/create-admin-firebase-fixed.js",
     "test-db": "node scripts/test-mongodb.js",
-    "test-cloudinary": "node scripts/test-cloudinary.js"
+    "test-cloudinary": "node scripts/test-cloudinary.js",
+    "seed-instagram": "node scripts/seed-instagram.js"
   },
   "dependencies": {
     "@radix-ui/react-slot": "^1.2.4",
