@@ -34,7 +34,7 @@ async function getLatestBlogs(): Promise<BlogPost[]> {
     try {
         const baseUrl = getBaseUrl();
         const res = await fetch(`${baseUrl}/api/blogs`, {
-            cache: 'no-store',
+            next: { revalidate: 3600 }, // ISR: Revalidate every hour (3600 seconds)
         });
 
         if (!res.ok) {

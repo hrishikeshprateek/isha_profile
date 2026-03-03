@@ -14,60 +14,71 @@ const options = {
   w: 'majority' as const,
 };
 
-let clientPromise: Promise<MongoClient>;
-let retryCount = 0;
-const MAX_RETRIES = 3;
-
-// Augment the NodeJS global interface so we can persist the MongoClient promise in development.
-// This avoids creating an unused local variable while still providing a typed global cache.
-declare global {
-  // eslint-disable-next-line @typescript-eslint/no-namespace
-  namespace NodeJS {
-    interface Global {
-      _mongoClientPromise?: Promise<MongoClient>;
-    }
-  }
+// Global cache interface for both dev and production
+interface GlobalMongoCache {
+  _mongoClientPromise?: Promise<MongoClient>;
+  _mongoClient?: MongoClient;
+  _connectionCount?: number;
 }
+
+// Augment the NodeJS global interface
+declare global {
+  var _mongoCache: GlobalMongoCache | undefined;
+}
+
+// Initialize global cache
+if (!global._mongoCache) {
+  global._mongoCache = {
+    _connectionCount: 0,
+  };
+}
+
+const cache = global._mongoCache;
 
 async function createConnection(): Promise<MongoClient> {
   if (!uri) {
     throw new Error('MONGODB_URI is not configured. Please set MONGODB_URI in your environment.');
   }
 
+  // Check if we already have a connected client
+  if (cache._mongoClient) {
+    try {
+      // Ping to verify connection is still alive
+      await cache._mongoClient.db().admin().ping();
+      return cache._mongoClient;
+    } catch {
+      // Connection is dead, will reconnect
+      console.warn('⚠️ Existing MongoDB connection is dead, reconnecting...');
+      cache._mongoClient = undefined;
+      cache._mongoClientPromise = undefined;
+    }
+  }
+
   try {
     const newClient = new MongoClient(uri, options);
     await newClient.connect();
-    console.log('✅ MongoDB connected successfully');
-    retryCount = 0; // Reset retry count on successful connection
+
+    // Only log on actual new connections, not reuse
+    if (!cache._connectionCount || cache._connectionCount === 0) {
+      console.log('✅ MongoDB connected successfully');
+    }
+    cache._connectionCount = (cache._connectionCount || 0) + 1;
+    cache._mongoClient = newClient;
+
     return newClient;
   } catch (error) {
     console.error('❌ MongoDB connection error:', error);
-    if (retryCount < MAX_RETRIES) {
-      retryCount++;
-      console.log(`Retrying MongoDB connection (${retryCount}/${MAX_RETRIES})...`);
-      await new Promise(resolve => setTimeout(resolve, 1000 * retryCount)); // Exponential backoff
-      return createConnection();
-    }
     throw error;
   }
 }
 
-if (process.env.NODE_ENV === 'development') {
-  // In development mode, use a global variable to preserve the connection
-  // Use a small runtime-only interface to avoid eslint/no-explicit-any while
-  // keeping access to a shared promise on globalThis.
-  interface DevGlobal {
-    _mongoClientPromise?: Promise<MongoClient>;
-  }
-  const g = globalThis as unknown as DevGlobal;
-  if (!g._mongoClientPromise) {
-    g._mongoClientPromise = createConnection();
-  }
-  clientPromise = g._mongoClientPromise as Promise<MongoClient>;
-} else {
-  // In production mode, use persistent connection with pooling
-  clientPromise = createConnection();
+// Lazy connection promise
+let clientPromise: Promise<MongoClient>;
+
+if (!cache._mongoClientPromise) {
+  cache._mongoClientPromise = createConnection();
 }
+clientPromise = cache._mongoClientPromise;
 
 export default clientPromise;
 
@@ -78,11 +89,14 @@ export async function getDatabase(): Promise<Db> {
     return mongoClient.db(process.env.MONGODB_DB || 'isha_portfolio');
   } catch (error) {
     console.error('Failed to get database:', error);
-    // Try to reconnect
-    if (process.env.NODE_ENV === 'development') {
-      (globalThis as unknown as { _mongoClientPromise?: Promise<MongoClient> })._mongoClientPromise = undefined;
-    }
-    throw error;
+    // Clear cache and retry once
+    cache._mongoClient = undefined;
+    cache._mongoClientPromise = undefined;
+    clientPromise = createConnection();
+    cache._mongoClientPromise = clientPromise;
+
+    const mongoClient = await clientPromise;
+    return mongoClient.db(process.env.MONGODB_DB || 'isha_portfolio');
   }
 }
 
