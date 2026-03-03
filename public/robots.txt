@@ -1,0 +1,38 @@
+# Robots.txt for ISHA RANI - isharani.in
+# Allow all search engines to crawl the website
+
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /api
+Disallow: /auth
+Disallow: /maintenance
+Disallow: /analytics
+Disallow: /*.json
+Disallow: /*?*utm_*
+Disallow: /*?*sort=
+Disallow: /*?*page=
+Crawl-delay: 1
+
+# Google-specific
+User-agent: Googlebot
+Allow: /
+Disallow: /admin
+Disallow: /api
+Disallow: /auth
+Disallow: /maintenance
+
+# Bing
+User-agent: Bingbot
+Allow: /
+Disallow: /admin
+Disallow: /api
+Disallow: /auth
+
+# Sitemap location
+Sitemap: https://www.isharani.in/sitemap.xml
+Sitemap: https://isharani.in/sitemap.xml
+
+# Add your canonical domain
+Host: https://www.isharani.in
+
