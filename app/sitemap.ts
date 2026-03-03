@@ -33,13 +33,15 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
     // Helper to sanitize URL to prevent XML parsing errors
     const sanitizeUrl = (url: string): string => {
-      // Remove any problematic characters and ensure valid URL encoding
-      return encodeURI(decodeURI(url))
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&apos;');
+      // Simply ensure proper URL encoding without manual XML escaping
+      // MetadataRoute.Sitemap handles XML escaping automatically
+      try {
+        // Decode and re-encode to normalize any double encoding
+        return decodeURI(url);
+      } catch {
+        // If decoding fails, return as-is
+        return url;
+      }
     };
 
     // Static routes

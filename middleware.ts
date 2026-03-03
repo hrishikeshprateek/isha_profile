@@ -17,6 +17,9 @@ const BYPASS_PATHS = [
   '/quotes',
   '/api/quotes',
   '/api/blogs',
+  // SEO critical paths - MUST be accessible
+  '/sitemap.xml',
+  '/robots.txt',
   '/_next',
   '/public',
   '.ico',
