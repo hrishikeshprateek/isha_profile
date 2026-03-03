@@ -176,7 +176,7 @@ const Toolbar = ({
                                         router.push("/vcard");
                                         closeMobileMenu();
                                     }}
-                                    className="w-full bg-[#3B241A] hover:bg-[#2A1810] text-white py-4 md:py-7 rounded-lg md:rounded-[1.5rem] font-bold uppercase tracking-widest text-[10px] md:text-xs transition-all active:scale-95"
+                                    className="w-full bg-[#3B241A] hover:bg-[#2A1810] text-white py-5 md:py-7 rounded-lg md:rounded-[1.5rem] font-bold uppercase tracking-widest text-[10px] md:text-xs transition-all active:scale-95"
                                 >
                                     <span className="md:hidden">vCard</span>
                                     <span className="hidden md:inline">Download Vcard</span>
