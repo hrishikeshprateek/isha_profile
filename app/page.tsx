@@ -10,6 +10,7 @@ import FeaturedBlogs from "@/components/sections/FeaturedBlogs";
 import Footer from "@/components/Footer";
 import Testimonials from "@/components/sections/Testimonials";
 import QuotesPreviewSection from "@/components/sections/QuotesPreviewSection";
+import InstagramSection from "@/components/sections/InstagramSection";
 import { getDatabase } from '@/lib/mongodb';
 
 // Local types for server-side shaping (named to avoid colliding with component-local types)
@@ -155,6 +156,7 @@ export default async function Home() {
         <ExpertiseSection />
         <FeaturedBlogs />
         <Testimonials />
+        <InstagramSection />
         <QuotesPreviewSection />
         <ContactSection />
         <Footer />
