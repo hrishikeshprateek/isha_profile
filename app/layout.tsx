@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 
@@ -11,6 +11,13 @@ const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
 });
+
+// Viewport configuration
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 5,
+};
 
 // Comprehensive SEO metadata for the entire website
 export const metadata: Metadata = {
@@ -112,13 +119,6 @@ export const metadata: Metadata = {
   // Alternate language versions (for international SEO)
   alternates: {
     canonical: "https://www.isharani.in",
-  },
-
-  // Viewport and charset (handled by Next.js but explicit for clarity)
-  viewport: {
-    width: "device-width",
-    initialScale: 1,
-    maximumScale: 5,
   },
 };
 
