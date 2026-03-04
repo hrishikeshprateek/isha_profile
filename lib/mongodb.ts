@@ -112,4 +112,5 @@ export const Collections = {
   QUOTES: 'quotes',
   TESTIMONIALS: 'testimonials',
   MEDIA: 'media',
+  WALL_ITEMS: 'wall_items',
 } as const;

@@ -7,6 +7,7 @@ import ServicesSection from "@/components/ServicesSection";
 import ExpertiseSection from "@/components/ExpertiseSection";
 import ContactSection from "@/components/ContactSection";
 import FeaturedBlogs from "@/components/sections/FeaturedBlogs";
+import FeaturedWorks from "@/components/sections/FeaturedWorks";
 import Footer from "@/components/Footer";
 import Testimonials from "@/components/sections/Testimonials";
 import QuotesPreviewSection from "@/components/sections/QuotesPreviewSection";
@@ -155,6 +156,7 @@ export default async function Home() {
         <ServicesSection servicesData={servicesData as unknown as any} />
         <ExpertiseSection />
         <FeaturedBlogs />
+        <FeaturedWorks />
         <Testimonials />
         <InstagramSection />
         <QuotesPreviewSection />
