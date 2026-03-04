@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { generateSEOMetadata } from "@/lib/seo-config";
 import StructuredData from "@/components/StructuredData";
+import { ModalProvider } from "@/components/ModalProvider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -105,8 +106,10 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <StructuredData />
-        {children}
+        <ModalProvider>
+          <StructuredData />
+          {children}
+        </ModalProvider>
       </body>
     </html>
   );

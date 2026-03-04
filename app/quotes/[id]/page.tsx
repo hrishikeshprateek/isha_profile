@@ -1,6 +1,7 @@
 import React from "react";
 import { notFound } from "next/navigation";
 import { Metadata } from "next";
+import Link from "next/link";
 import Footer from "@/components/Footer";
 import Toolbar from "@/components/Toolbar";
 
@@ -8,6 +9,8 @@ import { getDatabase, Collections } from "@/lib/mongodb";
 import type { Document, Filter } from "mongodb";
 import { ObjectId } from "mongodb";
 import ShareButton from "@/components/ShareButton";
+import DownloadQuote from "@/components/DownloadQuote";
+import ShareDownloadButton from "@/components/ShareDownloadButton";
 
 type Quote = {
   id: string;
@@ -113,25 +116,39 @@ export default async function QuotePage({ params }: { params: Promise<{ id: stri
       </div>
 
       {/* 3. MAIN CONTENT */}
-      <main className="flex-grow pt-32 pb-20 px-6 relative z-10">
+      <main className="flex-grow pt-32 pb-32 px-6 relative z-10">
         <div className="container mx-auto max-w-2xl">
           {/* QUOTE DETAIL SECTION */}
           <article className="p-6 md:p-8 rounded-2xl bg-[#FAF0E6]/5 backdrop-blur-md border !border-[#FAF0E6]/10 hover:border-[#F2A7A7]/30 transition-all">
-            <p className="text-2xl md:text-3xl font-serif font-bold !text-[#FAF0E6] mb-6 leading-relaxed whitespace-pre-line">
+            <p className="text-xl md:text-2xl font-serif font-bold !text-[#FAF0E6] mb-6 leading-relaxed whitespace-pre-line">
               &quot;{quote.text}&quot;
             </p>
 
-            <div className="flex flex-col md:flex-row items-start md:items-center justify-between pt-6 border-t !border-[#FAF0E6]/10 gap-4">
+            <div className="flex flex-col md:flex-row items-start md:items-center justify-between pt-6 border-t !border-[#FAF0E6]/10 gap-6">
               <div>
                 <div className="text-sm !text-[#F2A7A7] font-bold uppercase tracking-widest">{quote.author}</div>
                 {quote.category && <div className="text-xs !text-[#FAF0E6]/50 mt-1">{quote.category}</div>}
               </div>
 
-              <div className="flex items-center gap-3">
-                <a href="/quotes" className="text-xs font-bold !text-[#F2A7A7] hover:!text-[#FAF0E6] uppercase tracking-widest transition-colors">
-                  ← Back
-                </a>
-                <ShareButton quoteId={quote.id} title={quote.author} text={quote.text} />
+              {/* Fused Action Bar */}
+              <div className="inline-flex items-center gap-2">
+                {/* Back Button */}
+                <Link
+                  href="/quotes"
+                  className="inline-flex items-center gap-2 px-4 py-2 text-white hover:text-[#F2A7A7] transition-colors duration-300 font-bold text-sm uppercase tracking-wider border-r border-white/10"
+                >
+                  <span>←</span>
+                  <span className="hidden sm:inline">Back</span>
+                </Link>
+
+                {/* Share & Download (integrated) */}
+                <ShareDownloadButton
+                  quoteId={quote.id}
+                  text={quote.text}
+                  author={quote.author}
+                  title={quote.author}
+                  hideWrapper={true}
+                />
               </div>
             </div>
           </article>

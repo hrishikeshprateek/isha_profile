@@ -13,7 +13,7 @@ import {
 import Footer from "@/components/Footer";
 import Toolbar from "@/components/Toolbar";
 import Link from "next/link";
-import ShareButton from "@/components/ShareButton";
+import ShareDownloadButton from "@/components/ShareDownloadButton";
 
 // --- MOCK DATA (Fallback) ---
 type QuoteItem = {
@@ -206,7 +206,7 @@ export default function QuotesPage() {
             </div>
 
             {/* 3. MAIN CONTENT */}
-            <main className="flex-grow pt-28 pb-20 px-6 relative z-10">
+            <main className="flex-grow pt-28 pb-20 px-6 relative">
                 <div className="container mx-auto">
 
                     {/* HEADER SECTION (Compact & Centered on Mobile) */}
@@ -294,57 +294,62 @@ export default function QuotesPage() {
                                         key={quote.id || idToStringOrUndefined(quote._id)}
                                         className="break-inside-avoid relative group"
                                     >
-                                        <div className="relative !bg-[#FAF0E6]/5 backdrop-blur-md border !border-[#FAF0E6]/10 p-6 rounded-3xl hover:border-[#F2A7A7]/30 transition-all">
+                                        <Link
+                                            href={quote.id ? `/quotes/${quote.id}-${encodeURIComponent((quote.author || 'quote').toLowerCase().replace(/[^a-z0-9]+/g, '-'))}` : '#'}
+                                            className="block h-full"
+                                        >
+                                            <div className="relative !bg-[#FAF0E6]/5 backdrop-blur-md border !border-[#FAF0E6]/10 p-6 rounded-3xl hover:border-[#F2A7A7]/30 transition-all cursor-pointer h-full hover:!bg-[#FAF0E6]/10">
 
-                                            {/* Quote Icon */}
-                                            <Quote className="absolute top-5 left-5 w-6 h-6 !text-[#F2A7A7]/10 rotate-180" />
+                                                {/* Quote Icon */}
+                                                <Quote className="absolute top-5 left-5 w-6 h-6 !text-[#F2A7A7]/10 rotate-180" />
 
-                                            {/* Quote Text */}
-                                            <p className="leading-[1.5] !text-[#FAF0E6] mb-4 text-lg md:text-xl font-serif font-bold tracking-tight whitespace-pre-line">
-                                                &#34;{quote.text}&#34;
-                                            </p>
+                                                {/* Quote Text */}
+                                                <p className="leading-[1.5] !text-[#FAF0E6] mb-4 text-lg md:text-xl font-serif font-bold tracking-tight whitespace-pre-line">
+                                                    &#34;{quote.text}&#34;
+                                                </p>
 
-                                            {/* Author */}
-                                            <div className="flex items-center gap-3 mb-4 pb-4 border-b !border-[#FAF0E6]/10">
-                                                <div className="h-[1px] w-6 !bg-[#F2A7A7]" />
-                                                <span className="!text-[#F2A7A7] text-[10px] font-bold uppercase tracking-widest">
-                                                    {quote.author}
-                                                </span>
-                                            </div>
+                                                {/* Author */}
+                                                <div className="flex items-center gap-3 mb-4 pb-4 border-b !border-[#FAF0E6]/10">
+                                                    <div className="h-[1px] w-6 !bg-[#F2A7A7]" />
+                                                    <span className="!text-[#F2A7A7] text-[10px] font-bold uppercase tracking-widest">
+                                                        {quote.author}
+                                                    </span>
+                                                </div>
 
-                                            {/* Category & Actions */}
-                                            <div className="flex justify-between items-center">
-                                                <span className="text-[9px] font-bold uppercase tracking-widest !text-[#FAF0E6]/30">
-                                                    {quote.category}
-                                                </span>
+                                                {/* Category & Actions */}
+                                                <div className="flex justify-between items-center">
+                                                    <span className="text-[9px] font-bold uppercase tracking-widest !text-[#FAF0E6]/30">
+                                                        {quote.category}
+                                                    </span>
 
-                                                {/* Copy Button */}
-                                                <div className="flex items-center gap-2">
-                                                    {/* View Link */}
-                                                    {quote.id ? (
-                                                        <Link href={`/quotes/${quote.id}-${encodeURIComponent((quote.author || 'quote').toLowerCase().replace(/[^a-z0-9]+/g, '-'))}`} className="text-xs font-bold !text-[#F2A7A7] hover:!text-[#FAF0E6]">
-                                                            View
-                                                        </Link>
-                                                    ) : null}
-
-                                                    {/* Share Button (client) */}
-                                                    {quote.id ? (
-                                                        <ShareButton quoteId={quote.id} title={quote.author} text={quote.text} />
-                                                    ) : (
-                                                        <button
-                                                            onClick={() => handleCopy(quote.text, quote.id || idToStringOrUndefined(quote._id))}
-                                                            className="p-1.5 rounded-full hover:!bg-[#FAF0E6]/10 transition-colors"
-                                                        >
-                                                            {copiedId === (quote.id || quote._id) ? (
-                                                                <span className="!text-[#F2A7A7] text-[9px] font-bold">Copied</span>
-                                                            ) : (
-                                                                <Copy size={16} className="!text-[#F2A7A7]" />
-                                                            )}
-                                                        </button>
-                                                    )}
+                                                    {/* Actions */}
+                                                    <div className="flex items-center gap-2" onClick={(e) => e.preventDefault()}>
+                                                        {/* Fused Share & Download Button */}
+                                                        {quote.id ? (
+                                                            <div className="scale-75 origin-right">
+                                                                <ShareDownloadButton
+                                                                    quoteId={quote.id}
+                                                                    text={quote.text}
+                                                                    author={quote.author}
+                                                                    title={quote.author}
+                                                                />
+                                                            </div>
+                                                        ) : (
+                                                            <button
+                                                                onClick={() => handleCopy(quote.text, quote.id || idToStringOrUndefined(quote._id))}
+                                                                className="p-1.5 rounded-full hover:!bg-[#FAF0E6]/10 transition-colors"
+                                                            >
+                                                                {copiedId === (quote.id || quote._id) ? (
+                                                                    <span className="!text-[#F2A7A7] text-[9px] font-bold">Copied</span>
+                                                                ) : (
+                                                                    <Copy size={16} className="!text-[#F2A7A7]" />
+                                                                )}
+                                                            </button>
+                                                        )}
+                                                    </div>
                                                 </div>
                                             </div>
-                                        </div>
+                                        </Link>
                                     </motion.div>
                                 ))
                             ) : (
