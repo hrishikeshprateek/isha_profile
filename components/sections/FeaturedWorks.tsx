@@ -22,6 +22,8 @@ const FeaturedWorks = () => {
     const [loading, setLoading] = useState(true);
     const [center, setCenter] = useState<number>(2);
     const containerRef = useRef<HTMLDivElement | null>(null);
+    const touchStartX = useRef<number>(0);
+    const touchEndX = useRef<number>(0);
 
     useEffect(() => {
         const fetchWorks = async () => {
@@ -71,6 +73,36 @@ const FeaturedWorks = () => {
         }
     };
 
+    // Touch handlers for mobile swipe
+    const handleTouchStart = (e: React.TouchEvent) => {
+        touchStartX.current = e.touches[0].clientX;
+    };
+
+    const handleTouchMove = (e: React.TouchEvent) => {
+        touchEndX.current = e.touches[0].clientX;
+    };
+
+    const handleTouchEnd = () => {
+        if (works.length === 0) return;
+
+        const swipeThreshold = 50; // Minimum distance for a swipe
+        const diff = touchStartX.current - touchEndX.current;
+
+        if (Math.abs(diff) > swipeThreshold) {
+            if (diff > 0) {
+                // Swiped left - go to next card
+                setCenter(prev => Math.min(prev + 1, works.length - 1));
+            } else {
+                // Swiped right - go to previous card
+                setCenter(prev => Math.max(prev - 1, 0));
+            }
+        }
+
+        // Reset touch values
+        touchStartX.current = 0;
+        touchEndX.current = 0;
+    };
+
     if (loading || works.length === 0) {
         return null; // Can replace with a subtle loading skeleton if needed
     }
@@ -114,7 +146,10 @@ const FeaturedWorks = () => {
                 <div
                     ref={containerRef}
                     onMouseMove={handleMouseMove}
-                    className="relative flex items-center justify-center h-[500px] md:h-[600px] w-full z-10 cursor-ew-resize"
+                    onTouchStart={handleTouchStart}
+                    onTouchMove={handleTouchMove}
+                    onTouchEnd={handleTouchEnd}
+                    className="relative flex items-center justify-center h-[500px] md:h-[600px] w-full z-10 cursor-ew-resize touch-pan-y"
                 >
                     {works.map((item, i) => {
                         const offset = i - center;
@@ -211,6 +246,22 @@ const FeaturedWorks = () => {
                             </motion.div>
                         );
                     })}
+                </div>
+
+                {/* Navigation Dots - Mobile Only */}
+                <div className="flex items-center justify-center gap-2 mt-8 md:hidden">
+                    {works.map((_, index) => (
+                        <button
+                            key={index}
+                            onClick={() => setCenter(index)}
+                            className={`transition-all duration-300 rounded-full ${
+                                center === index 
+                                    ? 'w-8 h-2 bg-[#DC7C7C]' 
+                                    : 'w-2 h-2 bg-[#DC7C7C]/30'
+                            }`}
+                            aria-label={`Go to slide ${index + 1}`}
+                        />
+                    ))}
                 </div>
 
                 {/* Mobile Link Button */}
