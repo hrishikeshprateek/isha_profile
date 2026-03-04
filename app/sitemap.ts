@@ -68,7 +68,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       },
       {
         url: `${baseUrl}/build`,
-        changeFrequency: 'monthly',
+        changeFrequency: 'weekly',
         priority: 0.7,
         lastModified: new Date(),
       },
@@ -80,7 +80,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       },
       {
         url: `${baseUrl}/vcard`,
-        changeFrequency: 'monthly',
+        changeFrequency: 'weekly',
         priority: 0.6,
         lastModified: new Date(),
       },
