@@ -180,7 +180,7 @@ const DownloadQuote = ({ text, author, quoteId, showShareButton = false, onShare
             const footerY = height - qrSize - 80; // Bottom margin alignment
 
             try {
-                const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=${qrSize}x${qrSize}&data=https://isha.co.in/quotes&color=3B241A&bgcolor=FAF0E6`;
+                const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=${qrSize}x${qrSize}&data=https://ishra.co.in/quotes&color=3B241A&bgcolor=FAF0E6`;
                 const qrImg = await loadImage(qrUrl);
 
                 ctx.shadowColor = "rgba(59, 36, 26, 0.1)";
@@ -203,7 +203,7 @@ const DownloadQuote = ({ text, author, quoteId, showShareButton = false, onShare
             ctx.fillStyle = '#3B241A';
             ctx.font = 'italic 26px serif';
             ctx.letterSpacing = "0px";
-            ctx.fillText("isha.co.in/quotes", startX + qrSize + gap, footerY + 68);
+            ctx.fillText("ishra.co.in/quotes", startX + qrSize + gap, footerY + 68);
 
             return canvas;
         } catch (error) {

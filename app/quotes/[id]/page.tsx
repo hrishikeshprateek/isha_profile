@@ -138,7 +138,7 @@ export default async function QuotePage({ params }: { params: Promise<{ id: stri
                   className="inline-flex items-center gap-2 px-4 py-2 text-white hover:text-[#F2A7A7] transition-colors duration-300 font-bold text-sm uppercase tracking-wider border-r border-white/10"
                 >
                   <span>←</span>
-                  <span className="hidden sm:inline">Back</span>
+                  <span>Back</span>
                 </Link>
 
                 {/* Share & Download (integrated) */}
