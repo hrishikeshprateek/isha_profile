@@ -94,8 +94,8 @@ const HeroSection = ({ heroData }: HeroSectionProps) => {
                             </h2>
                         </div>
 
-                        {/* Updated paragraph color to #A68B7E (Blog Body Text) */}
-                        <p className="text-lg md:text-xl text-[#A68B7E] max-w-xl leading-relaxed">
+                        {/* Updated paragraph color to black */}
+                        <p className="text-lg md:text-xl text-[#3B241A] max-w-xl leading-relaxed">
                             {heroData?.description || "Crafting elegant digital experiences that blend beauty with purpose. Transforming ideas into intuitive designs that captivate and inspire."}
                         </p>
 
