@@ -87,7 +87,7 @@ const Blogs = () => {
             <Toolbar
                 title="Journal"
                 showBackButton={true}
-                backHref="/d1"
+                backHref="/"
                 showContactButton={false}
             />
 

@@ -23,9 +23,9 @@ interface ToolbarProps {
 }
 
 const DEFAULT_NAV_ITEMS: NavItem[] = [
-    { label: "Home", href: "/" },
-    { label: "Services", href: "#service" },
+    { label: "Services", href: "/#service" },
     { label: "Blogs", href: "/blogs" },
+    { label: "Works", href: "/wall" },
     { label: "Quotes", href: "/quotes" },
     { label: "Build", href: "/build" },
 ];

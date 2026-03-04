@@ -11,7 +11,7 @@ export default function WallPage() {
             <Toolbar
                 title="Gallery"
                 showBackButton={true}
-                backHref="/d1"
+                backHref="/"
             />
 
             {/* Main Content */}
