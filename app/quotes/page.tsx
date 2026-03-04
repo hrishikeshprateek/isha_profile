@@ -326,7 +326,7 @@ export default function QuotesPage() {
                                                     <div className="flex items-center gap-2" onClick={(e) => e.preventDefault()}>
                                                         {/* Fused Share & Download Button */}
                                                         {quote.id ? (
-                                                            <div className="scale-75 origin-right">
+                                                            <div className="scale-100">
                                                                 <ShareDownloadButton
                                                                     quoteId={quote.id}
                                                                     text={quote.text}

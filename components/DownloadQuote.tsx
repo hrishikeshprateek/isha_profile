@@ -251,7 +251,7 @@ const DownloadQuote = ({ text, author, quoteId, showShareButton = false, onShare
                             aria-label="Share quote"
                         >
                             <Share2 size={16} />
-                            <span className="hidden sm:inline">Share</span>
+                            <span>Share</span>
                         </button>
                     )}
                     <button
@@ -261,7 +261,7 @@ const DownloadQuote = ({ text, author, quoteId, showShareButton = false, onShare
                         aria-label="Download quote as image"
                     >
                         <Download size={16} />
-                        <span className="hidden sm:inline">{isGenerating ? 'Wait...' : 'Save'}</span>
+                        <span>{isGenerating ? 'Wait...' : 'Save'}</span>
                     </button>
                 </>
             ) : (
@@ -337,7 +337,7 @@ const DownloadQuote = ({ text, author, quoteId, showShareButton = false, onShare
                                         className="flex-1 sm:flex-none px-6 py-3 rounded-full bg-[#3B241A] text-[#FAF0E6] hover:bg-[#DC7C7C] hover:text-white transition-all duration-300 font-bold text-xs uppercase tracking-widest shadow-lg hover:shadow-xl hover:-translate-y-0.5 inline-flex items-center justify-center gap-2"
                                     >
                                         <Download size={16} />
-                                        Download Image
+                                        Download
                                     </button>
                                 </div>
                             </div>
