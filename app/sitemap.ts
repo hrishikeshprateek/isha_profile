@@ -2,7 +2,7 @@ import { getDatabase, Collections } from '@/lib/mongodb';
 import { MetadataRoute } from 'next';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.isharani.in';
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://isharani.in';
 
   try {
     const db = await getDatabase();
@@ -33,13 +33,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
     // Helper to sanitize URL to prevent XML parsing errors
     const sanitizeUrl = (url: string): string => {
-      // Simply ensure proper URL encoding without manual XML escaping
-      // MetadataRoute.Sitemap handles XML escaping automatically
       try {
-        // Decode and re-encode to normalize any double encoding
         return decodeURI(url);
       } catch {
-        // If decoding fails, return as-is
         return url;
       }
     };
@@ -99,8 +95,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
             typeof blog.slug === 'string'
               ? blog.slug
               : typeof blog.slug === 'object' && blog.slug !== null
-                ? String(blog.slug)
-                : id;
+              ? String(blog.slug)
+              : id;
 
           // Create safe URL
           const safeSlug = slug.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
@@ -108,7 +104,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
           return {
             url: sanitizeUrl(urlPath),
-            changeFrequency: 'monthly' as const,
+            changeFrequency: 'daily' as const,
             priority: 0.8,
             lastModified: blog.updatedAt ? new Date(blog.updatedAt as string | Date) : new Date(),
           };
@@ -132,7 +128,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
           return {
             url: sanitizeUrl(urlPath),
-            changeFrequency: 'monthly' as const,
+            changeFrequency: 'daily' as const,
             priority: 0.7,
             lastModified: quote.date ? new Date(quote.date as string | Date) : new Date(),
           };
@@ -149,10 +145,22 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     // Return at least the static routes
     return [
       {
-        url: process.env.NEXT_PUBLIC_SITE_URL || 'https://www.isharani.in',
-        changeFrequency: 'weekly',
-        priority: 1.0,
+        url: process.env.NEXT_PUBLIC_SITE_URL || 'https://isharani.in',
         lastModified: new Date(),
+        changeFrequency: 'weekly',
+        priority: 1,
+      },
+      {
+        url: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://isharani.in'}/blogs`,
+        lastModified: new Date(),
+        changeFrequency: 'daily',
+        priority: 0.9,
+      },
+      {
+        url: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://isharani.in'}/quotes`,
+        lastModified: new Date(),
+        changeFrequency: 'daily',
+        priority: 0.9,
       },
     ];
   }
