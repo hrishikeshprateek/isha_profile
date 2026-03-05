@@ -135,7 +135,7 @@ export default function Footer() {
                                     <div className="flex-1 min-w-0">
                                         <h3 className="font-bold text-sm !text-[#FAF0E6] mb-0.5">Address</h3>
                                         <p className="text-[#A68B7E] text-xs leading-relaxed break-words">
-                                            Paijawa, Near Mahadev Asthan, Patna, India Pin code : 800009
+                                            24/3 Paijawa, Near Mahadev Asthan, Patna, India Pin code : 800009
                                         </p>
                                     </div>
                                 </div>
